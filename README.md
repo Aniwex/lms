@@ -68,6 +68,7 @@ _____
 ```
     make app_exec
     su - sail
+    cd /var/www/html
     npm install
 ```
 Для запуска frontend приложения на DEV (или локальной среде):
