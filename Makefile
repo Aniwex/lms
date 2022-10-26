@@ -39,14 +39,14 @@ run:
 	vendor/bin/sail up -d
 	vendor/bin/sail ps
 	vendor/bin/sail composer install
-	vendor/bin/sail artisan migrate
 	vendor/bin/sail artisan optimize
+	vendor/bin/sail artisan migrate
 
 # оптимизация laravel приложения (установка пакетов, применение миграций, сброс кеша)
 optimize:
 	vendor/bin/sail composer install
-	vendor/bin/sail artisan migrate
 	vendor/bin/sail artisan optimize
+	vendor/bin/sail artisan migrate
 
 # посмотреть список и статус контейнеров
 ps:
