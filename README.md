@@ -1,67 +1,96 @@
-npm i
+# Lead Manage System
+Система управления лидами (обращениями) клиентов, заказавшим продвижение по модели CPA
 
-composer install
+## Требования
+- [Docker](https://www.docker.com)
+- [Docker Compose](https://docs.docker.com/compose/)
+- [Composer](https://getcomposer.org)
+- [Git](https://git-scm.com)
 
-.env должен быть +добавить
+## [ Установка проекта ]
 
-WWWGROUP=1000
+### 1. Склонировать репозиторий. 
+```
+    git clone git@git.isidea.ru:isidea/lms.git
+```
+или
+```
+    git clone https://git.isidea.ru/isidea/lms.git
+```
+В итоге создастся папка `lms` в текущей активной директории. Перейдем в эту папку:
+```
+    cd lms
+```
+### 2. Настроить конфигурационный файл.
+```
+    cp .env.example .env
+```
+В файле `.env` настраиваем следующие параметры:
+```
+    # название проекта
+    APP_NAME="Lead Manage System"
+    # текущее окружение
+    APP_ENV=local
+    # режим дебага
+    APP_DEBUG=true
+    # базовый урл приложения
+    APP_URL=http://lms.local
+    # порт приложения (докер)
+    APP_PORT=80
 
-WWWUSER=1000 если их нет
+    # порт базы данных (докер)
+    DB_PORT=3306
+    # данные для подключения к базе (в пределах докер контейнера)
+    DB_DATABASE=lms
+    DB_USERNAME=lms_user
+    DB_PASSWORD=lms_pass
 
-docker-compose up -d
+    # данные www-пользователя 
+    WWWGROUP=1000
+    WWWUSER=1000
+```
 
-npm run watch
+### 3. Установка.
+Выполнить сборку контейнеров и первоначальные настройки для приложения:
+```
+    make install
+```
+Если возникнут ошибки при выполнении этой команды, можно попробовать выполнить последовательность вручную поочередно (выполняемые операции описаны в `Makefile`).
 
-## About Laravel
+_____
+## [ Деплой проекта ]
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Для разворачивания (запуска) проекта используем следующую команду:
+```
+    make run
+```
+Для сборки frontend части приложения выполняем следующий набор команд:
+```
+    make app_exec
+    su - sail
+    npm install
+```
+Для запуска frontend приложения на DEV (или локальной среде):
+```
+    npm run watch
+```
 
--   [Simple, fast routing engine](https://laravel.com/docs/routing).
--   [Powerful dependency injection container](https://laravel.com/docs/container).
--   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
--   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
--   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
--   [Robust background job processing](https://laravel.com/docs/queues).
--   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Для запуска frontend приложения на продакшн среде:
+```
+    npm run prod
+    exit
+```
+_____
+:white_check_mark: <b>Все готово, проект запущен!</b> :+1: :tada:
+_____
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
-
-### Premium Partners
-
--   **[Vehikl](https://vehikl.com/)**
--   **[Tighten Co.](https://tighten.co)**
--   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
--   **[64 Robots](https://64robots.com)**
--   **[Cubet Techno Labs](https://cubettech.com)**
--   **[Cyber-Duck](https://cyber-duck.co.uk)**
--   **[Many](https://www.many.co.uk)**
--   **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
--   **[DevSquad](https://devsquad.com)**
--   **[Curotec](https://www.curotec.com/)**
--   **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Прочее
+- Выполнение команд типа "artisan, php, composer, npm и так далее" можно производить либо через `vendor/bin/sail ...`, либо напрямую внутри контейнера.
+- Для удобного использования Laravel Sail можно создать алиас для этой команды. Для этого нужно найти файл `.bash_aliases`, который обычно находится в корневой директории текущего юзера ОС (/home/{user}/...), и заполнить его следующим содержимым: `alias sail='bash vendor/bin/sail'`. Теперь вместо vendor/bin/sail можно использовать просто sail.
+- Если в процессе возникли какие-либо ошибки, можно посмотреть логи, используя команды `make logs`, `make app_logs`, `make db_logs`
+- Подключиться к базе данных: `make db_exec`
+- Выполнение оптимизации приложения (установка пакетов composer, применение миграций, сброс кеша): `make optimize`
+- Посмотреть список и статус контейнеров: `make ps`
+- Остановить все текущие активные контейнеры: `make stop`
+- Полностью пересобрать (обновить + сброс кеша) контейнер приложения: `make build`
+- Удалить все контейнеры и их данные (включая базу данных): `make remove`
