@@ -1,0 +1,38 @@
+/*================================================================================
+
+NOTE:
+------
+PLACE HERE YOUR OWN SCSS CODES AND IF NEEDED, OVERRIDE THE STYLES FROM THE OTHER STYLESHEETS.
+WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BETTER LIKE THIS.  */
+@import '../scss/_newAppeal';
+@import '../scss/_search';
+@import '../scss/_filters';
+@import '../scss/_tableHome';
+@import '../scss/_modalWindowHome';
+@import '../scss/_registration';
+// .dropitem__close {
+//     width: 45px;
+//     position: absolute;
+//     margin-top: 5px;
+//     top: 0;
+//     right: 0;
+//   }
+  .wrapper {
+    height: 50px;
+    margin: 0 auto !important;
+  }
+  .row__date-pickr,.row__user-input{
+    display: block;
+    text-align: center;
+    background: #fff;
+  }
+  .db__tc{
+    display: block;
+    text-align: center;
+  }
+  .form-control[readonly]{
+    background-color: #fff;
+  }
+
+
+

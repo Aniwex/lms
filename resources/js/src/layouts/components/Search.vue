@@ -1,0 +1,101 @@
+<template>
+  <div class="custom-search">
+    <div class="container__search-from">
+      <div class="search__form align-items-center">
+        <b-form-input
+          v-model="searchTerm"
+          placeholder="Поиск"
+          type="text"
+          class="search__input"
+          @input="handleSearch"
+        />
+      </div>
+      <div class="create__appeal" v-if="email === 'admin@mail.ru'">
+        <b-button
+          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+          variant="primary"
+          to="NewAppeal"
+          v-b-tooltip.hover.top="'Добавить'"
+          v-if="this.$route.path === '/Home'"
+        >
+          Добавить обращение
+        </b-button>
+        <b-button
+          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+          variant="primary"
+          to="NewIntegration"
+          v-b-tooltip.hover.top="'Добавить'"
+          v-if="this.$route.path === '/Integration'"
+        >
+          Добавить интеграцию
+        </b-button>
+        <b-button
+          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+          variant="primary"
+          to="NewSource"
+          v-b-tooltip.hover.top="'Добавить'"
+          v-if="this.$route.path === '/Sources'"
+        >
+          Добавить иcточник
+        </b-button>
+        <b-button
+          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+          variant="primary"
+          to="NewTag"
+          v-b-tooltip.hover.top="'Добавить'"
+          v-if="this.$route.path === '/Tags'"
+        >
+          Добавить тэг
+        </b-button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { BFormInput, BButton, VBTooltip } from "bootstrap-vue";
+import Ripple from "vue-ripple-directive";
+export default {
+  props: ["rows", "email"],
+  components: {
+    BFormInput,
+    BButton,
+    Ripple,
+  },
+  directives: {
+    Ripple,
+    "b-tooltip": VBTooltip,
+  },
+
+  data() {
+    return {
+      arraySearch: [],
+      searchTerm: "",
+    };
+  },
+  methods: {
+    handleSearch() {
+      this.arraySearch = [];
+      let key = Object.keys(this.rows[0]);
+      if (this.rows.length) {
+        this.rows.filter((item) => {
+          for (let k in key) {
+            if (
+              item[key[k]] !== null &&
+              item[key[k]].toString().includes(this.searchTerm)
+            ) {
+              this.arraySearch.push(item);
+            }
+          }
+        });
+      }
+      this.arraySearch = [...new Set(this.arraySearch)];
+      this.$emit("arraySearch", this.arraySearch);
+    },
+  },
+  mounted() {},
+};
+</script>
+
+<style>
+</style>

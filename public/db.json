@@ -1,0 +1,122 @@
+{
+  "dataTable": [
+    {
+      "id": 2696,
+      "date": "13.09.2022 15:14:27",
+      "call": "10 секунд",
+      "commentManager": "",
+      "source": "Задарма: Adwords на nw61.ru + Я.Объявления",
+      "user": "+7 (967) 106-02-00",
+      "tag": "окна",
+      "commentClient": "",
+      "manager": "целевой",
+      "client": "целевой",
+      "dialog":[
+        {"message":"Добрый день алло","value":"operator"},
+        {"message":"Алло","value":"subscriber"},
+        {"message":"Здравствуйте","value":"operator"},
+        {"message":"А вот у меня что то записано перевозка трактора это вы где в каком районе","value":"subscriber"},
+        {"message":"Ещё раз вас очень плохо слышно","value":"operator"},
+        {"message":"Я говорю записан телефон перевозка трактора перевозите","value":"subscriber"},
+        {"message":"Нет мы завод по производству металопластиковых окон вы не туда попали","value":"operator"},
+        {"message":"А я понял извините","value":"subscriber"},
+        {"message":"Угу","value":"operator"}
+      ]
+      
+     
+    },
+    {
+      "id": 2697,
+      "date": "13.09.2022 15:14:27",
+      "call": "40 секунд",
+      "commentManager": "",
+      "source": "Задарма: Adwords на nw61.ru + Я.Объявления",
+      "user": "+7 (967) 106-02-00",
+      "tag": "окна",
+      "commentClient": "",
+      "manager": "не целевой",
+      "client": "целевой",
+      "dialog":[
+        {"message":"Добрый день алло","value":"operator"},
+        {"message":"Алло","value":"subscriber"}
+      ]
+    },
+    {
+      "id": 2695,
+      "date": "23.09.2022 16:53:49",
+      "call": "50 секунд",
+      "commentManager": "",
+      "source": "Задарма: Оконский Директ",
+      "user": "+7 (988) 551-72-25",
+      "tag": "балкон",
+      "commentClient": "",
+      "manager": "не установленный",
+      "client": "не целевой",
+      "dialog":[
+        {"message":"Добрый день алло","value":"operator"},
+        {"message":"Алло","value":"subscriber"},
+        {"message":"Здравствуйте","value":"operator"},
+        {"message":"А вот у меня что то записано перевозка трактора это вы где в каком районе","value":"subscriber"},
+        {"message":"Ещё раз вас очень плохо слышно","value":"operator"},
+        {"message":"Я говорю записан телефон перевозка трактора перевозите","value":"subscriber"}
+      ]
+    },
+    {
+      "id": 2694,
+      "date": "20.09.2022 11:53:28",
+      "call": "80 секунд",
+      "commentManager": "",
+      "source": "Задарма: Adwords на nw61.ru + Я.Объявления",
+      "user": "+7 (916) 062-78-28",
+      "tag": "окна",
+      "commentClient": "",
+      "manager": "целевой",
+      "client": "целевой",
+      "dialog":[
+        {"message":"Добрый день алло","value":"operator"},
+        {"message":"Алло","value":"subscriber"},
+        {"message":"Здравствуйте","value":"operator"},
+        {"message":"А вот у меня что то записано перевозка трактора это вы где в каком районе","value":"subscriber"},
+        {"message":"Ещё раз вас очень плохо слышно","value":"operator"},
+        {"message":"Я говорю записан телефон перевозка трактора перевозите","value":"subscriber"},
+        {"message":"Нет мы завод по производству металопластиковых окон вы не туда попали","value":"operator"},
+        {"message":"А я понял извините","value":"subscriber"},
+        {"message":"Угу","value":"operator"}
+      ]
+    },
+    {
+      "id": 2699,
+      "date": "22.09.2022 15:14:27",
+      "call": "30 секунд",
+      "commentManager": "",
+      "source": "Задарма: Adwords на nw61.ru + Я.Объявления",
+      "user": "+7 (967) 106-02-00",
+      "tag": "балкон",
+      "commentClient": "",
+      "manager": "целевой",
+      "client": "не проверенный",
+      "dialog":[]
+    }
+  ],
+  "user": [
+    {
+      "id":1,
+      "login": "admin",
+      "password": "admin",
+      "name": "Alexandr",
+      "root": true
+    }
+  ],
+  "options_source": [
+  {
+      "value": null, "text": "—" 
+  },
+  {
+    "value": "Задарма: Adwords на nw61.ru + Я.Объявления",
+    "text": "Задарма: Adwords на nw61.ru + Я.Объявления"
+  },
+  { "value": "Задарма: Оконский Директ",
+    "text": "Задарма: Оконский Директ" 
+  }
+  ]
+}

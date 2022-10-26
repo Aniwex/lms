@@ -1,0 +1,69 @@
+.form__create-appeal {
+    width: 1470px;
+    height: 500px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 15px;
+    border-width: 1px;
+  }
+  .form__create-appeal .container {
+    height: 592px;
+  }
+  .form__create-appeal-two,
+  .form__create-appeal-three {
+    width: 1470px;
+    height: 285px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 15px;
+    border-width: 1px;
+  }
+  .container__appeal {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    height: 285px;
+  }
+  .form__appeal-input {
+    display: block; 
+    text-align: center;
+    width: 416px;
+    height: 36px !important;
+    border-radius: 0.5rem;
+    border-width: 1px;
+    background-color: #fff;
+    margin: 0;
+  }
+  .form__apeal-label-seconds {
+    margin-top: 10px;
+  }
+  .form__apeal-control {
+    width: 416px;
+    height: 34px;
+    border-radius: 0.5rem;
+  border-width: 1px;
+  border-color: #bacad6;
+  background-color: #fff;
+  }
+  .form__appeal-group {
+    display: flex;
+    flex-direction: row;
+    margin: 24px 32px 24px 32px;
+  }
+  .form__apeal-label {
+    display: flex;
+    padding: 0px 32px 0px 32px;
+    flex: 0 1 40%;
+    font-size: 15px;
+  }
+.form__buttons{
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 25px !important;
+}
+.form-control[readonly]{
+  background-color: #fff;
+}
+.form__checkbox{
+  margin:auto;
+}
