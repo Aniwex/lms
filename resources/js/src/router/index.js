@@ -50,34 +50,34 @@ const router = new VueRouter({
                 ],
             },
         },
-        // {
-        //     path: "/Users",
-        //     name: "Users",
-        //     component: () => import("@/views/Users.vue"),
-        //     meta: {
-        //         pageTitle: "Пользователи",
-        //         breadcrumb: [
-        //             {
-        //                 text: "Пользователи",
-        //                 active: true,
-        //             },
-        //         ],
-        //     },
-        // },
-        // {
-        //     path: "/Projects",
-        //     name: "Projects",
-        //     component: () => import("@/views/Projects.vue"),
-        //     meta: {
-        //         pageTitle: "Проекты",
-        //         breadcrumb: [
-        //             {
-        //                 text: "Проекты",
-        //                 active: true,
-        //             },
-        //         ],
-        //     },
-        // },
+        {
+            path: "/Users",
+            name: "Users",
+            component: () => import("@/views/Users.vue"),
+            meta: {
+                pageTitle: "Пользователи",
+                breadcrumb: [
+                    {
+                        text: "Пользователи",
+                        active: true,
+                    },
+                ],
+            },
+        },
+        {
+            path: "/Projects",
+            name: "Projects",
+            component: () => import("@/views/Projects.vue"),
+            meta: {
+                pageTitle: "Проекты",
+                breadcrumb: [
+                    {
+                        text: "Проекты",
+                        active: true,
+                    },
+                ],
+            },
+        },
         {
             path: "/Sources",
             name: "Sources",
@@ -160,14 +160,6 @@ const router = new VueRouter({
                         active: true,
                     },
                 ],
-            },
-        },
-        {
-            path: "/Register",
-            name: "Регистрация",
-            component: () => import("@/views/Register.vue"),
-            meta: {
-                layout: "full",
             },
         },
         {

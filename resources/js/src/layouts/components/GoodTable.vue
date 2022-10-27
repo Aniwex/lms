@@ -778,31 +778,34 @@ export default {
     },
     async getDataTable() {
       try {
-        axios.get("/api/data").then((response) => {
-          this.rows = response.data;
-          this.getDT = true;
-          this.rows.forEach((row) => {
-            const activeManager =
-              this.manager.find((m) => m.value == row.manager) || null;
-            this.$set(this.managerObject, row.id, activeManager);
-            const activeClient =
-              this.client.find((c) => c.value == row.client) || null;
-            this.$set(this.clientObject, row.id, activeClient);
-          });
-          this.historyArray = [];
-          this.rows.filter((row, index, k) => {
-            k = 0;
-            for (let i = 0; i < index; i++) {
-              if (row.user === this.rows[i].user) {
-                k++;
-                if (k < 2) {
-                  this.historyArray.push(this.rows[i].id);
-                }
-              }
-            }
-          });
-          this.historyArray = [...new Set(this.historyArray)];
-        });
+        // axios.get("/api/data").then((response) => {
+        //   this.rows = response.data;
+        //   this.getDT = true;
+        //   this.rows.forEach((row) => {
+        //     const activeManager =
+        //       this.manager.find((m) => m.value == row.manager) || null;
+        //     this.$set(this.managerObject, row.id, activeManager);
+        //     const activeClient =
+        //       this.client.find((c) => c.value == row.client) || null;
+        //     this.$set(this.clientObject, row.id, activeClient);
+        //   });
+        //   this.historyArray = [];
+        //   this.rows.filter((row, index, k) => {
+        //     k = 0;
+        //     for (let i = 0; i < index; i++) {
+        //       if (row.user === this.rows[i].user) {
+        //         k++;
+        //         if (k < 2) {
+        //           this.historyArray.push(this.rows[i].id);
+        //         }
+        //       }
+        //     }
+        //   });
+        //   this.historyArray = [...new Set(this.historyArray)];
+        // });
+        axios.get("api/integrations").then((response) => {
+          console.log(response.data);
+        })
       } catch (error) {
         alert(error.message);
       }

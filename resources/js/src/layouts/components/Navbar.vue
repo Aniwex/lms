@@ -17,7 +17,14 @@
       class="bookmark-wrapper align-items-center flex-grow-1 d-none d-lg-flex"
     >
       <dark-Toggler class="d-none d-lg-block" />
+      <b-form-select
+        class="choose__project"
+        v-model="choose_project"
+        :options="projects"
+      >
+      </b-form-select>
     </div>
+
     <div v-if="user.email === undefined">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
@@ -69,6 +76,7 @@
 
 <script>
 import {
+  BFormSelect,
   BLink,
   BNavbarNav,
   BNavItemDropdown,
@@ -83,6 +91,7 @@ import DarkToggler from "@core/layouts/components/app-navbar/components/DarkTogg
 import axios from "axios";
 export default {
   components: {
+    BFormSelect,
     BLink,
     BNavbarNav,
     BNavItemDropdown,
@@ -107,6 +116,17 @@ export default {
     return {
       user: {},
       response: [],
+      projects: [
+        { value: null, text: "Выберите проект" },
+        { value: null, text: "Новые окна" },
+        { value: null, text: "АстроМед" },
+        { value: null, text: "Специальность 1906" },
+        { value: null, text: "Пентакс Юг" },
+        { value: null, text: "ТМЗ" },
+        { value: null, text: "Новые окна. Новочеркасск" },
+        { value: null, text: "Новые окна. Таганрог" },
+      ],
+      choose_project: null,
     };
   },
   methods: {

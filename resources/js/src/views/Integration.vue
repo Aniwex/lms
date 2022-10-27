@@ -319,7 +319,7 @@ export default {
     },
     async getIntegration() {
       await axios.get("/api/integrations").then((response) => {
-        this.rowsIntegration = response.data;
+        this.rowsIntegration = response.data.integrations;
         this.getInt = true;
       });
     },
