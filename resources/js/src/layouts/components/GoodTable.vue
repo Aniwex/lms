@@ -804,7 +804,7 @@ export default {
         //   this.historyArray = [...new Set(this.historyArray)];
         // });
         axios.get("api/integrations").then((response) => {
-          console.log(response.data);
+          
         })
       } catch (error) {
         alert(error.message);

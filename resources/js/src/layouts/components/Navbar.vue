@@ -17,6 +17,30 @@
       class="bookmark-wrapper align-items-center flex-grow-1 d-none d-lg-flex"
     >
       <dark-Toggler class="d-none d-lg-block" />
+      <b-button
+        v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+        variant="primary"
+        to="Projects"
+        class="navbar__button"
+      >
+        Проекты
+      </b-button>
+      <b-button
+        v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+        variant="primary"
+        to="Users"
+        class="navbar__button"
+      >
+        Пользователи
+      </b-button>
+      <b-button
+        v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+        variant="primary"
+        to="Integration"
+        class="navbar__button"
+      >
+        Интеграции
+      </b-button>
       <b-form-select
         class="choose__project"
         v-model="choose_project"
@@ -87,6 +111,7 @@ import {
   BButton,
   VBTooltip,
 } from "bootstrap-vue";
+import Ripple from "vue-ripple-directive";
 import DarkToggler from "@core/layouts/components/app-navbar/components/DarkToggler.vue";
 import axios from "axios";
 export default {
@@ -104,6 +129,7 @@ export default {
     DarkToggler,
   },
   directives: {
+    Ripple,
     "b-tooltip": VBTooltip,
   },
   props: {
