@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ApplicationController;
-use App\Http\Controllers\GetController;
+use Illuminate\Support\Facades\Auth;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,9 +14,8 @@ use App\Http\Controllers\GetController;
 |
 */
 
-Route::get('/{any}', [ApplicationController::class, 'index'])->where('any', '.*');
+Route::get('/{any}', function() {
+    return view('application');
+})->where('any', '.*')->where('any', '^(?!api.*$).*');
 
 Auth::routes();
-
-Route::get('{page}', 'MainController')->where('page', '.*');
-

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateIntegrationsTable extends Migration
+class CreateProjectUserTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateIntegrationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('integrations', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('code');
+        Schema::create('project_user', function (Blueprint $table) {
+            $table->primary(['user_id','project_id']);
+            $table->foreignId('user_id')->constrained();
+            $table->foreignId('project_id')->constrained();
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ class CreateIntegrationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('integrations');
+        Schema::dropIfExists('project_user');
     }
 }

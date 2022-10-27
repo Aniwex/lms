@@ -16,9 +16,11 @@
         "laravel/sanctum": "^2.1",
         "laravel/tinker": "^2.5",
         "laravel/ui": "3.3",
+        "spatie/laravel-tags": "^4.3",
         "zadarma/user-api-v1": "^1.1"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^2.12",
         "facade/ignition": "^2.5",
         "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.16",
@@ -41,7 +43,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

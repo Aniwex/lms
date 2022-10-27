@@ -16,12 +16,10 @@ class CreateTagsTable extends Migration
         Schema::create('tags', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->boolean('type');
-            $table->string('plus_words_client')->nullable();
-            $table->string('minus_words_client')->nullable();
-            $table->string('plus_words_operator')->nullable();
-            $table->string('minus_words_operator')->nullable();
+            $table->boolean('objective')->default(0);
+            $table->foreignId('project_id')->constrained();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

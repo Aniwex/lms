@@ -1,3 +1,7 @@
+include .env
+
+$(eval export $(shell sed -ne 's/ *#.*$$//; /./ s/=.*$$// p' .env))
+
 # пересобрать контейнеры
 build:
 	docker-compose stop
@@ -7,6 +11,10 @@ build:
 remove:
 	docker-compose stop
 	vendor/bin/sail down -v
+
+# создать пользователя администратора
+create-admin:
+	vendor/bin/sail artisan user:admin
 
 # первоначальная установка приложения
 install:
