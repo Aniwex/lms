@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Resources;
+
+use App\Models\{{ Model }};
+
+/**
+ * Класс-ресурс модели "\App\Models\{{ Model }}".
+ */
+class {{ class }} extends AbstractResource
+{
+    /**
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @return \League\Fractal\Resource\Item
+     */
+    public static function make(\Illuminate\Database\Eloquent\Model $model) : \League\Fractal\Resource\Item
+    {
+        return new \League\Fractal\Resource\Item($model, function({{ Model }} ${{ model }}) {
+            return [
+                'id' => ${{ model }}->id
+            ];
+        });
+    }
+}

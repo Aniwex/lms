@@ -16,6 +16,6 @@ use Illuminate\Support\Facades\Auth;
 
 Route::get('/{any}', function() {
     return view('application');
-})->where('any', '.*')->where('any', '^(?!api.*$).*');
+})->where('any', '.*')->where('any', '^(?!api-docs|api.*$).*');
 
 Auth::routes();
