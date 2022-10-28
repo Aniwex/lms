@@ -12,10 +12,7 @@ return [
     */
     'url' => 'api-docs',
     'middlewares' => [
-        //Example
-        /** @todo: разобраться какой middleware нужен */
-        // \App\Http\Middleware\Authenticate::class,
-        // \App\Http\Middleware\NotFoundWhenProduction::class,
+        \App\Http\Middleware\HideWhenProduction::class,
     ],
 
     /*
