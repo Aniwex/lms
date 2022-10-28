@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center" v-if="!getDT || !email">
+    <div class="text-center" v-if="!getDT || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -10,8 +10,8 @@
     <search
       @arraySearch="pushArraySearch"
       :rows="rows"
-      v-if="getDT && email"
-      :email="email"
+      v-if="getDT && user"
+      :role_id="user.role_id"
     />
     <!-- filers -->
     <filters
@@ -20,9 +20,9 @@
       @selected="pushSelected"
       :rowSelection="rowSelection"
       :rows="rows"
-      :email="email"
+      :role_id="user.role_id"
       :options_source="options_source"
-      v-if="getDT && email"
+      v-if="getDT && user"
     />
 
     <!-- table -->
@@ -104,7 +104,7 @@
               class="dropdown-menu"
               style="min-width: 50px"
               aria-labelledby="dropdownMenuButton"
-              v-if="email === 'admin@mail.ru'"
+              v-if="user.role_id === 1"
             >
               <button
                 v-for="(m, index) in manager"
@@ -144,7 +144,7 @@
               class="dropdown-menu"
               style="min-width: 50px"
               aria-labelledby="dropdownMenuButton"
-              v-if="email === 'admin@mail.ru'"
+              v-if="user.role_id === 1"
             >
               <button
                 v-for="(c, index) in client"
@@ -208,10 +208,7 @@
                 <eye-icon size="1x" class="mr-50"></eye-icon>
                 <span>Посмотреть</span>
               </b-dropdown-item>
-              <b-dropdown-item
-                v-if="email === 'admin@mail.ru'"
-                @click="deleteModal"
-              >
+              <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
                 <feather-icon icon="TrashIcon" class="mr-50" />
                 <span>Удалить</span>
               </b-dropdown-item>
@@ -305,7 +302,7 @@
             <h3>Данные для редактирования</h3>
             <div class="container__see-project">
               <div class="row__lables">
-                <div v-if="email === 'admin@mail.ru'" class="row__date-lables">
+                <div v-if="user.role_id === 1" class="row__date-lables">
                   <label class="row__lables-label">Дата и время</label>
                   <flat-pickr
                     placeholder="Выберите дату и время"
@@ -318,7 +315,7 @@
                     }"
                   />
                 </div>
-                <div v-if="email === 'admin@mail.ru'" class="row__call-lables">
+                <div v-if="user.role_id === 1" class="row__call-lables">
                   <label class="row__lables-label"
                     >Продолжительность звонка</label
                   >
@@ -354,10 +351,7 @@
                     </b-button>
                   </div>
                 </div>
-                <div
-                  v-if="email === 'admin@mail.ru'"
-                  class="row__source-lables"
-                >
+                <div v-if="user.role_id === 1" class="row__source-lables">
                   <label class="row__lables-label">Источник</label>
                   <b-form-select
                     class="form__select"
@@ -366,7 +360,7 @@
                   >
                   </b-form-select>
                 </div>
-                <div v-if="email === 'admin@mail.ru'" class="row__user-lables">
+                <div v-if="user.role_id === 1" class="row__user-lables">
                   <label class="row__lables-label">Пользователь</label>
                   <b-form-input
                     class="row__user-input"
@@ -378,9 +372,7 @@
                   />
                 </div>
                 <div
-                  v-if="
-                    email === 'admin@mail.ru' || email === 'manager@mail.ru'
-                  "
+                  v-if="user.role_id === 1 || user.role_id === 2"
                   class="row__tag-lables"
                 >
                   <label class="row__lables-label">Тэги</label>
@@ -392,9 +384,7 @@
                   </b-form-select>
                 </div>
                 <div
-                  v-if="
-                    email === 'admin@mail.ru' || email === 'manager@mail.ru'
-                  "
+                  v-if="user.role_id === 1 || user.role_id === 2"
                   class="row__tag-lables"
                 >
                   <label class="row__lables-label">Проверка менеджера</label>
@@ -406,9 +396,7 @@
                   </b-form-select>
                 </div>
                 <div
-                  v-if="
-                    email === 'admin@mail.ru' || email === 'manager@mail.ru'
-                  "
+                  v-if="user.role_id === 1 || user.role_id === 2"
                   class="row__comment-manager-lables"
                 >
                   <label class="row__lables-label">Комментарий менеджера</label>
@@ -421,7 +409,7 @@
                     :value="data.commentManager"
                   />
                 </div>
-                <div v-if="email === 'admin@mail.ru'" class="row__tag-lables">
+                <div v-if="user.role_id === 1" class="row__tag-lables">
                   <label class="row__lables-label">Проверка клиента</label>
                   <b-form-select
                     class="form__select"
@@ -678,7 +666,7 @@ export default {
         { value: "не проверенный", text: "не проверенный" },
       ],
       rows: [],
-      email: "",
+      user: "",
       searchTerm: "",
       sortedFilter: [],
       arr: [],
@@ -704,6 +692,7 @@ export default {
       checkboxUser: [],
       arrayChat: [],
       getDT: false,
+      project: "",
     };
   },
   methods: {
@@ -772,37 +761,38 @@ export default {
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
         axios.get("api/user ").then((response) => {
-          this.email = response.data.email;
+          this.user = response.data;
         });
       });
     },
     async getDataTable() {
       try {
-        axios.get("/api/data").then((response) => {
-          this.rows = response.data;
-          this.getDT = true;
-          this.rows.forEach((row) => {
-            const activeManager =
-              this.manager.find((m) => m.value == row.manager) || null;
-            this.$set(this.managerObject, row.id, activeManager);
-            const activeClient =
-              this.client.find((c) => c.value == row.client) || null;
-            this.$set(this.clientObject, row.id, activeClient);
-          });
-          this.historyArray = [];
-          this.rows.filter((row, index, k) => {
-            k = 0;
-            for (let i = 0; i < index; i++) {
-              if (row.user === this.rows[i].user) {
-                k++;
-                if (k < 2) {
-                  this.historyArray.push(this.rows[i].id);
-                }
-              }
-            }
-          });
-          this.historyArray = [...new Set(this.historyArray)];
-        });
+        // axios.get("/api/data").then((response) => {
+        //   this.rows = response.data;
+        //   this.getDT = true;
+        //   this.rows.forEach((row) => {
+        //     const activeManager =
+        //       this.manager.find((m) => m.value == row.manager) || null;
+        //     this.$set(this.managerObject, row.id, activeManager);
+        //     const activeClient =
+        //       this.client.find((c) => c.value == row.client) || null;
+        //     this.$set(this.clientObject, row.id, activeClient);
+        //   });
+        //   this.historyArray = [];
+        //   this.rows.filter((row, index, k) => {
+        //     k = 0;
+        //     for (let i = 0; i < index; i++) {
+        //       if (row.user === this.rows[i].user) {
+        //         k++;
+        //         if (k < 2) {
+        //           this.historyArray.push(this.rows[i].id);
+        //         }
+        //       }
+        //     }
+        //   });
+        //   this.historyArray = [...new Set(this.historyArray)];
+        // });
+        
       } catch (error) {
         alert(error.message);
       }

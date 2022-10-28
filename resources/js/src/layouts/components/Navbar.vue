@@ -17,6 +17,36 @@
       class="bookmark-wrapper align-items-center flex-grow-1 d-none d-lg-flex"
     >
       <dark-Toggler class="d-none d-lg-block" />
+      <b-button
+        v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+        variant="primary"
+        to="Projects"
+        class="navbar__button"
+      >
+        Проекты
+      </b-button>
+      <b-nav>
+        <b-nav-item to="Users" class="navbar__button">
+          <user-icon
+            size="1.75x"
+            class="plus-icon align-middle mr-25"
+          ></user-icon>
+        </b-nav-item>
+        <b-nav-item to="Integration" class="navbar__button">
+          <TrendingUpIcon
+            size="1.75x"
+            class="plus-icon align-middle mr-25"
+          ></TrendingUpIcon>
+        </b-nav-item>
+      </b-nav>
+
+      <b-form-select
+        class="choose__project"
+        v-model="choose_project"
+        :options="projects"
+        @change="selectProject"
+      >
+      </b-form-select>
     </div>
     <div v-if="user.email === undefined">
       <b-button variant="primary" disabled class="mr-1">
@@ -42,7 +72,6 @@
             size="40"
             variant="light-primary"
             badge
-            :src="require('@/assets/images/avatars/13-small.png')"
             class="badge-minimal"
             badge-variant="success"
           />
@@ -69,6 +98,7 @@
 
 <script>
 import {
+  BFormSelect,
   BLink,
   BNavbarNav,
   BNavItemDropdown,
@@ -78,11 +108,20 @@ import {
   BSpinner,
   BButton,
   VBTooltip,
+  BNav,
+  BNavItem,
 } from "bootstrap-vue";
+import Ripple from "vue-ripple-directive";
 import DarkToggler from "@core/layouts/components/app-navbar/components/DarkToggler.vue";
 import axios from "axios";
+import { UserIcon, TrendingUpIcon } from "vue-feather-icons";
 export default {
   components: {
+    BNav,
+    BNavItem,
+    TrendingUpIcon,
+    UserIcon,
+    BFormSelect,
     BLink,
     BNavbarNav,
     BNavItemDropdown,
@@ -95,6 +134,7 @@ export default {
     DarkToggler,
   },
   directives: {
+    Ripple,
     "b-tooltip": VBTooltip,
   },
   props: {
@@ -107,9 +147,24 @@ export default {
     return {
       user: {},
       response: [],
+      choose_project: null,
+      projects: [
+        { value: null, text: "Выберите проект" },
+        { value: "Новые окна", text: "Новые окна" },
+        { value: "АстроМед", text: "АстроМед" },
+        { value: "Специальность 1906", text: "Специальность 1906" },
+        { value: "Пентакс Юг", text: "Пентакс Юг" },
+        { value: "ТМЗ", text: "ТМЗ" },
+        { value: "Новые окна. Новочеркасск", text: "Новые окна. Новочеркасск" },
+        { value: "Новые окна. Таганрог", text: "Новые окна. Таганрог" },
+      ],
     };
   },
   methods: {
+    selectProject(project) {
+      this.$store.commit("SET_PROJECT", project);
+      console.log("update");
+    },
     get_user() {
       axios.get("/sanctum/csrf-cookie").then((response) => {
         axios.get("api/user").then((response) => {

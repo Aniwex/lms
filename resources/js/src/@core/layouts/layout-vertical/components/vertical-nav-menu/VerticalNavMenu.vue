@@ -77,6 +77,7 @@
     </vue-perfect-scrollbar>
     <!-- /main menu content-->
   </div>
+
 </template>
 
 <script>

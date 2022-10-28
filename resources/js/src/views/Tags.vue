@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center" v-if="!getTag || !email">
+    <div class="text-center" v-if="!getTag || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -10,12 +10,12 @@
     <search
       :rows="rowsTags"
       :searchTerm="searchTerm"
-      v-if="getTag && email"
-      :email="email"
+      v-if="getTag && user"
+      :role_id="user.role_id"
       @arraySearch="pushArraySearch"
     />
     <div
-      v-if="rowSelection.length && this.email === 'admin@mail.ru'"
+      v-if="rowSelection.length && user.role_id === 1"
       class="d-flex justify-content-end"
     >
       <b-dropdown class="drop__down-delete" variant="primary" right no-caret>
@@ -39,7 +39,7 @@
     <vue-good-table
       :columns="columns"
       :rows="sorted"
-      v-if="getTag && email"
+      v-if="getTag && user"
       :search-options="{
         enabled: true,
       }"
@@ -130,7 +130,7 @@
                 <span>Посмотреть</span>
               </b-dropdown-item>
               <b-dropdown-item
-                v-if="email === 'admin@mail.ru'"
+                v-if="user.role_id === 1"
                 @click="deleteModal"
               >
                 <span>Удалить</span>
@@ -355,7 +355,7 @@ export default {
       modalArray: [],
       modalCounter: 0,
       searchTerm: "",
-      email: "",
+      user: "",
       pageLength: 5,
       columns: [
         {
@@ -415,8 +415,8 @@ export default {
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
         axios.get("api/user ").then((response) => {
-          this.email = response.data.email;
-          if (this.email === "admin@mail.ru") {
+          this.user = response.data;
+          if (this.user.role_id === 1) {
             const obj = {
               label: "Действие",
               field: "action",
