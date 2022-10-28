@@ -13,17 +13,17 @@
       <validation-observer ref="loginValidation">
         <b-form class="auth-login-form mt-2" @submit.prevent="Login">
           <!-- login -->
-          <b-form-group label="Email" label-for="login-email">
+          <b-form-group label="Login" label-for="login-login">
             <validation-provider
               #default="{ errors }"
-              name="Email"
-              rules="required|email"
+              name="login"
+              rules="required|login"
             >
               <b-form-input
-                id="login-email"
-                v-model="email"
+                id="login-login"
+                v-model="login"
                 :state="errors.length > 0 ? false : null"
-                name="login-email"
+                name="login-login"
                 placeholder="john@example.com"
               />
               <small class="text-danger">{{ errors[0] }}</small>
@@ -148,7 +148,7 @@ import {
   BButton,
   BSpinner,
 } from "bootstrap-vue";
-import { required, email } from "@validations";
+import { required, login } from "@validations";
 import { togglePasswordVisibility } from "@core/mixins/ui/forms";
 import Ripple from "vue-ripple-directive";
 import ToastificationContent from "@core/components/toastification/ToastificationContent.vue";
@@ -180,13 +180,12 @@ export default {
     return {
       status: "",
       password: "",
-      email: "",
+      login: "",
       enter: false,
       user: [],
       sideImg: require("@/assets/images/pages/login-v2.svg"),
       // validation rulesimport store from '@/store/index'
       required,
-      email,
       response: "",
     };
   },
@@ -201,7 +200,7 @@ export default {
       axios.get("/sanctum/csrf-cookie").then((response) => {
         axios
           .post("/login", {
-            email: this.email,
+            login: this.login,
             password: this.password,
           })
           .then((resp) => {

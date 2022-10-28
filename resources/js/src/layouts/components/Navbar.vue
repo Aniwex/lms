@@ -48,7 +48,7 @@
       >
       </b-form-select>
     </div>
-    <div v-if="user.email === undefined">
+    <div v-if="user.login === undefined">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -63,10 +63,7 @@
       >
         <template #button-content>
           <div class="d-sm-flex d-none user-nav">
-            <p class="user-name font-weight-bolder mb-0">
-              {{ user.name }}
-            </p>
-            <span class="user-status">{{ user.email }}</span>
+            <span class="user-status">{{ user.login }}</span>
           </div>
           <b-avatar
             size="40"
@@ -163,13 +160,12 @@ export default {
   methods: {
     selectProject(project) {
       this.$store.commit("SET_PROJECT", project);
-      console.log("update");
     },
     get_user() {
       axios.get("/sanctum/csrf-cookie").then((response) => {
         axios.get("api/user").then((response) => {
           this.user = response.data;
-          const vNodesMsg = [`Вы успешно вошли как  ${response.data.name}`];
+          const vNodesMsg = [`Вы успешно вошли как  ${response.data.login}`];
           this.$bvToast.toast([vNodesMsg], {
             title: `Добро пожаловать`,
             variant: "success",
@@ -182,8 +178,8 @@ export default {
       });
     },
     logout() {
-      this.user.email = undefined;
-      axios.post("/logout").then((resp) => {
+      this.user.login = undefined;
+      axios.get("/logout").then((resp) => {
         localStorage.removeItem(
           "x_xsrf_token",
           resp.config.headers["X-XSRF-TOKEN"]
@@ -191,10 +187,6 @@ export default {
         this.$router.push("/");
         this.$store.commit("SET_ENTERED", false);
       });
-      //
-      // this.$store.dispatch("logout").then(() => {
-      //   this.$router.push("/");
-      // });
     },
   },
 

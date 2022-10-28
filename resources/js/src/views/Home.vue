@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center" v-if="email === ''">
+    <div class="text-center" v-if="user.login === ''">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -25,21 +25,21 @@ export default {
   },
   data() {
     return {
-      email: "",
+      user: "",
       project: "",
     };
   },
   methods: {
-    getEmail() {
+    getUser() {
       axios.get("/sanctum/csrf-cookie").then((response) => {
         axios.get("api/user ").then((response) => {
-          this.email = response.data.email;
+          this.user = response.data;
         });
       });
     },
   },
   mounted() {
-    this.getEmail();
+    this.getUser();
     this.$store.commit("SET_ENTERED", true);
   },
 };
