@@ -9,81 +9,77 @@
         Пожалуйста, войдите в свою учетную запись
       </b-card-text>
       <!-- form -->
-        <b-form class="auth-login-form mt-2" @submit.prevent="Login">
-          <!-- login -->
-          <b-form-group label="Login">
-            <validation-provider
-              #default="{ errors }"
-              name="Login"
-              rules="required"
-            >
-              <b-form-input
-                id="login-login"
-                v-model="login"
-                :state="errors.length > 0 ? false : null"
-                name="login-login"
-                placeholder="john"
-              />
-              <small class="text-danger">{{ errors[0] }}</small>
-            </validation-provider>
-          </b-form-group>
+      <b-form class="auth-login-form mt-2" @submit.prevent="Login">
+        <!-- login -->
+        <b-form-group label="Login">
+          <validation-provider
+            #default="{ errors }"
+            name="Login"
+            rules="required"
+          >
+            <b-form-input
+              id="login-login"
+              v-model="login"
+              :state="errors.length > 0 ? false : null"
+              name="login-login"
+              placeholder="john"
+            />
+            <small class="text-danger">{{ errors[0] }}</small>
+          </validation-provider>
+        </b-form-group>
 
-          <!-- forgot password -->
-          <b-form-group>
-            <div class="d-flex justify-content-between">
-              <label for="login-password">Password</label>
-              <!-- <b-link :to="{ name: 'auth-forgot-password-v2' }">
+        <!-- forgot password -->
+        <b-form-group>
+          <div class="d-flex justify-content-between">
+            <label for="login-password">Password</label>
+            <!-- <b-link :to="{ name: 'auth-forgot-password-v2' }">
                 <small>Забыли пароль?</small>
               </b-link> -->
-            </div>
-            <validation-provider
-              #default="{ errors }"
-              name="Password"
-              rules="required"
+          </div>
+          <validation-provider
+            #default="{ errors }"
+            name="Password"
+            rules="required"
+          >
+            <b-input-group
+              class="input-group-merge"
+              :class="errors.length > 0 ? 'is-invalid' : null"
             >
-              <b-input-group
-                class="input-group-merge"
-                :class="errors.length > 0 ? 'is-invalid' : null"
-              >
-                <b-form-input
-                  id="login-password"
-                  v-model="password"
-                  :state="errors.length > 0 ? false : null"
-                  class="form-control-merge"
-                  :type="passwordFieldType"
-                  name="login-password"
-                  placeholder="············"
+              <b-form-input
+                id="login-password"
+                v-model="password"
+                :state="errors.length > 0 ? false : null"
+                class="form-control-merge"
+                :type="passwordFieldType"
+                name="login-password"
+                placeholder="············"
+              />
+              <b-input-group-append is-text>
+                <feather-icon
+                  class="cursor-pointer"
+                  :icon="passwordToggleIcon"
+                  @click="togglePasswordVisibility"
                 />
-                <b-input-group-append is-text>
-                  <feather-icon
-                    class="cursor-pointer"
-                    :icon="passwordToggleIcon"
-                    @click="togglePasswordVisibility"
-                  />
-                </b-input-group-append>
-              </b-input-group>
-              <small class="text-danger">{{ errors[0] }}</small>
-            </validation-provider>
-          </b-form-group>
+              </b-input-group-append>
+            </b-input-group>
+            <small class="text-danger">{{ errors[0] }}</small>
+          </validation-provider>
+        </b-form-group>
 
-          <!-- checkbox -->
-          <b-form-group>
-            <b-form-checkbox
-              id="remember-me"
-              v-model="status"
-              name="checkbox-1"
-            >
-              Запомнить меня
-            </b-form-checkbox>
-          </b-form-group>
+        <!-- checkbox -->
+        <b-form-group>
+          <b-form-checkbox id="remember-me" v-model="status" name="checkbox-1">
+            Запомнить меня
+          </b-form-checkbox>
+        </b-form-group>
 
-          <!-- submit buttons -->
-          <b-button type="submit" variant="primary" block>
-            <span v-if="!enter">Войти</span>
-            <span v-if="enter">Загрузка...</span>
-            <b-spinner v-if="enter" small />
-          </b-button>
-        </b-form>
+        <!-- submit buttons -->
+        <b-button type="submit" variant="primary" block>
+          <span v-if="!enter">Войти</span>
+          <span v-if="enter">Загрузка...</span>
+          <b-spinner v-if="enter" small />
+        </b-button>
+      </b-form>
 
       <!-- divider -->
       <div class="divider my-2">
