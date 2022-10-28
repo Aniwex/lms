@@ -16,6 +16,7 @@ export default new Vuex.Store({
         entered: false,
         seeAction: {},
         searchHistory: "",
+        project: "",
     },
 
     mutations: {
@@ -31,8 +32,12 @@ export default new Vuex.Store({
         SET_USER: (state, payload) => {
             state.user = payload;
         },
+        SET_PROJECT: (state, payload) => {
+            state.project = payload;
+        },
     },
     actions: {
+        
     },
     getters: {
         entered: (state) => {
@@ -46,6 +51,9 @@ export default new Vuex.Store({
         },
         user: (state) => {
             return state.user;
+        },
+        project: (state) => {
+            return state.project;
         }
     },
     modules: {

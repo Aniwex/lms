@@ -32,10 +32,10 @@ export default {
     return {
       token: null,
       user: {},
+      project:'',
     };
   },
-  methods: {
-  },
+  methods: {},
   mounted() {
     this.$store.commit("SET_ENTERED", true);
   },
@@ -50,10 +50,10 @@ export default {
       return this.$store.state.appConfig.layout.type;
     },
   },
-  updated() {},
-  created() {
+  updated() {
     
   },
+  created() {},
   beforeCreate() {
     // Set colors in theme
     const colors = [
