@@ -112,7 +112,7 @@
     </b-form-group>
 
     <div
-      v-if="rowSelection.length && this.email === 'admin@mail.ru'"
+      v-if="rowSelection.length && role_id === 1"
       class="d-flex justify-content-end"
     >
       <b-dropdown class="drop__down-delete" variant="primary" right no-caret>
@@ -174,7 +174,7 @@ export default {
     Ripple,
     // "b-tooltip": VBTooltip,
   },
-  props: ["options_source", "rows", "rowSelection", "email"],
+  props: ["options_source", "rows", "rowSelection", "role_id"],
   data() {
     return {
       selected: {

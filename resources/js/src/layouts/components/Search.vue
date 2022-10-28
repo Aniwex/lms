@@ -10,7 +10,7 @@
           @input="handleSearch"
         />
       </div>
-      <div class="create__appeal" v-if="email === 'admin@mail.ru'">
+      <div class="create__appeal" v-if="role_id === 1">
         <b-button
           v-ripple.400="'rgba(255, 255, 255, 0.15)'"
           variant="primary"
@@ -56,7 +56,7 @@
 import { BFormInput, BButton, VBTooltip } from "bootstrap-vue";
 import Ripple from "vue-ripple-directive";
 export default {
-  props: ["rows", "email"],
+  props: ["rows", "role_id"],
   components: {
     BFormInput,
     BButton,

@@ -4,11 +4,11 @@ export default [
         route: "Home",
         icon: "HomeIcon",
     },
-    {
-        title: "Интеграции",
-        route: "Integration",
-        icon: "TrendingUpIcon",
-    },
+    // {
+    //     title: "Интеграции",
+    //     route: "Integration",
+    //     icon: "TrendingUpIcon",
+    // },
     // {
     //     title: "Пользователи",
     //     route: "Users",

@@ -8,98 +8,78 @@
       <b-card-text class="mb-2">
         Пожалуйста, войдите в свою учетную запись
       </b-card-text>
-
       <!-- form -->
-      <validation-observer ref="loginValidation">
-        <b-form class="auth-login-form mt-2" @submit.prevent="Login">
-          <!-- login -->
-          <b-form-group label="Email" label-for="login-email">
-            <validation-provider
-              #default="{ errors }"
-              name="Email"
-              rules="required|email"
-            >
-              <b-form-input
-                id="login-email"
-                v-model="email"
-                :state="errors.length > 0 ? false : null"
-                name="login-email"
-                placeholder="john@example.com"
-              />
-              <small class="text-danger">{{ errors[0] }}</small>
-            </validation-provider>
-          </b-form-group>
+      <b-form class="auth-login-form mt-2" @submit.prevent="Login">
+        <!-- login -->
+        <b-form-group label="Login">
+          <validation-provider
+            #default="{ errors }"
+            name="Login"
+            rules="required"
+          >
+            <b-form-input
+              id="login-login"
+              v-model="login"
+              :state="errors.length > 0 ? false : null"
+              name="login-login"
+              placeholder="john"
+            />
+            <small class="text-danger">{{ errors[0] }}</small>
+          </validation-provider>
+        </b-form-group>
 
-          <!-- forgot password -->
-          <b-form-group>
-            <div class="d-flex justify-content-between">
-              <label for="login-password">Password</label>
-              <!-- <b-link :to="{ name: 'auth-forgot-password-v2' }">
+        <!-- forgot password -->
+        <b-form-group>
+          <div class="d-flex justify-content-between">
+            <label for="login-password">Password</label>
+            <!-- <b-link :to="{ name: 'auth-forgot-password-v2' }">
                 <small>Забыли пароль?</small>
               </b-link> -->
-            </div>
-            <validation-provider
-              #default="{ errors }"
-              name="Password"
-              rules="required"
-            >
-              <b-input-group
-                class="input-group-merge"
-                :class="errors.length > 0 ? 'is-invalid' : null"
-              >
-                <b-form-input
-                  id="login-password"
-                  v-model="password"
-                  :state="errors.length > 0 ? false : null"
-                  class="form-control-merge"
-                  :type="passwordFieldType"
-                  name="login-password"
-                  placeholder="············"
-                />
-                <b-input-group-append is-text>
-                  <feather-icon
-                    class="cursor-pointer"
-                    :icon="passwordToggleIcon"
-                    @click="togglePasswordVisibility"
-                  />
-                </b-input-group-append>
-              </b-input-group>
-              <small class="text-danger">{{ errors[0] }}</small>
-            </validation-provider>
-          </b-form-group>
-
-          <!-- checkbox -->
-          <b-form-group>
-            <b-form-checkbox
-              id="remember-me"
-              v-model="status"
-              name="checkbox-1"
-            >
-              Запомнить меня
-            </b-form-checkbox>
-          </b-form-group>
-
-          <!-- submit buttons -->
-          <b-button type="submit" variant="primary" block>
-            <span v-if="!enter">Войти</span>
-            <span v-if="enter">Загрузка...</span>
-            <b-spinner v-if="enter" small />
-          </b-button>
-        </b-form>
-      </validation-observer>
-
-      <b-card-text class="text-center mt-2">
-        <span>Впервые на нашей платформе? </span>
-        <b-link :to="{ name: 'page-auth-register-v2' }">
-          <b-button
-            to="Register"
-            v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-            variant="primary"
+          </div>
+          <validation-provider
+            #default="{ errors }"
+            name="Password"
+            rules="required"
           >
-            Зарегистрировать аккаунт
-          </b-button>
-        </b-link>
-      </b-card-text>
+            <b-input-group
+              class="input-group-merge"
+              :class="errors.length > 0 ? 'is-invalid' : null"
+            >
+              <b-form-input
+                id="login-password"
+                v-model="password"
+                :state="errors.length > 0 ? false : null"
+                class="form-control-merge"
+                :type="passwordFieldType"
+                name="login-password"
+                placeholder="············"
+              />
+              <b-input-group-append is-text>
+                <feather-icon
+                  class="cursor-pointer"
+                  :icon="passwordToggleIcon"
+                  @click="togglePasswordVisibility"
+                />
+              </b-input-group-append>
+            </b-input-group>
+            <small class="text-danger">{{ errors[0] }}</small>
+          </validation-provider>
+        </b-form-group>
+
+        <!-- checkbox -->
+        <b-form-group>
+          <b-form-checkbox id="remember-me" v-model="status" name="checkbox-1">
+            Запомнить меня
+          </b-form-checkbox>
+        </b-form-group>
+
+        <!-- submit buttons -->
+        <b-button type="submit" variant="primary" block>
+          <span v-if="!enter">Войти</span>
+          <span v-if="enter">Загрузка...</span>
+          <b-spinner v-if="enter" small />
+        </b-button>
+      </b-form>
 
       <!-- divider -->
       <div class="divider my-2">
@@ -148,7 +128,7 @@ import {
   BButton,
   BSpinner,
 } from "bootstrap-vue";
-import { required, email } from "@validations";
+import { required } from "@validations";
 import { togglePasswordVisibility } from "@core/mixins/ui/forms";
 import Ripple from "vue-ripple-directive";
 import ToastificationContent from "@core/components/toastification/ToastificationContent.vue";
@@ -180,13 +160,12 @@ export default {
     return {
       status: "",
       password: "",
-      email: "",
+      login: "",
       enter: false,
       user: [],
       sideImg: require("@/assets/images/pages/login-v2.svg"),
       // validation rulesimport store from '@/store/index'
       required,
-      email,
       response: "",
     };
   },
@@ -201,7 +180,7 @@ export default {
       axios.get("/sanctum/csrf-cookie").then((response) => {
         axios
           .post("/login", {
-            email: this.email,
+            login: this.login,
             password: this.password,
           })
           .then((resp) => {

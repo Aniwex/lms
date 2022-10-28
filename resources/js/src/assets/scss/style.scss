@@ -10,6 +10,7 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
 @import '../scss/_tableHome';
 @import '../scss/_modalWindowHome';
 @import '../scss/_registration';
+@import '../scss/_navbar';
 // .dropitem__close {
 //     width: 45px;
 //     position: absolute;
@@ -33,6 +34,10 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
   .form-control[readonly]{
     background-color: #fff;
   }
+.choose__project{
+  width:250px;
+  margin-left: 20px;
+}
 
 
 
