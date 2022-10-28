@@ -315,7 +315,8 @@ export default {
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     async getIntegration() {
-      await axios.get("/api/integrations").then((response) => {
+      await axios.get("api/integrations").then((response) => {
+        console.log(response.data)
         this.rowsIntegration = response.data.integrations;
         this.getInt = true;
       });

@@ -165,6 +165,8 @@ export default {
       axios.get("/sanctum/csrf-cookie").then((response) => {
         axios.get("api/user").then((response) => {
           this.user = response.data;
+          const token = response.config.headers["X-XSRF-TOKEN"];
+          
           const vNodesMsg = [`Вы успешно вошли как  ${response.data.login}`];
           this.$bvToast.toast([vNodesMsg], {
             title: `Добро пожаловать`,
@@ -198,6 +200,5 @@ export default {
       return this.$store.getters.isLoggedIn;
     },
   },
-  
 };
 </script>

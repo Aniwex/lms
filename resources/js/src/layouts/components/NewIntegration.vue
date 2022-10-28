@@ -6,20 +6,20 @@
           <label class="form__label">Название </label>
           <b-form-input
             class="row__user-input"
-            v-model="name"
+            v-model="title"
             type="text"
             placeholder="Название"
-            :state="name !== ''"
+            :state="title !== ''"
           />
         </div>
         <div class="form__group">
           <label class="form__label">Код </label>
           <b-form-input
             class="row__user-input"
-            v-model="code"
+            v-model="slug"
             type="text"
             placeholder="Код"
-            :state="code !== ''"
+            :state="slug !== ''"
           />
         </div>
       </div>
@@ -86,8 +86,9 @@ export default {
   },
   data() {
     return {
-      name: "",
-      code: "",
+      title: "",
+      slug: "",
+      config: [],
       enter: false,
       enterAndAdd: false,
     };
@@ -95,12 +96,12 @@ export default {
   methods: {
     async addIntegration() {
       try {
-        if (this.name && this.code) {
+        if (this.title && this.slug) {
           this.enter = true;
-          await axios.post("/api/integrations", {
+          await axios.post("api/integrations", {
             id: Date.now(),
-            name: this.name,
-            code: this.code,
+            title: this.title,
+            slug: this.slug,
           });
           this.$router.push("/Integration");
         } else {
@@ -113,19 +114,21 @@ export default {
             autoHideDelay: 2000,
           });
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     },
     async CreateAndAddIntegration() {
       try {
-        if (this.name && this.code) {
+        if (this.title && this.slug) {
           this.enterAndAdd = true;
           await axios.post("/api/integrations", {
             id: Date.now(),
-            name: this.name,
-            code: this.code,
+            title: this.title,
+            slug: this.slug,
           });
-          this.name = "";
-          this.code = "";
+          this.title = "";
+          this.slug = "";
           this.enterAndAdd = false;
         } else {
           this.$bvToast.toast("Пожалуйтса заполните все поля", {
