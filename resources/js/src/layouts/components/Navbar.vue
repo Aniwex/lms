@@ -198,5 +198,6 @@ export default {
       return this.$store.getters.isLoggedIn;
     },
   },
+  
 };
 </script>

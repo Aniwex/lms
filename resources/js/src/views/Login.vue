@@ -8,23 +8,21 @@
       <b-card-text class="mb-2">
         Пожалуйста, войдите в свою учетную запись
       </b-card-text>
-
       <!-- form -->
-      <validation-observer ref="loginValidation">
         <b-form class="auth-login-form mt-2" @submit.prevent="Login">
           <!-- login -->
-          <b-form-group label="Login" label-for="login-login">
+          <b-form-group label="Login">
             <validation-provider
               #default="{ errors }"
-              name="login"
-              rules="required|login"
+              name="Login"
+              rules="required"
             >
               <b-form-input
                 id="login-login"
                 v-model="login"
                 :state="errors.length > 0 ? false : null"
                 name="login-login"
-                placeholder="john@example.com"
+                placeholder="john"
               />
               <small class="text-danger">{{ errors[0] }}</small>
             </validation-provider>
@@ -86,20 +84,6 @@
             <b-spinner v-if="enter" small />
           </b-button>
         </b-form>
-      </validation-observer>
-
-      <b-card-text class="text-center mt-2">
-        <span>Впервые на нашей платформе? </span>
-        <b-link :to="{ name: 'page-auth-register-v2' }">
-          <b-button
-            to="Register"
-            v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-            variant="primary"
-          >
-            Зарегистрировать аккаунт
-          </b-button>
-        </b-link>
-      </b-card-text>
 
       <!-- divider -->
       <div class="divider my-2">
@@ -148,7 +132,7 @@ import {
   BButton,
   BSpinner,
 } from "bootstrap-vue";
-import { required, login } from "@validations";
+import { required } from "@validations";
 import { togglePasswordVisibility } from "@core/mixins/ui/forms";
 import Ripple from "vue-ripple-directive";
 import ToastificationContent from "@core/components/toastification/ToastificationContent.vue";

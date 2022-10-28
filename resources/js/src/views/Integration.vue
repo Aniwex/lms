@@ -89,10 +89,7 @@
               <b-dropdown-item v-b-modal.modal__seeIntegration>
                 <span>Посмотреть</span>
               </b-dropdown-item>
-              <b-dropdown-item
-                v-if="user.role_id === 1"
-                @click="deleteModal"
-              >
+              <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
                 <span>Удалить</span>
               </b-dropdown-item>
             </b-dropdown>
@@ -263,7 +260,7 @@ export default {
     BDropdownDivider,
     BButton,
   },
-  
+
   directives: {
     Ripple,
     "b-modal": VBModal,
@@ -448,6 +445,9 @@ export default {
     },
   },
   computed: {
+    getProject() {
+      return this.$store.getters.project;
+    },
     sorted() {
       if (this.arraySearch.length) {
         return this.arraySearch;

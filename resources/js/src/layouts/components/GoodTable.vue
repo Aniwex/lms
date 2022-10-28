@@ -1,5 +1,6 @@
 <template>
   <div>
+    
     <div class="text-center" v-if="!getDT || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
@@ -792,7 +793,6 @@ export default {
         //   });
         //   this.historyArray = [...new Set(this.historyArray)];
         // });
-        
       } catch (error) {
         alert(error.message);
       }
