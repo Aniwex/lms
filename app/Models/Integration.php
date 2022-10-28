@@ -35,4 +35,9 @@ class Integration extends Model
     protected $casts = [
         'config' => 'array',
     ];
+
+    /**
+     * @var array
+     */
+    protected $fillable = ['title', 'slug', 'config'];
 }

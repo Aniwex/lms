@@ -7,6 +7,7 @@ use App\Http\Requests\Integration\UpdateIntegrationRequest;
 use App\Http\Response;
 use App\Models\Integration;
 use App\Resources\IntegrationCollection;
+use App\Resources\IntegrationResource;
 
 /**
  * REST-API контроллер для взаимодействия с интеграциями.
@@ -35,7 +36,11 @@ class IntegrationController extends Controller
      */
     public function store(StoreIntegrationRequest $request)
     {
-        return Response::success()->message('Integration create request mock');
+        $integration = Integration::create($request->validated());
+
+        return Response::success()
+            ->message('Новая интеграция была добавлена успешно!')
+            ->data(['integration' => IntegrationResource::makeArray($integration)]);
     }
 
     /**
@@ -46,7 +51,9 @@ class IntegrationController extends Controller
      */
     public function show(Integration $integration)
     {
-        return Response::success()->message('Integration show request mock');
+        return Response::success()->data([
+            'integration' => IntegrationResource::makeArray($integration)
+        ]);
     }
 
     /**
@@ -58,7 +65,12 @@ class IntegrationController extends Controller
      */
     public function update(UpdateIntegrationRequest $request, Integration $integration)
     {
-        return Response::success()->message('Integration update request mock');
+        $integration->fill($request->validated());
+        $integration->save();
+
+        return Response::success()
+            ->message('Интеграция была успешно обновлена!')
+            ->data(['integration' => IntegrationResource::makeArray($integration)]);
     }
 
     /**
@@ -69,6 +81,7 @@ class IntegrationController extends Controller
      */
     public function destroy(Integration $integration)
     {
-        return Response::success()->message('Integration delete request mock');
+        $integration->delete();
+        return Response::success()->message('Интеграция удалена');
     }
 }

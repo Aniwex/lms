@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\Integration;
 
-use App\Http\Requests\Request;
-
-class UpdateIntegrationRequest extends Request
+/**
+ * Запрос на изменение данных интеграции.
+ */
+class UpdateIntegrationRequest extends StoreIntegrationRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -13,8 +14,8 @@ class UpdateIntegrationRequest extends Request
      */
     public function rules()
     {
-        return [
-            //
-        ];
+        $rules = parent::rules();
+        $rules['slug'] = ['string', 'required', 'unique:integrations,slug,'.$this->integration->id, 'max:255'];
+        return $rules;
     }
 }

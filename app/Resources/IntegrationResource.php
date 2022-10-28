@@ -17,7 +17,10 @@ class IntegrationResource extends AbstractResource
     {
         return new \League\Fractal\Resource\Item($model, function(Integration $integration) {
             return [
-                'id' => $integration->id
+                'id' => $integration->id,
+                'title' => $integration->title,
+                'slug' => $integration->slug,
+                'config' => $integration->config
             ];
         });
     }
