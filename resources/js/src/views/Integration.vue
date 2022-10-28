@@ -61,16 +61,16 @@
     >
       >
       <template slot="table-row" slot-scope="props">
-        <!-- Column: Name -->
-        <span v-if="props.column.field === 'name'" class="text-nowrap db__tc">
-          <span class="text-nowrap">{{ props.row.name }}</span>
+        <!-- Column: title -->
+        <span v-if="props.column.field === 'title'" class="text-nowrap db__tc">
+          <span class="text-nowrap">{{ props.row.title }}</span>
         </span>
-        <!-- Column: code -->
+        <!-- Column: slug -->
         <span
-          v-else-if="props.column.field === 'code'"
+          v-else-if="props.column.field === 'slug'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.code }}</span>
+          <span class="text-nowrap">{{ props.row.slug }}</span>
         </span>
         <span v-else-if="props.column.field === 'action'">
           <span class="db__tc">
@@ -162,7 +162,7 @@
                   <label class="row__lables-label">Название</label>
                   <b-form-input
                     class="row__user-input"
-                    v-model="data.name"
+                    v-model="data.title"
                     type="text"
                     placeholder="Название"
                   />
@@ -171,7 +171,7 @@
                   <label class="row__lables-label">Код</label>
                   <b-form-input
                     class="row__user-input"
-                    v-model="data.code"
+                    v-model="data.slug"
                     type="text"
                     placeholder="Код"
                   />
@@ -278,13 +278,13 @@ export default {
       columns: [
         {
           label: "Название",
-          field: "name",
+          field: "title",
           thClass: "columnCenter",
           width: "600px",
         },
         {
           label: "Код",
-          field: "code",
+          field: "slug",
           thClass: "columnCenter",
           width: "600px",
         },
@@ -316,7 +316,7 @@ export default {
     },
     async getIntegration() {
       await axios.get("api/integrations").then((response) => {
-        console.log(response.data)
+        console.log(response.data.integrations)
         this.rowsIntegration = response.data.integrations;
         this.getInt = true;
       });
@@ -369,8 +369,8 @@ export default {
           "/api/integrations/" + this.modalArray[this.modalCounter].id,
           {
             id: this.modalArray[this.modalCounter].id,
-            name: this.modalArray[this.modalCounter].name,
-            code: this.modalArray[this.modalCounter].code,
+            title: this.modalArray[this.modalCounter].title,
+            slug: this.modalArray[this.modalCounter].slug,
           }
         );
         this.$refs["modal__window"].hide();

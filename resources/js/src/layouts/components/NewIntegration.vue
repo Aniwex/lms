@@ -22,6 +22,22 @@
             :state="slug !== ''"
           />
         </div>
+        <div class="form__group">
+          <label class="form__label">Настройки </label>
+          <div v-if="config.length">
+            <table>
+              <tr>
+                <th>KEY</th>
+                <th>VALUE</th>
+              </tr>
+              <tr v-for="(c, index) in config" :key="index">
+                <th>{{ c.key }}</th>
+                <th>{{ c.value }}</th>
+              </tr>
+            </table>
+          </div>
+          <label v-else style="font-size: 15px">Настроек нет</label>
+        </div>
       </div>
     </div>
     <div class="form__buttons">
@@ -88,7 +104,7 @@ export default {
     return {
       title: "",
       slug: "",
-      config: [],
+      config: [{ key: "test", value: "test" }],
       enter: false,
       enterAndAdd: false,
     };
@@ -98,10 +114,10 @@ export default {
       try {
         if (this.title && this.slug) {
           this.enter = true;
-          await axios.post("api/integrations", {
-            id: Date.now(),
+          await axios.post("/api/integrations", {
             title: this.title,
             slug: this.slug,
+            config: this.config,
           });
           this.$router.push("/Integration");
         } else {
@@ -153,6 +169,24 @@ export default {
 </script>
 
 <style scoped>
+table {
+  border-collapse: collapse;
+  width: 420px;
+  /*убираем пустые промежутки между ячейками*/
+  border: 1px solid black;
+  /*устанавливаем для таблицы внешнюю границу серого цвета толщиной 1px*/
+}
+th,
+td {
+  border: 1px solid black;
+  padding: 10px 15px;
+}
+th {
+  width: 20%;
+}
+td:first-child {
+  width: 320%;
+}
 .form__create-integration {
   width: 1470px;
   height: 390px;
@@ -168,7 +202,7 @@ export default {
   display: flex;
   flex-direction: column;
   margin: 0 auto;
-  height: 285px;
+  min-height: 285px;
 }
 .form__label {
   display: flex;
