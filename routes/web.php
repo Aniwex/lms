@@ -1,7 +1,7 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,9 +13,9 @@ use Illuminate\Support\Facades\Auth;
 | contains the "web" middleware group. Now create something great!
 |
 */
+Route::post('login', [LoginController::class, 'login']);
+Route::get('logout', [LoginController::class, 'logout']);
 
 Route::get('/{any}', function() {
     return view('application');
 })->where('any', '.*')->where('any', '^(?!api-docs|api.*$).*');
-
-Auth::routes();

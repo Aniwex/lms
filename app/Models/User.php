@@ -12,9 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
  * Пользователь системы.
  *
  * @property int $id
- * @property string $name Имя (login)
- * @property string $email e-mail
- * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property string $login логин
  * @property string $password Пароль
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -56,7 +54,6 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
         'password',
         'role_id'
     ];
@@ -69,15 +66,6 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-    ];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
     ];
 
     /**
