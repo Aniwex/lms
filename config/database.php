@@ -17,6 +17,8 @@ return [
 
     'default' => env('DB_CONNECTION', 'mysql'),
 
+    'query_log' => (bool) env('DB_QUERY_LOG', false),
+
     /*
     |--------------------------------------------------------------------------
     | Database Connections

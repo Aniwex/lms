@@ -17,7 +17,7 @@ class IntegrationController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \App\Http\Response
      */
     public function index()
     {
@@ -32,7 +32,7 @@ class IntegrationController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\StoreIntegrationRequest  $request
-     * @return \Illuminate\Http\Response
+     * @return \App\Http\Response
      */
     public function store(StoreIntegrationRequest $request)
     {
@@ -47,7 +47,7 @@ class IntegrationController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Models\Integration  $integration
-     * @return \Illuminate\Http\Response
+     * @return \App\Http\Response
      */
     public function show(Integration $integration)
     {
@@ -61,7 +61,7 @@ class IntegrationController extends Controller
      *
      * @param  \App\Http\Requests\UpdateIntegrationRequest  $request
      * @param  \App\Models\Integration  $integration
-     * @return \Illuminate\Http\Response
+     * @return \App\Http\Response
      */
     public function update(UpdateIntegrationRequest $request, Integration $integration)
     {
@@ -77,7 +77,7 @@ class IntegrationController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Integration  $integration
-     * @return \Illuminate\Http\Response
+     * @return \App\Http\Response
      */
     public function destroy(Integration $integration)
     {

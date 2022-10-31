@@ -24,6 +24,12 @@ Route::middleware('auth:sanctum')->group(function() {
     /**
      * Роуты для REST-api взаимодействия.
      */
-    Route::apiResource('integrations', 'IntegrationController');
+    Route::apiResources([
+        'integrations' => 'IntegrationController',
+        'users'        => 'UserController'
+    ]);
+
+    // список ролей
+    Route::get('roles', 'UserController@roles');
 });
 

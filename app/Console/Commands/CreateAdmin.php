@@ -44,16 +44,8 @@ class CreateAdmin extends Command
     public function handle()
     {
         do {
-            $name = $this->ask('Имя (логин): ', 'admin');
-            if (User::whereName($name)->count()) {
-                $this->error('Такой пользователь уже существует');
-                continue;
-            }
-            break;
-        } while(true);
-        do {
-            $email = $this->ask('E-mail: ', 'admin@mail.ru');
-            if (User::whereEmail($email)->count()) {
+            $login = $this->ask('Имя (логин): ', 'admin');
+            if (User::whereLogin($login)->count()) {
                 $this->error('Такой пользователь уже существует');
                 continue;
             }
@@ -63,8 +55,7 @@ class CreateAdmin extends Command
         $password = $this->secret('Пароль: ');
 
         User::create([
-            'name' => $name,
-            'email' => $email,
+            'login' => $login,
             'password' => Hash::make($password),
             'role_id' => Role::whereId(Role::SUPER_ADMIN_ID)->first()?->id
         ]);
