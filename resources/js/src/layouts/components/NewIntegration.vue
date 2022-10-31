@@ -1,7 +1,7 @@
 <template>
   <div class="forms">
     <div class="form__create-integration">
-      <div class="container">
+      <div class="container" :style="{ height: trHeight + 'px' }">
         <div class="form__group">
           <label class="form__label">Название </label>
           <b-form-input
@@ -24,19 +24,63 @@
         </div>
         <div class="form__group">
           <label class="form__label">Настройки </label>
-          <div v-if="config.length">
-            <table>
-              <tr>
-                <th>KEY</th>
-                <th>VALUE</th>
-              </tr>
-              <tr v-for="(c, index) in config" :key="index">
-                <th>{{ c.key }}</th>
-                <th>{{ c.value }}</th>
-              </tr>
-            </table>
+          <div>
+            <b-form
+              ref="form"
+              :style="{ height: trHeight }"
+              class="repeater-form"
+              @submit.prevent="repeateAgain"
+            >
+              <!-- Row Loop -->
+              <div
+                v-for="(item, index) in config"
+                :id="index"
+                :key="index"
+                ref="row"
+                :style="{ margin: trMargin + 'px' }"
+              >
+                <!-- Ключ -->
+                <b-form-group label="Ключ">
+                  <b-form-input
+                    type="text"
+                    placeholder="Ключ"
+                    v-model="item.key"
+                  />
+                </b-form-group>
+                <!-- Значение -->
+
+                <b-form-group label="Значение">
+                  <b-form-input
+                    type="text"
+                    placeholder="Значение"
+                    v-model="item.value"
+                  />
+                </b-form-group>
+                <hr />
+                <!-- Добавить Button -->
+                <b-button
+                  v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                  variant="primary"
+                  @click="repeateAgain"
+                  class="btn__plus-integration"
+                >
+                  <feather-icon icon="PlusIcon" class="mr-25" />
+                  <span>Добавить ещё</span>
+                </b-button>
+
+                <!-- Удалить Button -->
+                <b-button
+                  v-ripple.400="'rgba(234, 84, 85, 0.15)'"
+                  variant="outline-danger"
+                  @click="removeItem(index)"
+                  class="btn__delete-integration"
+                >
+                  <feather-icon icon="XIcon" class="mr-25" />
+                  <span>Удалить</span>
+                </b-button>
+              </div>
+            </b-form>
           </div>
-          <label v-else style="font-size: 15px">Настроек нет</label>
         </div>
       </div>
     </div>
@@ -72,6 +116,7 @@
 
 <script>
 import {
+  BForm,
   BFormGroup,
   BFormInput,
   BFormSpinbutton,
@@ -80,6 +125,8 @@ import {
   BFormTextarea,
   BButton,
   BSpinner,
+  BRow,
+  BCol,
 } from "bootstrap-vue";
 import flatPickr from "vue-flatpickr-component";
 import "@core/scss/vue/libs/vue-flatpicker.scss";
@@ -87,6 +134,9 @@ import Ripple from "vue-ripple-directive";
 import axios from "axios";
 export default {
   components: {
+    BRow,
+    BCol,
+    BForm,
     BSpinner,
     BFormInput,
     flatPickr,
@@ -104,12 +154,38 @@ export default {
     return {
       title: "",
       slug: "",
-      config: [{ key: "test", value: "test" }],
+      config: [
+        {
+          key: null,
+          value: null,
+        },
+      ],
       enter: false,
       enterAndAdd: false,
+      trHeight: 500,
+      trMargin: 20,
+      items: [
+        {
+          id: 1,
+          selected: "male",
+          selected1: "designer",
+          prevHeight: 0,
+        },
+      ],
     };
   },
   methods: {
+    repeateAgain() {
+      this.config.push({});
+      this.trHeight += 220;
+    },
+    removeItem(index) {
+      if (this.config.length !== 1) {
+        this.config.splice(index, 1);
+        this.trHeight -= 220;
+      }
+    },
+
     async addIntegration() {
       try {
         if (this.title && this.slug) {
@@ -165,31 +241,14 @@ export default {
   mounted() {
     this.$store.commit("SET_ENTERED", true);
   },
+  created() {},
+  destroyed() {},
 };
 </script>
 
 <style scoped>
-table {
-  border-collapse: collapse;
-  width: 420px;
-  /*убираем пустые промежутки между ячейками*/
-  border: 1px solid black;
-  /*устанавливаем для таблицы внешнюю границу серого цвета толщиной 1px*/
-}
-th,
-td {
-  border: 1px solid black;
-  padding: 10px 15px;
-}
-th {
-  width: 20%;
-}
-td:first-child {
-  width: 320%;
-}
 .form__create-integration {
   width: 1470px;
-  height: 390px;
   margin: 0 auto;
   background: #fff;
   border-radius: 15px;
@@ -227,5 +286,15 @@ input {
 
 .btn {
   margin-left: 12px;
+}
+.btn__plus-integration {
+  margin: 0;
+}
+.btn__delete-integration {
+  margin-left: 0px;
+  float: right;
+}
+.repeater-form{
+  margin-left: -15px;
 }
 </style>

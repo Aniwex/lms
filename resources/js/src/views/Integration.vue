@@ -86,7 +86,10 @@
                   class="text-body align-middle mr-25"
                 />
               </template>
-              <b-dropdown-item v-b-modal.modal__seeIntegration>
+              <b-dropdown-item
+                v-if="user.role_id === 1"
+                v-b-modal.modal__seeIntegration
+              >
                 <span>Посмотреть</span>
               </b-dropdown-item>
               <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
@@ -140,7 +143,7 @@
     <b-modal
       id="modal__seeIntegration"
       centered
-      title="Просмотр обращения"
+      title="Просмотр интеграции"
       cancel-title="Отмена"
       size="lg"
       ref="modal__window"
@@ -175,6 +178,80 @@
                     type="text"
                     placeholder="Код"
                   />
+                </div>
+                <div class="form__group" v-if="data.config.length">
+                  <div>
+                    <label class="row__lables-label">Настройки </label>
+                    <b-form
+                      ref="form"
+                      :style="{ height: trHeight }"
+                      class="repeater__form"
+                      @submit.prevent="repeateAgain"
+                    >
+                      <!-- Row Loop -->
+                      <div
+                        v-for="(item, index) in data.config"
+                        :id="index"
+                        :key="index"
+                        ref="row"
+                        :style="{ margin: trMargin + 'px' }"
+                      >
+                        <!-- Ключ -->
+                        <b-form-group label="Ключ">
+                          <b-form-input
+                            type="text"
+                            placeholder="Ключ"
+                            v-model="item.key"
+                            class="row__user-input"
+                          />
+                        </b-form-group>
+                        <!-- Значение -->
+
+                        <b-form-group label="Значение">
+                          <b-form-input
+                            type="text"
+                            placeholder="Значение"
+                            v-model="item.value"
+                            class="row__user-input"
+                          />
+                        </b-form-group>
+                        <hr />
+                        <!-- Добавить Button -->
+                        <b-button
+                          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                          variant="primary"
+                          @click="repeateAgain"
+                        >
+                          <feather-icon icon="PlusIcon" class="mr-25" />
+                          <span>Добавить ещё</span>
+                        </b-button>
+
+                        <!-- Удалить Button -->
+                        <b-button
+                          v-ripple.400="'rgba(234, 84, 85, 0.15)'"
+                          variant="outline-danger"
+                          @click="removeItem(index)"
+                          class="btn__delete-integration"
+                        >
+                          <feather-icon icon="XIcon" class="mr-25" />
+                          <span>Удалить</span>
+                        </b-button>
+                      </div>
+                    </b-form>
+                  </div>
+                </div>
+                <div v-else>
+                  <label class="row__lables-label db__tc">Настроек нет </label>
+                  <!-- Добавить Button -->
+                  <b-button
+                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                    variant="primary"
+                    @click="repeateAgain"
+                    class="btn__plus-integration"
+                  >
+                    <feather-icon icon="PlusIcon" class="mr-25" />
+                    <span>Добавить ещё</span>
+                  </b-button>
                 </div>
                 <div class="modal__form-buttons">
                   <b-button
@@ -213,9 +290,10 @@ import axios from "axios";
 import "vue-good-table/dist/vue-good-table.css";
 import { Trash2Icon } from "vue-feather-icons";
 import {
+  BForm,
+  BFormGroup,
   BBadge,
   BPagination,
-  BFormGroup,
   BFormInput,
   BFormSelect,
   BDropdown,
@@ -237,6 +315,7 @@ import Ripple from "vue-ripple-directive";
 import "swiper/css/swiper.css";
 export default {
   components: {
+    BForm,
     Trash2Icon,
     MoreVerticalIcon,
     Swiper,
@@ -300,9 +379,19 @@ export default {
         },
       },
       getInt: false,
+      trHeight: 500,
+      trMargin: 20,
     };
   },
   methods: {
+    repeateAgain() {
+      this.modalArray[this.modalCounter].config.push({});
+      this.trHeight += 220;
+    },
+    removeItem(index) {
+      this.modalArray[this.modalCounter].config.splice(index, 1);
+      this.trHeight -= 220;
+    },
     changeSlideNext() {
       this.modalCounter++;
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
@@ -316,8 +405,8 @@ export default {
     },
     async getIntegration() {
       await axios.get("api/integrations").then((response) => {
-        console.log(response.data.integrations)
         this.rowsIntegration = response.data.integrations;
+        console.log(this.rowsIntegration);
         this.getInt = true;
       });
     },
@@ -361,6 +450,7 @@ export default {
       }
     },
     hideModal() {
+      this.getIntegration();
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
@@ -371,6 +461,7 @@ export default {
             id: this.modalArray[this.modalCounter].id,
             title: this.modalArray[this.modalCounter].title,
             slug: this.modalArray[this.modalCounter].slug,
+            config: this.modalArray[this.modalCounter].config,
           }
         );
         this.$refs["modal__window"].hide();
@@ -382,7 +473,7 @@ export default {
     async deleteModal() {
       try {
         this.$swal({
-          title: "Вы согласны удалить обращение?",
+          title: "Вы согласны удалить интеграцию?",
           text: "Это действие необратимо!",
           icon: "warning",
           showCancelButton: true,
@@ -398,7 +489,7 @@ export default {
             this.$swal({
               icon: "success",
               title: "Удалено!",
-              text: "Ваше обращение было удалено.",
+              text: "Ваша интеграция была удалена.",
               customClass: {
                 confirmButton: "btn btn-success",
               },
@@ -414,7 +505,7 @@ export default {
           } else if (result.dismiss === "cancel") {
             this.$swal({
               title: "Отмена",
-              text: "Удаление обращения было отменено",
+              text: "Удаление интеграции было отменено",
               icon: "error",
               customClass: {
                 confirmButton: "btn btn-success",
@@ -464,5 +555,17 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.btn__plus-integration {
+  display: block;
+  margin: 0 auto;
+}
+.btn__delete-integration {
+  float: right;
+}
+.repeater__form {
+  width: 600px;
+  display: block;
+  margin: 0 auto;
+}
 </style>
