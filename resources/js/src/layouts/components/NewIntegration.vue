@@ -162,7 +162,7 @@ export default {
       ],
       enter: false,
       enterAndAdd: false,
-      trHeight: 500,
+      trHeight: 600,
       trMargin: 20,
       items: [
         {

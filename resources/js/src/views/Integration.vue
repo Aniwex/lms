@@ -157,7 +157,7 @@
         @slidePrevTransitionStart="changeSlidePrev"
       >
         <swiper-slide v-for="(data, index) in modalArray" :key="index"
-          ><div class="see-project__form">
+          ><div class="see-project__form" >
             <h3 class="see-project__read">Данные для редактирования</h3>
             <div class="container__see-project">
               <div class="row__lables">
@@ -184,7 +184,6 @@
                     <label class="row__lables-label">Настройки </label>
                     <b-form
                       ref="form"
-                      :style="{ height: trHeight }"
                       class="repeater__form"
                       @submit.prevent="repeateAgain"
                     >
@@ -206,7 +205,6 @@
                           />
                         </b-form-group>
                         <!-- Значение -->
-
                         <b-form-group label="Значение">
                           <b-form-input
                             type="text"
@@ -379,18 +377,23 @@ export default {
         },
       },
       getInt: false,
-      trHeight: 500,
+      trHeight: 1000,
       trMargin: 20,
+      tempHeightPlus: null,
+      tempHeightMinus: null,
     };
   },
   methods: {
     repeateAgain() {
-      this.modalArray[this.modalCounter].config.push({});
-      this.trHeight += 220;
+      this.modalArray[this.modalCounter].config.push({
+        key: null,
+        value: null,
+      });
+      this.trHeight += 250;
     },
     removeItem(index) {
       this.modalArray[this.modalCounter].config.splice(index, 1);
-      this.trHeight -= 220;
+      this.trHeight -= 250;
     },
     changeSlideNext() {
       this.modalCounter++;
@@ -444,6 +447,10 @@ export default {
             this.modalArray.push(item);
           }
         });
+        this.trHeight =
+          294 +
+          290 * this.modalArray[this.modalCounter].config.length -
+          this.trMargin * this.modalArray[this.modalCounter].config.length;
       }
       if (item === "Удалить") {
         this.modalArray = row;
