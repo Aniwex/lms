@@ -354,7 +354,6 @@ export default {
         .get("api/users")
         .then((response) => {
           this.rowsUsers = response.data.users;
-          console.log(this.rowsUsers);
         })
         .catch((error) => {
           const vNodesMsg = [`${error.response.data.error}`];

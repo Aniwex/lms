@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center" v-if="!getUsers || !user">
+    <div class="text-center" v-if="!getProjects || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -8,9 +8,9 @@
     </div>
     <!-- search input -->
     <search
-      :rows="rowsUsers"
+      :rows="rowsProjects"
       :searchTerm="searchTerm"
-      v-if="getUsers && user"
+      v-if="getProjects && user"
       :role_id="user.role_id"
       @arraySearch="pushArraySearch"
     />
@@ -39,7 +39,7 @@
     <vue-good-table
       :columns="columns"
       :rows="sorted"
-      v-if="getUsers && user"
+      v-if="getProjects && user"
       :search-options="{
         enabled: true,
       }"
@@ -65,12 +65,24 @@
         <span v-if="props.column.field === 'name'" class="text-nowrap db__tc">
           <span class="text-nowrap">{{ props.row.name }}</span>
         </span>
+        <!-- Column: domain -->
+        <span
+          v-else-if="props.column.field === 'domain'"
+          class="text-nowrap db__tc"
+        >
+          <span class="text-nowrap">{{ props.row.domain }}</span>
+        </span>
         <!-- Column: mirrows -->
         <span
           v-else-if="props.column.field === 'mirrows'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.mirrows }}</span>
+          <span
+            v-for="(mirrow, index) in props.row.mirrows"
+            :key="index"
+            class="text-nowrap"
+            >Зеркало №{{ index + 1 }} {{ mirrow }} <br
+          /></span>
         </span>
         <!-- Column: users -->
         <span
@@ -177,23 +189,86 @@
                     placeholder="Название"
                   />
                 </div>
-                <div class="row__date-lables">
-                  <label class="row__lables-label">Зеркала</label>
-                  <b-form-select
-                    class="form__appeal-input db__tc"
-                    v-model="role"
-                    :options="options_roles"
-                  >
-                  </b-form-select>
-                </div>
-                <div class="row__date-lables">
-                  <label class="row__lables-label">Пароль</label>
+                <div class="row__source-lables">
+                  <label class="row__lables-label">Домен</label>
                   <b-form-input
                     class="row__user-input"
-                    v-model="password"
+                    v-model="data.domain"
                     type="text"
-                    placeholder="Пароль"
-                    :state="password !== ''"
+                    placeholder="Название"
+                  />
+                </div>
+                <div class="form__group-options" v-if="data.mirrows.length">
+                  <div>
+                    <label class="row__lables-label">Зеркала</label>
+                    <b-form
+                      ref="form"
+                      class="repeater__form-project"
+                      @submit.prevent="repeateAgain"
+                    >
+                      <!-- Row Loop -->
+                      <div
+                        v-for="(item, index) in data.mirrows"
+                        :id="index"
+                        :key="index"
+                        ref="row"
+                        :style="{ margin: trMargin + 'px' }"
+                      >
+                        <!-- Значение -->
+                        <b-form-group label="Значение">
+                          <b-form-input
+                            type="text"
+                            placeholder="Значение"
+                            v-model="item.value"
+                            class="row__user-input"
+                          />
+                        </b-form-group>
+                        <hr />
+                        <!-- Добавить Button -->
+                        <b-button
+                          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                          variant="primary"
+                          @click="repeateAgain"
+                        >
+                          <feather-icon icon="PlusIcon" class="mr-25" />
+                          <span>Добавить ещё</span>
+                        </b-button>
+
+                        <!-- Удалить Button -->
+                        <b-button
+                          v-ripple.400="'rgba(234, 84, 85, 0.15)'"
+                          variant="outline-danger"
+                          @click="removeItem(index)"
+                          class="btn__delete-project"
+                        >
+                          <feather-icon icon="XIcon" class="mr-25" />
+                          <span>Удалить</span>
+                        </b-button>
+                      </div>
+                    </b-form>
+                  </div>
+                </div>
+                <div v-else>
+                  <label class="row__lables-label db__tc">Настроек нет </label>
+                  <!-- Добавить Button -->
+                  <b-button
+                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                    variant="primary"
+                    @click="repeateAgain"
+                    class="btn__plus-projects"
+                  >
+                    <feather-icon icon="PlusIcon" class="mr-25" />
+                    <span>Добавить ещё</span>
+                  </b-button>
+                </div>
+                <div class="row__date-lables">
+                  <label class="row__lables-label">Пользователи</label>
+                  <v-select
+                    v-model="users"
+                    multiple
+                    label="title"
+                    :options="option_users"
+                    class="row__users-input"
                   />
                 </div>
                 <div class="modal__form-buttons">
@@ -231,6 +306,8 @@
 import { VueGoodTable } from "vue-good-table";
 import axios from "axios";
 import "vue-good-table/dist/vue-good-table.css";
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
 import { Trash2Icon } from "vue-feather-icons";
 import {
   BForm,
@@ -258,6 +335,7 @@ import Ripple from "vue-ripple-directive";
 import "swiper/css/swiper.css";
 export default {
   components: {
+    vSelect,
     BForm,
     Trash2Icon,
     MoreVerticalIcon,
@@ -289,7 +367,7 @@ export default {
   },
   data() {
     return {
-      rowsUsers: [],
+      rowsProjects: [],
       password: "",
       rowSelection: [],
       modalArray: [],
@@ -302,6 +380,11 @@ export default {
         {
           label: "Название",
           field: "name",
+          thClass: "columnCenter",
+        },
+        {
+          label: "Домен",
+          field: "domain",
           thClass: "columnCenter",
         },
         {
@@ -325,25 +408,29 @@ export default {
           type: "progressbar",
         },
       },
-      getUsers: false,
+      getProjects: false,
       trHeight: 550,
       trMargin: 20,
       tempHeightPlus: null,
       tempHeightMinus: null,
-      options_roles: [],
-      role: null,
+      mirrows: [
+        {
+          value: "",
+        },
+      ],
+      users: [],
+      option_users: [],
     };
   },
   methods: {
     repeateAgain() {
-      this.modalArray[this.modalCounter].config.push({
-        key: null,
-        value: null,
+      this.modalArray[this.modalCounter].mirrows.push({
+        value: "",
       });
       this.trHeight += 250;
     },
     removeItem(index) {
-      this.modalArray[this.modalCounter].config.splice(index, 1);
+      this.modalArray[this.modalCounter].mirrows.splice(index, 1);
       this.trHeight -= 250;
     },
     changeSlideNext() {
@@ -357,33 +444,13 @@ export default {
       this.modalCounter--;
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
-    async getTableUsers() {
+
+    async getTableProjects() {
       await axios
-        .get("api/users")
+        .get("api/projects")
         .then((response) => {
-          this.rowsUsers = response.data.users;
-          console.log(this.rowsUsers);
-        })
-        .catch((error) => {
-          const vNodesMsg = [`${error.response.data.error}`];
-          this.$bvToast.toast([vNodesMsg], {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
-          });
-        });
-      await axios
-        .get("api/roles")
-        .then((response) => {
-          this.options_roles = response.data.roles;
-          this.options_roles.filter((item, i) => {
-            item["value"] = item["text"] = i + 1;
-          });
-          this.options_roles.unshift({ value: null, text: "—" });
-          this.getUsers = true;
+          this.rowsProjects = response.data.projects;
+          this.getProjects = true;
         })
         .catch((error) => {
           const vNodesMsg = [`${error.response.data.error}`];
@@ -447,7 +514,7 @@ export default {
         let temp = row;
         this.modalArray = [];
         let i = 0;
-        this.rowsUsers.filter((item) => {
+        this.rowsProjects.filter((item) => {
           if (temp.id === item.id) {
             i++;
           }
@@ -461,18 +528,23 @@ export default {
       }
     },
     hideModal() {
-      this.getTableUsers();
+      this.getTableProjects();
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
       try {
-        await axios.put("/api/users/" + this.modalArray[this.modalCounter].id, {
-          name: this.modalArray[this.modalCounter].name,
-          password: this.password,
-          role_id: this.role,
-        });
+        await axios.put(
+          "/api/projects/" + this.modalArray[this.modalCounter].id,
+          {
+            name: this.modalArray[this.modalCounter].name,
+            mirrows: this.modalArray[this.modalCounter].mirrows,
+            domain: this.modalArray[this.modalCounter].domain,
+            users: this.users,
+          }
+        );
         this.$refs["modal__window"].hide();
-        await this.getTableUsers();
+        await this.getTableProjects();
+        await this.$store.dispatch("SET_PROJECTS");
       } catch (error) {
         const vNodesMsg = [`${error.response.data.error}`];
         this.$bvToast.toast([vNodesMsg], {
@@ -500,12 +572,15 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.rowsUsers.length) {
-            this.rowsUsers.filter((index, i) => {
+          if (this.rowsProjects.length) {
+            this.rowsProjects.filter((index, i) => {
               if (index.id === this.modalArray.id) {
                 axios
-                  .delete("/api/users/" + this.modalArray.id)
-                  .then(() => this.rowsUsers.splice(i, 1))
+                  .delete("/api/projects/" + this.modalArray.id)
+                  .then(() => {
+                    this.rowsProjects.splice(i, 1);
+                    this.$store.dispatch("SET_PROJECTS");
+                  })
                   .then(() => {
                     if (result.value) {
                       this.$swal({
@@ -552,12 +627,12 @@ export default {
       }
     },
     deleteSelected() {
-      if (this.rowsUsers.length) {
+      if (this.rowsProjects.length) {
         this.rowSelection.filter((item) => {
-          this.rowsUsers.map((index, i) => {
+          this.rowsProjects.map((index, i) => {
             if (item.id === index.id) {
-              axios.delete("/api/users/" + item.id);
-              this.rowsUsers.splice(i, 1);
+              axios.delete("/api/projects/" + item.id);
+              this.rowsProjects.splice(i, 1);
             }
           });
         });
@@ -572,28 +647,32 @@ export default {
       if (this.arraySearch.length) {
         return this.arraySearch;
       } else {
-        return this.rowsUsers;
+        return this.rowsProjects;
       }
     },
   },
   created() {
     this.getDataUser();
-    this.getTableUsers();
+    this.getTableProjects();
   },
 };
 </script>
 
 <style scoped>
-.btn__plus-integration {
+.btn__plus-projects {
   display: block;
   margin: 0 auto;
 }
-.btn__delete-integration {
+.btn__delete-project {
   float: right;
 }
-.repeater__form {
+.repeater__form-project {
   width: 600px;
   display: block;
   margin: 0 auto;
+}
+.row__users-input {
+  width: 300px;
+  padding: 20px 0px;
 }
 </style>

@@ -177,6 +177,20 @@ const router = new VueRouter({
             },
         },
         {
+            path: "/NewProject",
+            name: "Добавить проект",
+            component: () => import("../layouts/components/NewProject"),
+            meta: {
+                pageTitle: "Добавить проект",
+                breadcrumb: [
+                    {
+                        text: "Добавить проект",
+                        active: true,
+                    },
+                ],
+            },
+        },
+        {
             path: "/error-404",
             name: "error-404",
             component: () => import("@/views/error/Error404.vue"),
@@ -217,6 +231,7 @@ router.beforeEach((to, from, next) => {
             to.name === "Добавить пользователя" ||
             to.name === "Добавить тэг" ||
             to.name === "Добавить иcточник" ||
+            to.name === "Добавить проект" ||
             to.name === "Users") &&
         !token
     ) {

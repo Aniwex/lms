@@ -39,14 +39,21 @@
           ></TrendingUpIcon>
         </b-nav-item>
       </b-nav>
-
-      <b-form-select
-        class="choose__project"
-        v-model="choose_project"
-        :options="projects"
-        @change="selectProject"
-      >
-      </b-form-select>
+      <div v-if="get_projects">
+        <b-form-select
+          class="choose__project"
+          v-model="choose_project"
+          :options="get_projects"
+          @change="selectProject"
+        >
+        </b-form-select>
+      </div>
+      <div v-else>
+        <b-button variant="primary" disabled class="mr-1">
+          <b-spinner small />
+          Загрузка...
+        </b-button>
+      </div>
     </div>
     <div v-if="user.login === undefined">
       <b-button variant="primary" disabled class="mr-1">
@@ -145,26 +152,12 @@ export default {
       user: {},
       response: [],
       choose_project: null,
-      projects: [
-        { value: null, text: "Выберите проект" },
-        { value: "Новые окна", text: "Новые окна" },
-        { value: "АстроМед", text: "АстроМед" },
-        { value: "Специальность 1906", text: "Специальность 1906" },
-        { value: "Пентакс Юг", text: "Пентакс Юг" },
-        { value: "ТМЗ", text: "ТМЗ" },
-        { value: "Новые окна. Новочеркасск", text: "Новые окна. Новочеркасск" },
-        { value: "Новые окна. Таганрог", text: "Новые окна. Таганрог" },
-      ],
+      projects: [],
     };
   },
   methods: {
     selectProject(project) {
       this.$store.commit("SET_PROJECT", project);
-    },
-    get_projects() {
-      axios.get("/api/projects").then((response) => {
-        console.log(response.data);
-      });
     },
     get_user() {
       axios.get("/sanctum/csrf-cookie").then((response) => {
@@ -218,13 +211,20 @@ export default {
         this.$store.commit("SET_ENTERED", false);
       });
     },
+    async setProjects() {
+      await this.$store.dispatch("SET_PROJECTS");
+      this.projects = this.$store.getters.projects;
+    },
   },
 
   created() {
     this.get_user();
-    this.get_projects();
+    this.setProjects();
   },
   computed: {
+    get_projects() {
+      return this.$store.getters.projects;
+    },
     isLoggedIn() {
       return this.$store.getters.isLoggedIn;
     },

@@ -16,6 +16,7 @@ export default new Vuex.Store({
         entered: false,
         seeAction: {},
         searchHistory: "",
+        projects: "",
         project: "",
     },
 
@@ -32,12 +33,24 @@ export default new Vuex.Store({
         SET_USER: (state, payload) => {
             state.user = payload;
         },
+        SET_PROJECTS: (state, payload) => {
+            state.projects = payload;
+        },
         SET_PROJECT: (state, payload) => {
             state.project = payload;
         },
     },
     actions: {
-        
+        SET_PROJECTS: async (ctx) => {
+            await axios.get("/api/projects").then((response) => {
+                const projects = response.data.projects;
+                projects.filter((item) => {
+                    item["title"] = item["text"] = item.name;
+                });
+                projects.unshift({ value: null, text: "—" });
+                ctx.commit("SET_PROJECTS", projects);
+            });
+        },
     },
     getters: {
         entered: (state) => {
@@ -52,9 +65,12 @@ export default new Vuex.Store({
         user: (state) => {
             return state.user;
         },
+        projects: (state) => {
+            return state.projects;
+        },
         project: (state) => {
             return state.project;
-        }
+        },
     },
     modules: {
         app,

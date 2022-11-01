@@ -35,7 +35,7 @@
         <div class="form__group">
           <label class="form__label">Проекты </label>
           <v-select
-            v-model="selected"
+            v-model="project"
             multiple
             label="title"
             :options="option_project"
@@ -116,11 +116,32 @@ export default {
       enterAndAdd: false,
       options_roles: [],
       role: null,
-      selected: [],
-      option_project: [{ title: "fff" }],
+      project: [],
+      option_project: [],
     };
   },
   methods: {
+    async getProjects() {
+      await axios
+        .get("api/projects")
+        .then((response) => {
+          this.option_project = response.data.projects;
+          this.option_project.filter((item) => {
+            item["title"] = item.name;
+          });
+        })
+        .catch((error) => {
+          const vNodesMsg = [`${error.response.data.error}`];
+          this.$bvToast.toast([vNodesMsg], {
+            title: `Ошибка`,
+            variant: "danger",
+            solid: true,
+            appendToast: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+          });
+        });
+    },
     async getApiRoles() {
       await axios
         .get("api/roles")
@@ -222,6 +243,7 @@ export default {
   mounted() {
     this.$store.commit("SET_ENTERED", true);
     this.getApiRoles();
+    this.getProjects();
   },
 };
 </script>
