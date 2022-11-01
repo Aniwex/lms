@@ -20,7 +20,9 @@ class IntegrationResource extends AbstractResource
                 'id' => $integration->id,
                 'title' => $integration->title,
                 'slug' => $integration->slug,
-                'config' => $integration->config
+                'config' => $integration->config,
+                'created_at' => $integration->created_at->format('Y-m-d H:i:s'),
+                'updated_at' => $integration->updated_at->format('Y-m-d H:i:s')
             ];
         });
     }

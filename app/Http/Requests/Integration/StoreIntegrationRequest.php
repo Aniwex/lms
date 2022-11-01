@@ -18,8 +18,10 @@ class StoreIntegrationRequest extends Request
     {
         return [
             'title' => ['string', 'nullable', 'max:255'],
-            'slug' => ['string', 'required', 'unique:integrations', 'max:255'],
-            'config' => ['array', 'nullable']
+            'slug' => ['string', 'required', 'unique:integrations', 'max:255', 'alpha_dash'],
+            'config' => ['array', 'nullable'],
+            'config.*.key' => ['required', 'max:255'],
+            'config.*.value' => ['required', 'max:255']
         ];
     }
 

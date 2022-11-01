@@ -26,6 +26,11 @@ class UserResource extends AbstractResource
             if ($user->relationLoaded('role')) {
                 $data['role'] = RoleResource::makeArray($user->role);
             }
+
+            if ($user->relationLoaded('projects')) {
+                $data['projects'] = ProjectCollection::makeArray($user->projects);
+            }
+
             return $data;
         });
     }

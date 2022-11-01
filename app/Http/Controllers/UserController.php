@@ -34,7 +34,7 @@ class UserController extends Controller
     {
         return Response::success()->data([
             'users' => UserCollection::makeArray(
-                User::with('role')->get()
+                User::with(['role'])->get()
             )]
         );
     }
@@ -66,7 +66,7 @@ class UserController extends Controller
         $user->password = Hash::make($request->input('password'));
         $user->save();
 
-        $user->load('role');
+        $user->load(['role', 'projects']);
 
         return Response::success()
             ->message('Новый пользователь был успешно добавлен!')
@@ -81,7 +81,8 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        $user->load('role');
+        $user->load(['role', 'projects']);
+
         return Response::success()->data([
             'user' => UserResource::makeArray($user)
         ]);
@@ -96,11 +97,19 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        $user->fill($request->except('password'));
-        $user->password = Hash::make($request->input('password'));
+        $user->fill($request->onlyFilled()->except(['projects', 'password']));
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->input('password'));
+        }
+
+        if ($request->filled('projects')) {
+            $user->projects()->sync($request->input('projects', []));
+        }
+
         $user->save();
 
-        $user->load('role');
+        $user->load(['role', 'projects']);
 
         return Response::success()
             ->message('Пользователь был успешно обновлен!')

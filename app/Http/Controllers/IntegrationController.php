@@ -15,6 +15,14 @@ use App\Resources\IntegrationResource;
 class IntegrationController extends Controller
 {
     /**
+     * Инициализация контроллера.
+     */
+    public function __construct()
+    {
+        $this->authorizeResource(Integration::class);
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \App\Http\Response
@@ -31,7 +39,7 @@ class IntegrationController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\StoreIntegrationRequest  $request
+     * @param  \App\Http\Requests\Integration\StoreIntegrationRequest  $request
      * @return \App\Http\Response
      */
     public function store(StoreIntegrationRequest $request)
@@ -59,13 +67,13 @@ class IntegrationController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \App\Http\Requests\UpdateIntegrationRequest  $request
+     * @param  \App\Http\Requests\Integration\UpdateIntegrationRequest  $request
      * @param  \App\Models\Integration  $integration
      * @return \App\Http\Response
      */
     public function update(UpdateIntegrationRequest $request, Integration $integration)
     {
-        $integration->fill($request->validated());
+        $integration->fill($request->onlyFilled()->all());
         $integration->save();
 
         return Response::success()

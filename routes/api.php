@@ -26,7 +26,8 @@ Route::middleware('auth:sanctum')->group(function() {
      */
     Route::apiResources([
         'integrations' => 'IntegrationController',
-        'users'        => 'UserController'
+        'users'        => 'UserController',
+        'projects'     => 'ProjectController'
     ]);
 
     // список ролей

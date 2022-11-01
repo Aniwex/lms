@@ -14,8 +14,12 @@ class UpdateIntegrationRequest extends StoreIntegrationRequest
      */
     public function rules()
     {
-        $rules = parent::rules();
-        $rules['slug'] = ['string', 'required', 'unique:integrations,slug,'.$this->integration->id, 'max:255'];
-        return $rules;
+        return [
+            'title' => ['string', 'nullable', 'max:255'],
+            'slug' => ['string', 'nullable', 'unique:integrations,slug,'.$this->integration->id, 'max:255', 'alpha_dash'],
+            'config' => ['array', 'nullable'],
+            'config.*.key' => ['required', 'max:255'],
+            'config.*.value' => ['required', 'max:255']
+        ];
     }
 }
