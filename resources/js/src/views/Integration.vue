@@ -615,24 +615,10 @@ export default {
     deleteSelected() {
       if (this.rowsIntegration.length) {
         this.rowSelection.filter((item) => {
-          this.rowsIntegration.map((index, i) => {
+          this.rowsIntegration.filter((index, i) => {
             if (item.id === index.id) {
-              axios
-                .delete("/api/integrations/" + item.id)
-                .then(() => {
-                  this.rowsIntegration.splice(i, 1);
-                })
-                .catch((error) => {
-                  const vNodesMsg = [`${error.response.data.error}`];
-                  this.$bvToast.toast([vNodesMsg], {
-                    title: `Ошибка`,
-                    variant: "danger",
-                    solid: true,
-                    appendToast: true,
-                    toaster: "b-toaster-top-center",
-                    autoHideDelay: 3000,
-                  });
-                });
+              axios.delete("/api/integrations/" + item.id);
+              this.rowsIntegration.splice(i, 1);
             }
           });
         });

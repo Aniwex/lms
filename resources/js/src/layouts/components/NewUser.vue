@@ -25,13 +25,22 @@
         <div class="form__group">
           <label class="form__label">Роли </label>
           <b-form-select
-            style="display: block; text-align: center"
             class="form__appeal-input"
             v-model="role"
             :options="options_roles"
             :state="role !== null"
           >
           </b-form-select>
+        </div>
+        <div class="form__group">
+          <label class="form__label">Проекты </label>
+          <v-select
+            v-model="selected"
+            multiple
+            label="title"
+            :options="option_project"
+            class="form__appeal-input"
+          />
         </div>
       </div>
     </div>
@@ -79,9 +88,13 @@ import {
 import flatPickr from "vue-flatpickr-component";
 import "@core/scss/vue/libs/vue-flatpicker.scss";
 import Ripple from "vue-ripple-directive";
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
+
 import axios from "axios";
 export default {
   components: {
+    vSelect,
     BSpinner,
     BFormInput,
     flatPickr,
@@ -103,6 +116,8 @@ export default {
       enterAndAdd: false,
       options_roles: [],
       role: null,
+      selected: [],
+      option_project: [{ title: "fff" }],
     };
   },
   methods: {
@@ -115,7 +130,6 @@ export default {
             item["value"] = item["text"] = i + 1;
           });
           this.options_roles.unshift({ value: null, text: "—" });
-          console.log(this.options_roles);
         })
         .catch((error) => {
           const vNodesMsg = [`${error.response.data.error}`];
@@ -250,7 +264,6 @@ input {
   flex-direction: row;
   margin: 24px 32px 24px 32px;
 }
-
 .btn {
   margin-left: 12px;
 }

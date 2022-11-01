@@ -161,6 +161,11 @@ export default {
     selectProject(project) {
       this.$store.commit("SET_PROJECT", project);
     },
+    get_projects() {
+      axios.get("/api/projects").then((response) => {
+        console.log(response.data);
+      });
+    },
     get_user() {
       axios.get("/sanctum/csrf-cookie").then((response) => {
         axios
@@ -217,6 +222,7 @@ export default {
 
   created() {
     this.get_user();
+    this.get_projects();
   },
   computed: {
     isLoggedIn() {

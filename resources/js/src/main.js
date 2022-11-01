@@ -9,6 +9,7 @@ import App from "./App.vue";
 // Global Components
 import "./global-components";
 import VueMask from "v-mask";
+import vSelect from "vue-select";
 // 3rd party plugins
 import "@/libs/portal-vue";
 import "@/libs/toastification";
@@ -19,6 +20,7 @@ Vue.use(ModalPlugin);
 Vue.use(VueMask);
 // Composition API
 Vue.use(VueCompositionAPI);
+Vue.use(vSelect);
 // import core styles
 require("@core/scss/core.scss");
 

@@ -45,6 +45,7 @@
                     type="text"
                     placeholder="Ключ"
                     v-model="item.key"
+                    :state="item.key !== null"
                   />
                 </b-form-group>
                 <!-- Значение -->
@@ -54,6 +55,7 @@
                     type="text"
                     placeholder="Значение"
                     v-model="item.value"
+                    :state="item.value !== null"
                   />
                 </b-form-group>
                 <hr />
@@ -215,13 +217,20 @@ export default {
     async CreateAndAddIntegration() {
       try {
         this.enterAndAdd = true;
-        await axios.post("/api/integrations", {
-          id: Date.now(),
-          title: this.title,
-          slug: this.slug,
-        });
-        this.title = "";
-        this.slug = "";
+        await axios
+          .post("/api/integrations", {
+            id: Date.now(),
+            title: this.title,
+            slug: this.slug,
+            config: this.config,
+          })
+          .then(() => {
+            this.config = [{ key: null, value: null }];
+            this.title = "";
+            this.slug = "";
+            this.trHeight = 600;
+          });
+
         this.enterAndAdd = false;
       } catch (error) {
         this.enterAndAdd = false;

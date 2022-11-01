@@ -174,7 +174,7 @@
                   />
                 </div>
                 <div class="row__date-lables">
-                  <label class="row__lables-label">Роли</label>
+                  <label class="row__lables-label">Роль</label>
                   <b-form-select
                     style="display: block; text-align: center"
                     class="form__appeal-input"
@@ -354,6 +354,7 @@ export default {
         .get("api/users")
         .then((response) => {
           this.rowsUsers = response.data.users;
+          console.log(this.rowsUsers);
         })
         .catch((error) => {
           const vNodesMsg = [`${error.response.data.error}`];
