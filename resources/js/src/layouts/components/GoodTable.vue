@@ -1,6 +1,5 @@
 <template>
   <div>
-    
     <div class="text-center" v-if="!getDT || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
@@ -761,41 +760,76 @@ export default {
     },
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
-        axios.get("api/user ").then((response) => {
-          this.user = response.data;
-        });
+        axios
+          .get("api/user ")
+          .then((response) => {
+            this.user = response.data;
+          })
+          .catch((error) => {
+            if (error.response.status === 401) {
+              axios.get("/logout").then((resp) => {
+                localStorage.removeItem(
+                  "x_xsrf_token",
+                  resp.config.headers["X-XSRF-TOKEN"]
+                );
+                this.$router.push("/");
+                this.$store.commit("SET_ENTERED", false);
+              });
+            } else {
+              const vNodesMsg = [`${error.response.data.error}`];
+              this.$bvToast.toast([vNodesMsg], {
+                title: `Ошибка`,
+                variant: "danger",
+                solid: true,
+                appendToast: true,
+                toaster: "b-toaster-top-center",
+                autoHideDelay: 3000,
+              });
+            }
+          });
       });
     },
     async getDataTable() {
       try {
-        // axios.get("/api/data").then((response) => {
-        //   this.rows = response.data;
-        //   this.getDT = true;
-        //   this.rows.forEach((row) => {
-        //     const activeManager =
-        //       this.manager.find((m) => m.value == row.manager) || null;
-        //     this.$set(this.managerObject, row.id, activeManager);
-        //     const activeClient =
-        //       this.client.find((c) => c.value == row.client) || null;
-        //     this.$set(this.clientObject, row.id, activeClient);
-        //   });
-        //   this.historyArray = [];
-        //   this.rows.filter((row, index, k) => {
-        //     k = 0;
-        //     for (let i = 0; i < index; i++) {
-        //       if (row.user === this.rows[i].user) {
-        //         k++;
-        //         if (k < 2) {
-        //           this.historyArray.push(this.rows[i].id);
-        //         }
-        //       }
-        //     }
-        //   });
-        //   this.historyArray = [...new Set(this.historyArray)];
-        // });
-      } catch (error) {
-        alert(error.message);
-      }
+        axios
+          .get("/api/data")
+          .then((response) => {
+            this.rows = response.data;
+            this.getDT = true;
+            this.rows.forEach((row) => {
+              const activeManager =
+                this.manager.find((m) => m.value == row.manager) || null;
+              this.$set(this.managerObject, row.id, activeManager);
+              const activeClient =
+                this.client.find((c) => c.value == row.client) || null;
+              this.$set(this.clientObject, row.id, activeClient);
+            });
+            this.historyArray = [];
+            this.rows.filter((row, index, k) => {
+              k = 0;
+              for (let i = 0; i < index; i++) {
+                if (row.user === this.rows[i].user) {
+                  k++;
+                  if (k < 2) {
+                    this.historyArray.push(this.rows[i].id);
+                  }
+                }
+              }
+            });
+            this.historyArray = [...new Set(this.historyArray)];
+          })
+          .catch((error) => {
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
+          });
+      } catch (error) {}
     },
     selectionChanged(params) {
       this.rowSelection = params.selectedRows;
@@ -853,23 +887,37 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (result.value) {
-            this.$swal({
-              icon: "success",
-              title: "Удалено!",
-              text: "Ваше обращение было удалено.",
-              customClass: {
-                confirmButton: "btn btn-success",
-              },
+          if (this.rows.length) {
+            this.rows.filter((index, i) => {
+              if (index.id === this.modalArray.id) {
+                axios
+                  .delete("/api/data/" + this.modalArray.id)
+                  .then(() => {
+                    this.rows.splice(i, 1);
+                    if (result.value) {
+                      this.$swal({
+                        icon: "success",
+                        title: "Удалено!",
+                        text: "Ваше обращение было удалено.",
+                        customClass: {
+                          confirmButton: "btn btn-success",
+                        },
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    const vNodesMsg = [`${error.response.data.error}`];
+                    this.$bvToast.toast([vNodesMsg], {
+                      title: `Ошибка`,
+                      variant: "danger",
+                      solid: true,
+                      appendToast: true,
+                      toaster: "b-toaster-top-center",
+                      autoHideDelay: 3000,
+                    });
+                  });
+              }
             });
-            if (this.rows.length) {
-              this.rows.filter((index, i) => {
-                if (index.id === this.modalArray.id) {
-                  axios.delete("/api/data/" + this.modalArray.id);
-                  this.rows.splice(i, 1);
-                }
-              });
-            }
           } else if (result.dismiss === "cancel") {
             this.$swal({
               title: "Отмена",
@@ -888,42 +936,69 @@ export default {
     },
     async saveModal() {
       try {
-        await axios.put("/api/data/" + this.modalArray[this.modalCounter].id, {
-          id: this.modalArray[this.modalCounter].id,
-          date: this.modalArray[this.modalCounter].date,
-          call: this.modalArray[this.modalCounter].call,
-          commentManager: this.modalArray[this.modalCounter].commentManager,
-          source: this.modalArray[this.modalCounter].source,
-          user: this.modalArray[this.modalCounter].user,
-          tag: this.modalArray[this.modalCounter].tag,
-          commentClient: this.modalArray[this.modalCounter].commentClient,
-          manager: this.modalArray[this.modalCounter].manager,
-          client: this.modalArray[this.modalCounter].client,
-          dialog: this.modalArray[this.modalCounter].dialog,
-        });
-        this.$refs["modal__window"].hide();
+        await axios
+          .put("/api/data/" + this.modalArray[this.modalCounter].id, {
+            id: this.modalArray[this.modalCounter].id,
+            date: this.modalArray[this.modalCounter].date,
+            call: this.modalArray[this.modalCounter].call,
+            commentManager: this.modalArray[this.modalCounter].commentManager,
+            source: this.modalArray[this.modalCounter].source,
+            user: this.modalArray[this.modalCounter].user,
+            tag: this.modalArray[this.modalCounter].tag,
+            commentClient: this.modalArray[this.modalCounter].commentClient,
+            manager: this.modalArray[this.modalCounter].manager,
+            client: this.modalArray[this.modalCounter].client,
+            dialog: this.modalArray[this.modalCounter].dialog,
+          })
+          .then(() => {
+            this.$refs["modal__window"].hide();
+          })
+          .catch((error) => {
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
+          });
+
         await this.getDataTable();
-      } catch (error) {
-        alert("Error: " + error);
-      }
+      } catch (error) {}
     },
     async changeIconManager(id, manager) {
       this.rows.map((row) => {
         if (row.id === id) {
           row.manager = manager.value;
-          axios.put("/api/data/" + id, {
-            id: id,
-            date: row.date,
-            call: row.call,
-            commentManager: row.commentManager,
-            source: row.source,
-            user: row.user,
-            tag: row.tag,
-            commentClient: row.commentClient,
-            manager: manager.value,
-            client: row.client,
-          });
-          this.$set(this.managerObject, id, manager);
+          axios
+            .put("/api/data/" + id, {
+              id: id,
+              date: row.date,
+              call: row.call,
+              commentManager: row.commentManager,
+              source: row.source,
+              user: row.user,
+              tag: row.tag,
+              commentClient: row.commentClient,
+              manager: manager.value,
+              client: row.client,
+            })
+            .then(() => {
+              this.$set(this.managerObject, id, manager);
+            })
+            .catch((error) => {
+              const vNodesMsg = [`${error.response.data.error}`];
+              this.$bvToast.toast([vNodesMsg], {
+                title: `Ошибка`,
+                variant: "danger",
+                solid: true,
+                appendToast: true,
+                toaster: "b-toaster-top-center",
+                autoHideDelay: 3000,
+              });
+            });
         }
       });
     },
@@ -931,19 +1006,33 @@ export default {
       this.rows.map((row) => {
         if (row.id === id) {
           row.client = client.value;
-          axios.put("/api/data/" + id, {
-            id: id,
-            date: row.date,
-            call: row.call,
-            commentManager: row.commentManager,
-            source: row.source,
-            user: row.user,
-            tag: row.tag,
-            commentClient: row.commentClient,
-            manager: row.manager,
-            client: client.value,
-          });
-          this.$set(this.clientObject, id, client);
+          axios
+            .put("/api/data/" + id, {
+              id: id,
+              date: row.date,
+              call: row.call,
+              commentManager: row.commentManager,
+              source: row.source,
+              user: row.user,
+              tag: row.tag,
+              commentClient: row.commentClient,
+              manager: row.manager,
+              client: client.value,
+            })
+            .then(() => {
+              this.$set(this.clientObject, id, client);
+            })
+            .catch((error) => {
+              const vNodesMsg = [`${error.response.data.error}`];
+              this.$bvToast.toast([vNodesMsg], {
+                title: `Ошибка`,
+                variant: "danger",
+                solid: true,
+                appendToast: true,
+                toaster: "b-toaster-top-center",
+                autoHideDelay: 3000,
+              });
+            });
         }
       });
     },

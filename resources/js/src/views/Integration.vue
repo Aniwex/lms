@@ -179,7 +179,7 @@
                     placeholder="Код"
                   />
                 </div>
-                <div class="form__group" v-if="data.config.length">
+                <div class="form__group-options" v-if="data.config.length">
                   <div>
                     <label class="row__lables-label">Настройки </label>
                     <b-form
@@ -393,10 +393,22 @@ export default {
     },
     removeItem(index) {
       this.modalArray[this.modalCounter].config.splice(index, 1);
-      this.trHeight -= 250;
+      if (this.modalArray[this.modalCounter].config.length === 0) {
+        this.trHeight = 350;
+      } else {
+        this.trHeight -= 250;
+      }
     },
     changeSlideNext() {
       this.modalCounter++;
+      if (this.modalArray[this.modalCounter].config.length >= 2) {
+        this.trHeight =
+          297 +
+          277 * this.modalArray[this.modalCounter].config.length -
+          this.trMargin * this.modalArray[this.modalCounter].config.length;
+      } else {
+        this.trHeight = 550;
+      }
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     pushArraySearch(search) {
@@ -404,29 +416,73 @@ export default {
     },
     changeSlidePrev() {
       this.modalCounter--;
+      if (this.modalArray[this.modalCounter].config.length >= 2) {
+        this.trHeight =
+          297 +
+          277 * this.modalArray[this.modalCounter].config.length -
+          this.trMargin * this.modalArray[this.modalCounter].config.length;
+      } else {
+        this.trHeight = 550;
+      }
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     async getIntegration() {
-      await axios.get("api/integrations").then((response) => {
-        this.rowsIntegration = response.data.integrations;
-        console.log(this.rowsIntegration);
-        this.getInt = true;
-      });
+      await axios
+        .get("api/integrations")
+        .then((response) => {
+          this.rowsIntegration = response.data.integrations;
+          this.getInt = true;
+        })
+        .catch((error) => {
+          const vNodesMsg = [`${error.response.data.error}`];
+          this.$bvToast.toast([vNodesMsg], {
+            title: `Ошибка`,
+            variant: "danger",
+            solid: true,
+            appendToast: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+          });
+        });
     },
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
-        axios.get("api/user ").then((response) => {
-          this.user = response.data;
-          if (this.user.role_id === 1) {
-            const obj = {
-              label: "Действие",
-              field: "action",
-              thClass: "columnCenter",
-              width: "200px",
-            };
-            this.columns.push(obj);
-          }
-        });
+        axios
+          .get("api/user")
+          .then((response) => {
+            this.user = response.data;
+            if (this.user.role_id === 1) {
+              const obj = {
+                label: "Действие",
+                field: "action",
+                thClass: "columnCenter",
+                width: "200px",
+              };
+              this.columns.push(obj);
+            }
+          })
+          .catch((error) => {
+            if (error.response.status === 401) {
+              axios.get("/logout").then((resp) => {
+                localStorage.removeItem(
+                  "x_xsrf_token",
+                  resp.config.headers["X-XSRF-TOKEN"]
+                );
+                this.$router.push("/");
+                this.$store.commit("SET_ENTERED", false);
+              });
+            } else {
+              const vNodesMsg = [`${error.response.data.error}`];
+              this.$bvToast.toast([vNodesMsg], {
+                title: `Ошибка`,
+                variant: "danger",
+                solid: true,
+                appendToast: true,
+                toaster: "b-toaster-top-center",
+                autoHideDelay: 3000,
+              });
+            }
+          });
       });
     },
     onCellClick(row) {
@@ -447,10 +503,14 @@ export default {
             this.modalArray.push(item);
           }
         });
-        this.trHeight =
-          270 +
-          290 * this.modalArray[this.modalCounter].config.length -
-          this.trMargin * this.modalArray[this.modalCounter].config.length;
+        if (this.modalArray[this.modalCounter].config.length === 0) {
+          this.trHeight = 350;
+        } else {
+          this.trHeight =
+            297 +
+            277 * this.modalArray[this.modalCounter].config.length -
+            this.trMargin * this.modalArray[this.modalCounter].config.length;
+        }
       }
       if (item === "Удалить") {
         this.modalArray = row;
@@ -462,19 +522,27 @@ export default {
     },
     async saveModal() {
       try {
-        await axios.put(
-          "/api/integrations/" + this.modalArray[this.modalCounter].id,
-          {
+        await axios
+          .put("/api/integrations/" + this.modalArray[this.modalCounter].id, {
             id: this.modalArray[this.modalCounter].id,
             title: this.modalArray[this.modalCounter].title,
             slug: this.modalArray[this.modalCounter].slug,
             config: this.modalArray[this.modalCounter].config,
-          }
-        );
-        this.$refs["modal__window"].hide();
+          })
+          .then(() => {
+            this.$refs["modal__window"].hide();
+          });
         await this.getIntegration();
       } catch (error) {
-        alert("Error: " + error);
+        const vNodesMsg = [`${error.response.data.error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
       }
     },
     async deleteModal() {
@@ -493,19 +561,33 @@ export default {
           buttonsStyling: false,
         }).then((result) => {
           if (result.value) {
-            this.$swal({
-              icon: "success",
-              title: "Удалено!",
-              text: "Ваша интеграция была удалена.",
-              customClass: {
-                confirmButton: "btn btn-success",
-              },
-            });
             if (this.rowsIntegration.length) {
               this.rowsIntegration.filter((index, i) => {
                 if (index.id === this.modalArray.id) {
-                  axios.delete("/api/integrations/" + this.modalArray.id);
-                  this.rowsIntegration.splice(i, 1);
+                  axios
+                    .delete("/api/integrations/" + this.modalArray.id)
+                    .then(() => {
+                      this.rowsIntegration.splice(i, 1);
+                      this.$swal({
+                        icon: "success",
+                        title: "Удалено!",
+                        text: "Ваша интеграция была удалена.",
+                        customClass: {
+                          confirmButton: "btn btn-success",
+                        },
+                      });
+                    })
+                    .catch((error) => {
+                      const vNodesMsg = [`${error.response.data.error}`];
+                      this.$bvToast.toast([vNodesMsg], {
+                        title: `Ошибка`,
+                        variant: "danger",
+                        solid: true,
+                        appendToast: true,
+                        toaster: "b-toaster-top-center",
+                        autoHideDelay: 3000,
+                      });
+                    });
                 }
               });
             }
@@ -535,8 +617,22 @@ export default {
         this.rowSelection.filter((item) => {
           this.rowsIntegration.map((index, i) => {
             if (item.id === index.id) {
-              axios.delete("/api/integrations/" + item.id);
-              this.rowsIntegration.splice(i, 1);
+              axios
+                .delete("/api/integrations/" + item.id)
+                .then(() => {
+                  this.rowsIntegration.splice(i, 1);
+                })
+                .catch((error) => {
+                  const vNodesMsg = [`${error.response.data.error}`];
+                  this.$bvToast.toast([vNodesMsg], {
+                    title: `Ошибка`,
+                    variant: "danger",
+                    solid: true,
+                    appendToast: true,
+                    toaster: "b-toaster-top-center",
+                    autoHideDelay: 3000,
+                  });
+                });
             }
           });
         });

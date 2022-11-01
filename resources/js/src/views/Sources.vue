@@ -105,10 +105,7 @@
               <b-dropdown-item v-b-modal.modal__seeIntegration>
                 <span>Посмотреть</span>
               </b-dropdown-item>
-              <b-dropdown-item
-                v-if="user.role_id === 1"
-                @click="deleteModal"
-              >
+              <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
                 <span>Удалить</span>
               </b-dropdown-item>
             </b-dropdown>
@@ -359,25 +356,51 @@ export default {
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     async getSource() {
-      await axios.get("/api/sources").then((response) => {
-        this.rowsSource = response.data;
-        this.getSources = true;
-      });
+      await axios
+        .get("/api/sources")
+        .then((response) => {
+          this.rowsSource = response.data;
+          this.getSources = true;
+        })
+        .catch((error) => {
+          const vNodesMsg = [`${error.response.data.error}`];
+          this.$bvToast.toast([vNodesMsg], {
+            title: `Ошибка`,
+            variant: "danger",
+            solid: true,
+            appendToast: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+          });
+        });
     },
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
-        axios.get("api/user ").then((response) => {
-          this.user = response.data;
-          if (this.user.role_id === 1) {
-            const obj = {
-              label: "Действие",
-              field: "action",
-              thClass: "columnCenter",
-              width: "200px",
-            };
-            this.columns.push(obj);
-          }
-        });
+        axios
+          .get("api/user ")
+          .then((response) => {
+            this.user = response.data;
+            if (this.user.role_id === 1) {
+              const obj = {
+                label: "Действие",
+                field: "action",
+                thClass: "columnCenter",
+                width: "200px",
+              };
+              this.columns.push(obj);
+            }
+          })
+          .catch((error) => {
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
+          });
       });
     },
     onCellClick(row) {
@@ -408,21 +431,31 @@ export default {
     },
     async saveModal() {
       try {
-        await axios.put(
-          "/api/sources/" + this.modalArray[this.modalCounter].id,
-          {
+        await axios
+          .put("/api/sources/" + this.modalArray[this.modalCounter].id, {
             id: this.modalArray[this.modalCounter].id,
             integration: this.modalArray[this.modalCounter].integration,
             name: this.modalArray[this.modalCounter].name,
             code: this.modalArray[this.modalCounter].code,
             source_data: this.modalArray[this.modalCounter].source_data,
-          }
-        );
-        this.$refs["modal__window"].hide();
+          })
+          .then(() => {
+            this.$refs["modal__window"].hide();
+          })
+          .catch((error) => {
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
+          });
+
         await this.getSource();
-      } catch (error) {
-        alert("Error: " + error);
-      }
+      } catch (error) {}
     },
     async deleteModal() {
       try {
@@ -439,23 +472,37 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (result.value) {
-            this.$swal({
-              icon: "success",
-              title: "Удалено!",
-              text: "Ваше обращение было удалено.",
-              customClass: {
-                confirmButton: "btn btn-success",
-              },
+          if (this.rowsSource.length) {
+            this.rowsSource.filter((index, i) => {
+              if (index.id === this.modalArray.id) {
+                axios
+                  .delete("/api/sources/" + this.modalArray.id)
+                  .then(() => {
+                    this.rowsSource.splice(i, 1);
+                    if (result.value) {
+                      this.$swal({
+                        icon: "success",
+                        title: "Удалено!",
+                        text: "Ваше обращение было удалено.",
+                        customClass: {
+                          confirmButton: "btn btn-success",
+                        },
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    const vNodesMsg = [`${error.response.data.error}`];
+                    this.$bvToast.toast([vNodesMsg], {
+                      title: `Ошибка`,
+                      variant: "danger",
+                      solid: true,
+                      appendToast: true,
+                      toaster: "b-toaster-top-center",
+                      autoHideDelay: 3000,
+                    });
+                  });
+              }
             });
-            if (this.rowsSource.length) {
-              this.rowsSource.filter((index, i) => {
-                if (index.id === this.modalArray.id) {
-                  axios.delete("/api/sources/" + this.modalArray.id);
-                  this.rowsSource.splice(i, 1);
-                }
-              });
-            }
           } else if (result.dismiss === "cancel") {
             this.$swal({
               title: "Отмена",
@@ -482,8 +529,22 @@ export default {
         this.rowSelection.filter((item) => {
           this.rowsSource.map((index, i) => {
             if (item.id === index.id) {
-              axios.delete("/api/sources/" + item.id);
-              this.rowsSource.splice(i, 1);
+              axios
+                .delete("/api/sources/" + item.id)
+                .then(() => {
+                  this.rowsSource.splice(i, 1);
+                })
+                .catch((error) => {
+                  const vNodesMsg = [`${error.response.data.error}`];
+                  this.$bvToast.toast([vNodesMsg], {
+                    title: `Ошибка`,
+                    variant: "danger",
+                    solid: true,
+                    appendToast: true,
+                    toaster: "b-toaster-top-center",
+                    autoHideDelay: 3000,
+                  });
+                });
             }
           });
         });
