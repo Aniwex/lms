@@ -12,7 +12,7 @@ class Request extends FormRequest
     /**
      * @var bool
      */
-    protected $stopOnFirstFailure = true;
+    protected $stopOnFirstFailure = false;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -32,10 +32,6 @@ class Request extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
-        $error = Response::error(422)->message(
-            $validator->errors()->first()
-        );
-
-        throw new HttpResponseException($error->json());
+        return parent::failedValidation($validator);
     }
 }
