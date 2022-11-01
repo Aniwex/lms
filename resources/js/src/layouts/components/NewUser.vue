@@ -23,14 +23,15 @@
           />
         </div>
         <div class="form__group">
-          <label class="form__label">Id роли </label>
-          <b-form-input
-            class="row__user-input"
-            v-model="role_id"
-            type="text"
-            placeholder="Id роли"
-            :state="role_id !== ''"
-          />
+          <label class="form__label">Роли </label>
+          <b-form-select
+            style="display: block; text-align: center"
+            class="form__appeal-input"
+            v-model="role"
+            :options="options_roles"
+            :state="role !== null"
+          >
+          </b-form-select>
         </div>
       </div>
     </div>
@@ -98,21 +99,45 @@ export default {
     return {
       login: "",
       password: "",
-      role_id: "",
       enter: false,
       enterAndAdd: false,
+      options_roles: [],
+      role: null,
     };
   },
   methods: {
+    async getApiRoles() {
+      await axios
+        .get("api/roles")
+        .then((response) => {
+          this.options_roles = response.data.roles;
+          this.options_roles.filter((item, i) => {
+            item["value"] = item["text"] = i + 1;
+          });
+          this.options_roles.unshift({ value: null, text: "—" });
+          console.log(this.options_roles);
+        })
+        .catch((error) => {
+          const vNodesMsg = [`${error.response.data.error}`];
+          this.$bvToast.toast([vNodesMsg], {
+            title: `Ошибка`,
+            variant: "danger",
+            solid: true,
+            appendToast: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+          });
+        });
+    },
     async addUser() {
       try {
-        if (this.login && this.password && this.role_id) {
+        if (this.login && this.password && this.role) {
           this.enter = true;
           await axios
             .post("/api/users", {
               login: this.login,
               password: this.password,
-              role_id: this.role_id,
+              role_id: this.role,
             })
             .then(() => {
               this.$router.push("/Users");
@@ -143,13 +168,13 @@ export default {
     },
     async CreateAndAddUser() {
       try {
-        if (this.login && this.password && this.role_id) {
+        if (this.login && this.password && this.role) {
           this.enterAndAdd = true;
           await axios
             .post("/api/users", {
               login: this.login,
               password: this.password,
-              role_id: this.role_id,
+              role_id: this.role,
             })
             .catch((error) => {
               this.enter = false;
@@ -182,6 +207,7 @@ export default {
   },
   mounted() {
     this.$store.commit("SET_ENTERED", true);
+    this.getApiRoles();
   },
 };
 </script>
