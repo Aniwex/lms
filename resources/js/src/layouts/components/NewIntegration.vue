@@ -176,7 +176,10 @@ export default {
   },
   methods: {
     repeateAgain() {
-      this.config.push({});
+      this.config.push({
+        key: null,
+        value: null,
+      });
       this.trHeight += 220;
     },
     removeItem(index) {
@@ -294,7 +297,7 @@ input {
   margin-left: 0px;
   float: right;
 }
-.repeater-form{
+.repeater-form {
   margin-left: -15px;
 }
 </style>

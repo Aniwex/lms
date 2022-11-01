@@ -157,10 +157,10 @@
         @slidePrevTransitionStart="changeSlidePrev"
       >
         <swiper-slide v-for="(data, index) in modalArray" :key="index"
-          ><div class="see-project__form" >
+          ><div class="see-project__form">
             <h3 class="see-project__read">Данные для редактирования</h3>
             <div class="container__see-project">
-              <div class="row__lables">
+              <div class="row__lables" :style="{ height: trHeight + 'px' }">
                 <div class="row__date-lables">
                   <label class="row__lables-label">Название</label>
                   <b-form-input
@@ -377,7 +377,7 @@ export default {
         },
       },
       getInt: false,
-      trHeight: 1000,
+      trHeight: 550,
       trMargin: 20,
       tempHeightPlus: null,
       tempHeightMinus: null,
@@ -448,7 +448,7 @@ export default {
           }
         });
         this.trHeight =
-          294 +
+          270 +
           290 * this.modalArray[this.modalCounter].config.length -
           this.trMargin * this.modalArray[this.modalCounter].config.length;
       }
