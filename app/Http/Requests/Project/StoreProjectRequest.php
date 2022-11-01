@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Project;
 
 use App\Http\Requests\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * Запрос на добавление нового проекта.
@@ -21,6 +22,8 @@ class StoreProjectRequest extends Request
             'domain' => ['string', 'required', 'unique:projects', 'max:255'],
             'mirrows' => ['array', 'nullable'],
             'mirrows.*' => ['required', 'string', 'max:255'],
+            'users' => ['array', 'nullable'],
+            'users.*' => ['integer', Rule::exists('users', 'id')]
         ];
     }
 

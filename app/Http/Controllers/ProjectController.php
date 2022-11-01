@@ -46,6 +46,12 @@ class ProjectController extends Controller
     {
         $project = Project::create($request->validated());
 
+        if ($request->filled('users')) {
+            $project->users()->sync($request->input('users', []));
+            $project->load('users');
+            $project->save();
+        }
+
         return Response::success()
             ->message('Новый проект был успешно добавлен!')
             ->data(['project' => ProjectResource::makeArray($project)]);

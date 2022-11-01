@@ -64,6 +64,11 @@ class UserController extends Controller
         $user->role_id = $request->input('role_id');
         $user->login = $request->input('login');
         $user->password = Hash::make($request->input('password'));
+
+        if ($request->filled('projects')) {
+            $user->projects()->sync($request->input('projects', []));
+        }
+        
         $user->save();
 
         $user->load(['role', 'projects']);
