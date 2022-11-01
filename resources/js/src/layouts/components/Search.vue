@@ -15,7 +15,7 @@
           v-ripple.400="'rgba(255, 255, 255, 0.15)'"
           variant="primary"
           to="NewAppeal"
-          v-b-tooltip.hover.top="'Добавить'"
+          v-b-tooltip.hover.top="'Добавить обращение'"
           v-if="this.$route.path === '/Home'"
         >
           Добавить обращение
@@ -24,7 +24,7 @@
           v-ripple.400="'rgba(255, 255, 255, 0.15)'"
           variant="primary"
           to="NewIntegration"
-          v-b-tooltip.hover.top="'Добавить'"
+          v-b-tooltip.hover.top="'Добавить интеграцию'"
           v-if="this.$route.path === '/Integration'"
         >
           Добавить интеграцию
@@ -33,7 +33,7 @@
           v-ripple.400="'rgba(255, 255, 255, 0.15)'"
           variant="primary"
           to="NewSource"
-          v-b-tooltip.hover.top="'Добавить'"
+          v-b-tooltip.hover.top="'Добавить иcточник'"
           v-if="this.$route.path === '/Sources'"
         >
           Добавить иcточник
@@ -42,10 +42,19 @@
           v-ripple.400="'rgba(255, 255, 255, 0.15)'"
           variant="primary"
           to="NewTag"
-          v-b-tooltip.hover.top="'Добавить'"
+          v-b-tooltip.hover.top="'Добавить тэг'"
           v-if="this.$route.path === '/Tags'"
         >
           Добавить тэг
+        </b-button>
+        <b-button
+          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+          variant="primary"
+          to="NewUser"
+          v-b-tooltip.hover.top="'Добавить пользователя'"
+          v-if="this.$route.path === '/Users'"
+        >
+          Добавить пользователя
         </b-button>
       </div>
     </div>

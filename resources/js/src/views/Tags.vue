@@ -129,10 +129,7 @@
               <b-dropdown-item v-b-modal.modal__seeIntegration>
                 <span>Посмотреть</span>
               </b-dropdown-item>
-              <b-dropdown-item
-                v-if="user.role_id === 1"
-                @click="deleteModal"
-              >
+              <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
                 <span>Удалить</span>
               </b-dropdown-item>
             </b-dropdown>
@@ -400,7 +397,7 @@ export default {
         },
       },
       getTag: false,
-      arraySearch:'',
+      arraySearch: "",
     };
   },
   methods: {
@@ -414,25 +411,51 @@ export default {
     },
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
-        axios.get("api/user ").then((response) => {
-          this.user = response.data;
-          if (this.user.role_id === 1) {
-            const obj = {
-              label: "Действие",
-              field: "action",
-              thClass: "columnCenter",
-              width: "200px",
-            };
-            this.columns.push(obj);
-          }
-        });
+        axios
+          .get("api/user ")
+          .then((response) => {
+            this.user = response.data;
+            if (this.user.role_id === 1) {
+              const obj = {
+                label: "Действие",
+                field: "action",
+                thClass: "columnCenter",
+                width: "200px",
+              };
+              this.columns.push(obj);
+            }
+          })
+          .catch((error) => {
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
+          });
       });
     },
     async getTags() {
-      await axios.get("/api/tags").then((response) => {
-        this.rowsTags = response.data;
-        this.getTag = true;
-      });
+      await axios
+        .get("/api/tags")
+        .then((response) => {
+          this.rowsTags = response.data;
+          this.getTag = true;
+        })
+        .catch((error) => {
+          const vNodesMsg = [`${error.response.data.error}`];
+          this.$bvToast.toast([vNodesMsg], {
+            title: `Ошибка`,
+            variant: "danger",
+            solid: true,
+            appendToast: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+          });
+        });
     },
     onCellClick(row) {
       if (row.column.label === "Действие") {
@@ -462,24 +485,36 @@ export default {
     },
     async saveModal() {
       try {
-        await axios.put("/api/tags/" + this.modalArray[this.modalCounter].id, {
-          id: this.modalArray[this.modalCounter].id,
-          name: this.modalArray[this.modalCounter].name,
-          type: this.modalArray[this.modalCounter].type,
-          plus_words_client:
-            this.modalArray[this.modalCounter].plus_words_client,
-          minus_words_client:
-            this.modalArray[this.modalCounter].minus_words_client,
-          plus_words_operator:
-            this.modalArray[this.modalCounter].plus_words_operator,
-          minus_words_operator:
-            this.modalArray[this.modalCounter].minus_words_operator,
-        });
-        this.$refs["modal__window"].hide();
+        await axios
+          .put("/api/tags/" + this.modalArray[this.modalCounter].id, {
+            id: this.modalArray[this.modalCounter].id,
+            name: this.modalArray[this.modalCounter].name,
+            type: this.modalArray[this.modalCounter].type,
+            plus_words_client:
+              this.modalArray[this.modalCounter].plus_words_client,
+            minus_words_client:
+              this.modalArray[this.modalCounter].minus_words_client,
+            plus_words_operator:
+              this.modalArray[this.modalCounter].plus_words_operator,
+            minus_words_operator:
+              this.modalArray[this.modalCounter].minus_words_operator,
+          })
+          .then(() => {
+            this.$refs["modal__window"].hide();
+          })
+          .catch((error) => {
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
+          });
         await this.getTags();
-      } catch (error) {
-        alert("Error: " + error);
-      }
+      } catch (error) {}
     },
     async deleteModal() {
       try {
@@ -496,23 +531,37 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (result.value) {
-            this.$swal({
-              icon: "success",
-              title: "Удалено!",
-              text: "Ваше обращение было удалено.",
-              customClass: {
-                confirmButton: "btn btn-success",
-              },
+          if (this.rowsTags.length) {
+            this.rowsTags.filter((index, i) => {
+              if (index.id === this.modalArray.id) {
+                axios
+                  .delete("/api/tags/" + this.modalArray.id)
+                  .then(() => {
+                    this.rowsTags.splice(i, 1);
+                    if (result.value) {
+                      this.$swal({
+                        icon: "success",
+                        title: "Удалено!",
+                        text: "Ваше обращение было удалено.",
+                        customClass: {
+                          confirmButton: "btn btn-success",
+                        },
+                      });
+                    }
+                  })
+                  .catch((error) => {
+                    const vNodesMsg = [`${error.response.data.error}`];
+                    this.$bvToast.toast([vNodesMsg], {
+                      title: `Ошибка`,
+                      variant: "danger",
+                      solid: true,
+                      appendToast: true,
+                      toaster: "b-toaster-top-center",
+                      autoHideDelay: 3000,
+                    });
+                  });
+              }
             });
-            if (this.rowsTags.length) {
-              this.rowsTags.filter((index, i) => {
-                if (index.id === this.modalArray.id) {
-                  axios.delete("/api/tags/" + this.modalArray.id);
-                  this.rowsTags.splice(i, 1);
-                }
-              });
-            }
           } else if (result.dismiss === "cancel") {
             this.$swal({
               title: "Отмена",
@@ -539,8 +588,22 @@ export default {
         this.rowSelection.filter((item) => {
           this.rowsTags.map((index, i) => {
             if (item.id === index.id) {
-              axios.delete("/api/tags/" + item.id);
-              this.rowsTags.splice(i, 1);
+              axios
+                .delete("/api/tags/" + item.id)
+                .then(() => {
+                  this.rowsTags.splice(i, 1);
+                })
+                .catch((error) => {
+                  const vNodesMsg = [`${error.response.data.error}`];
+                  this.$bvToast.toast([vNodesMsg], {
+                    title: `Ошибка`,
+                    variant: "danger",
+                    solid: true,
+                    appendToast: true,
+                    toaster: "b-toaster-top-center",
+                    autoHideDelay: 3000,
+                  });
+                });
             }
           });
         });

@@ -163,20 +163,43 @@ export default {
     },
     get_user() {
       axios.get("/sanctum/csrf-cookie").then((response) => {
-        axios.get("api/user").then((response) => {
-          this.user = response.data;
-          const token = response.config.headers["X-XSRF-TOKEN"];
-          
-          const vNodesMsg = [`Вы успешно вошли как  ${response.data.login}`];
-          this.$bvToast.toast([vNodesMsg], {
-            title: `Добро пожаловать`,
-            variant: "success",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
+        axios
+          .get("api/user")
+          .then((response) => {
+            this.user = response.data;
+            const token = response.config.headers["X-XSRF-TOKEN"];
+            // const vNodesMsg = [`Вы успешно вошли как  ${response.data.login}`];
+            // this.$bvToast.toast([vNodesMsg], {
+            //   title: `Добро пожаловать`,
+            //   variant: "success",
+            //   solid: true,
+            //   appendToast: true,
+            //   toaster: "b-toaster-top-center",
+            //   autoHideDelay: 3000,
+            // });
+          })
+          .catch((error) => {
+            if (error.response.status === 401) {
+              axios.get("/logout").then((resp) => {
+                localStorage.removeItem(
+                  "x_xsrf_token",
+                  resp.config.headers["X-XSRF-TOKEN"]
+                );
+                this.$router.push("/");
+                this.$store.commit("SET_ENTERED", false);
+              });
+            } else {
+              const vNodesMsg = [`${error.response.data.error}`];
+              this.$bvToast.toast([vNodesMsg], {
+                title: `Ошибка`,
+                variant: "danger",
+                solid: true,
+                appendToast: true,
+                toaster: "b-toaster-top-center",
+                autoHideDelay: 3000,
+              });
+            }
           });
-        });
       });
     },
     logout() {

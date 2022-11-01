@@ -191,51 +191,50 @@ export default {
 
     async addIntegration() {
       try {
-        if (this.title && this.slug) {
-          this.enter = true;
-          await axios.post("/api/integrations", {
+        this.enter = true;
+        await axios
+          .post("/api/integrations", {
             title: this.title,
             slug: this.slug,
             config: this.config,
-          });
-          this.$router.push("/Integration");
-        } else {
-          this.$bvToast.toast("Пожалуйтса заполните все поля", {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 2000,
-          });
-        }
+          })
+          .then(() => this.$router.push("/Integration"));
       } catch (error) {
-        console.log(error);
+        this.enter = false;
+        const vNodesMsg = [`${error.response.data.error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
       }
     },
     async CreateAndAddIntegration() {
       try {
-        if (this.title && this.slug) {
-          this.enterAndAdd = true;
-          await axios.post("/api/integrations", {
-            id: Date.now(),
-            title: this.title,
-            slug: this.slug,
-          });
-          this.title = "";
-          this.slug = "";
-          this.enterAndAdd = false;
-        } else {
-          this.$bvToast.toast("Пожалуйтса заполните все поля", {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 2000,
-          });
-        }
-      } catch (error) {}
+        this.enterAndAdd = true;
+        await axios.post("/api/integrations", {
+          id: Date.now(),
+          title: this.title,
+          slug: this.slug,
+        });
+        this.title = "";
+        this.slug = "";
+        this.enterAndAdd = false;
+      } catch (error) {
+        this.enterAndAdd = false;
+        const vNodesMsg = [`${error.response.data.error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
+      }
     },
     inputSpinButton(call) {
       this.selected.rangeAppeal = call + " секунд";

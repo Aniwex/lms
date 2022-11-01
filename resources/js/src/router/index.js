@@ -163,6 +163,20 @@ const router = new VueRouter({
             },
         },
         {
+            path: "/NewUser",
+            name: "Добавить пользователя",
+            component: () => import("../layouts/components/NewUser"),
+            meta: {
+                pageTitle: "Добавить пользователя",
+                breadcrumb: [
+                    {
+                        text: "Добавить пользователя",
+                        active: true,
+                    },
+                ],
+            },
+        },
+        {
             path: "/error-404",
             name: "error-404",
             component: () => import("@/views/error/Error404.vue"),
@@ -199,7 +213,11 @@ router.beforeEach((to, from, next) => {
             to.name === "Tags" ||
             to.name === "Sources" ||
             to.name === "Integration" ||
-            to.name === "Добавить интеграцию") &&
+            to.name === "Добавить интеграцию" ||
+            to.name === "Добавить пользователя" ||
+            to.name === "Добавить тэг" ||
+            to.name === "Добавить иcточник" ||
+            to.name === "Users") &&
         !token
     ) {
         return next({
