@@ -2,25 +2,16 @@
 
 namespace App\Policies;
 
-use App\Models\Role;
+use App\Models\Project;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 /**
- * Права доступа к пользователям.
+ * Права доступа к проектам.
  */
-class UserPolicy
+class ProjectPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * @param User $user
-     * @return bool
-     */
-    protected function doesUserHasAccess(User $user) : bool
-    {
-        return $user->isAdmin();
-    }
 
     /**
      * Determine whether the user can view any models.
@@ -30,19 +21,19 @@ class UserPolicy
      */
     public function viewAny(User $user)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin();
     }
 
     /**
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\User  $model
+     * @param  \App\Models\Project  $project
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, User $model)
+    public function view(User $user, Project $project)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin() || $user->isProjectManager($project);
     }
 
     /**
@@ -53,54 +44,54 @@ class UserPolicy
      */
     public function create(User $user)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin();
     }
 
     /**
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\User  $model
+     * @param  \App\Models\Project  $project
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, User $model)
+    public function update(User $user, Project $project)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin();
     }
 
     /**
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\User  $model
+     * @param  \App\Models\Project  $project
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, User $model)
+    public function delete(User $user, Project $project)
     {
-        return $this->doesUserHasAccess($user) && !$model->isAdmin();
+        return $user->isAdmin();
     }
 
     /**
      * Determine whether the user can restore the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\User  $model
+     * @param  \App\Models\Project  $project
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore(User $user, User $model)
+    public function restore(User $user, Project $project)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin();
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\User  $model
+     * @param  \App\Models\Project  $project
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function forceDelete(User $user, User $model)
+    public function forceDelete(User $user, Project $project)
     {
-        return $this->doesUserHasAccess($user) && !$model->isAdmin();
+        return $user->isAdmin();
     }
 }

@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Проект.
@@ -36,19 +35,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|Project withAllTagsOfAnyType($tags)
  * @method static \Illuminate\Database\Eloquent\Builder|Project withAnyTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Project withAnyTagsOfAnyType($tags)
- * @method static \Illuminate\Database\Query\Builder|Project withTrashed()
- * @method static \Illuminate\Database\Query\Builder|Project withoutTrashed()
  * @mixin \Eloquent
  */
 class Project extends Model
 {
-    use HasFactory, SoftDeletes, \Spatie\Tags\HasTags;
+    use HasFactory, \Spatie\Tags\HasTags;
 
     /**
      * @var array
      */
     protected $casts = [
         'mirrows' => 'array'
+    ];
+
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        'name', 'domain', 'mirrows'
     ];
 
     /**
