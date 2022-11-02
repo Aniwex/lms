@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Models\Traits\HasProject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Источник обращения (заявки).
@@ -23,7 +22,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|Source byProject(?int $projectId = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Source newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Source newQuery()
- * @method static \Illuminate\Database\Query\Builder|Source onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Source query()
  * @method static \Illuminate\Database\Eloquent\Builder|Source whereCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Source whereCreatedAt($value)

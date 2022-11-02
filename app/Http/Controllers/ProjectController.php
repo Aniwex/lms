@@ -104,6 +104,14 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        if ($project->sources()->exists()) {
+            return Response::error(422)->message('Невозможно удалить проект, так как он закреплен за одним или несколькими источниками обращений');
+        }
+
+        if ($project->tags()->exists()) {
+            return Response::error(422)->message('Невозможно удалить проект, так как он закреплен за одним или несколькими тегами обращений');
+        }
+        
         $project->delete();
         return Response::success()->message('Проект удален');
     }

@@ -17,8 +17,8 @@ class UpdateUserRequest extends StoreUserRequest
     public function rules()
     {
         return [
-            'login' => ['string', 'nullable', 'unique:users,login,' . $this->user->id, 'max:255'],
-            'password' => ['string', 'nullable', 'max:255'],
+            'login' => ['string', 'nullable', 'unique:users,login,' . $this->user->id, 'max:255', 'alpha_dash'],
+            'password' => ['string', 'nullable', 'max:255', 'alpha_dash'],
             'role_id' => ['integer', 'exists:roles,id', 'nullable'],
             'projects' => ['array', 'nullable'],
             'projects.*' => ['integer', Rule::exists('projects', 'id')]

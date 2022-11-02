@@ -42,7 +42,8 @@ Route::middleware('auth:sanctum')->group(function() {
      */
     Route::prefix('projects/{project}')->group(function() {
         Route::apiResources([
-            'sources' => 'SourceController'
+            'sources' => 'SourceController',
+            'tags'    => 'TagController'
         ]);
     });
 });
