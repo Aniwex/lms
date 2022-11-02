@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Integration whereSlug($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Integration whereTitle($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Integration whereUpdatedAt($value)
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Source[] $sources Источники обращений, закрепленные за данной интеграцией
+ * @property-read int|null $sources_count
  * @mixin \Eloquent
  */
 class Integration extends Model
@@ -40,4 +42,12 @@ class Integration extends Model
      * @var array
      */
     protected $fillable = ['title', 'slug', 'config'];
+
+    /**
+     * Источники обращений, закрепленные за данной интеграцией.
+     */
+    public function sources()
+    {
+        return $this->hasMany(Source::class);
+    }
 }

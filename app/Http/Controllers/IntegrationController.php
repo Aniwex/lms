@@ -89,6 +89,10 @@ class IntegrationController extends Controller
      */
     public function destroy(Integration $integration)
     {
+        if ($integration->sources()->exists()) {
+            return Response::error(422)->message('Невозможно удалить интеграцию, так как она закреплена за одним или несколькими источниками обращений');
+        }
+
         $integration->delete();
         return Response::success()->message('Интеграция удалена');
     }

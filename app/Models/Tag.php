@@ -6,7 +6,6 @@ use App\Models\Traits\HasProject;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Тег обращения.
@@ -17,7 +16,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $project_id ID проекта
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TagWord[] $clientMinusWords Минус-слова клиента
  * @property-read int|null $client_minus_words_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TagWord[] $clientPlusWords Плюс-слова клиента
@@ -34,7 +32,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|Tag byProject(?int $projectId = null)
  * @method static Builder|Tag newModelQuery()
  * @method static Builder|Tag newQuery()
- * @method static \Illuminate\Database\Query\Builder|Tag onlyTrashed()
  * @method static Builder|Tag query()
  * @method static Builder|Tag recognizeFromDialog($clientWords, $operatorWords)
  * @method static Builder|Tag whereCreatedAt($value)
@@ -44,13 +41,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static Builder|Tag whereObjective($value)
  * @method static Builder|Tag whereProjectId($value)
  * @method static Builder|Tag whereUpdatedAt($value)
- * @method static \Illuminate\Database\Query\Builder|Tag withTrashed()
- * @method static \Illuminate\Database\Query\Builder|Tag withoutTrashed()
+ * @method static Builder|Tag withWords() подгрузить все слова для тега
  * @mixin \Eloquent
  */
 class Tag extends Model
 {
-    use HasFactory, HasProject, SoftDeletes;
+    use HasFactory, HasProject;
+
+    /**
+     * @var array
+     */
+    protected $fillable = ['name', 'objective', 'project_id', 'client_minus_words', 'client_plus_words', 'operator_plus_word', 'operator_minus_word'];
 
     public static function boot()
     {
@@ -58,9 +59,7 @@ class Tag extends Model
 
         self::deleting(function($model){
             // при удалении тега удаляем все его слова из базы данных
-            if ($model->forceDeleting) {
-                TagWord::whereTagId($model->id)->delete();
-            }
+            TagWord::whereTagId($model->id)->delete();
         });
     }
     /**
@@ -81,7 +80,7 @@ class Tag extends Model
         foreach (TagWord::$types as $type) {
             $key = $type . 's';
             if (!empty($this->attributes[$key])) {
-                $wordsToCreate[$type] = preg_split('/\r\n|\r|\n/', $this->attributes[$key]);
+                $wordsToCreate[$type] = $this->attributes[$key];
             }
             unset($this->attributes[$key]);
         }
@@ -129,20 +128,24 @@ class Tag extends Model
     }
 
     /**
+     * Найти теги по заданному диалогу (тексту).
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder $query
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeWithWords(Builder $query)
+    {
+        return $query->with(['clientPlusWords', 'clientMinusWords', 'operatorPlusWords', 'operatorMinusWords']);
+    }
+
+    /**
      * Плюс-слова клиента.
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function clientPlusWords() 
     {
         return $this->hasMany(TagWord::class)->where('type', 'client_plus_word');
-    }
-
-    /**
-     * @return string Плюс-слова клиента в виде текста для редактирования на форме.
-     */
-    public function getClientPlusWordsAttribute() 
-    {
-        return $this->clientPlusWords()->get()->pluck('phrase')->implode(PHP_EOL);
     }
 
     /**
@@ -155,14 +158,6 @@ class Tag extends Model
     }
 
     /**
-     * @return string Минус-слова клиента в виде текста для редактирования на форме.
-     */
-    public function getClientMinusWordsAttribute() 
-    {
-        return $this->clientMinusWords()->get()->pluck('phrase')->implode(PHP_EOL);
-    }
-
-    /**
      * Плюс-слова оператора.
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -172,27 +167,11 @@ class Tag extends Model
     }
 
     /**
-     * @return string Плюс-слова оператора в виде текста для редактирования на форме.
-     */
-    public function getOperatorPlusWordsAttribute() 
-    {
-        return $this->operatorPlusWords()->get()->pluck('phrase')->implode(PHP_EOL);
-    }
-
-    /**
      * Минус-слова оператора.
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function operatorMinusWords() 
     {
         return $this->hasMany(TagWord::class)->where('type', 'operator_minus_word');
-    }
-
-    /**
-     * @return string Минус-слова клиента в виде текста для редактирования на форме.
-     */
-    public function getOperatorMinusWordsAttribute() 
-    {
-        return $this->operatorMinusWords()->get()->pluck('phrase')->implode(PHP_EOL);
     }
 }

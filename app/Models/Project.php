@@ -21,7 +21,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Project my()
  * @method static \Illuminate\Database\Eloquent\Builder|Project newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Project newQuery()
- * @method static \Illuminate\Database\Query\Builder|Project onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Project query()
  * @method static \Illuminate\Database\Eloquent\Builder|Project whereCreatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Project whereDeletedAt($value)
@@ -34,6 +33,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Project withAllTagsOfAnyType($tags)
  * @method static \Illuminate\Database\Eloquent\Builder|Project withAnyTags(\ArrayAccess|\Spatie\Tags\Tag|array|string $tags, ?string $type = null)
  * @method static \Illuminate\Database\Eloquent\Builder|Project withAnyTagsOfAnyType($tags)
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Source[] $sources Источники обращений, которые связаны с проектом
+ * @property-read int|null $sources_count
  * @mixin \Eloquent
  */
 class Project extends Model
@@ -103,5 +104,13 @@ class Project extends Model
     public function tags() 
     {
         return $this->hasMany(Tag::class);
+    }
+
+    /**
+     * Источники обращений в проекте.
+     */
+    public function sources()
+    {
+        return $this->hasMany(Source::class);
     }
 }
