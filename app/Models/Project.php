@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property array $mirrows Список зеркал
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Database\Eloquent\Collection|\App\Models\Tag[] $tags Теги
  * @property-read int|null $tags_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\User[] $users Пользователи связанные с проектом

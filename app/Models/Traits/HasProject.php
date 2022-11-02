@@ -14,7 +14,7 @@ trait HasProject
         // при создании нового объекта, связываем с текущим выбранным проектом.
         static::creating(function ($object) {
             if (!$object->project_id) {
-                $object->project_id = project();
+                $object->project_id = current_project();
             }
         });
     }
@@ -37,7 +37,7 @@ trait HasProject
     public function scopeByProject($query, int $projectId = null) {
 
         if (!$projectId)
-            $projectId = project();
+            $projectId = current_project();
 
         return $query->whereProjectId($projectId);
     }

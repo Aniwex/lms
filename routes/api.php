@@ -32,5 +32,14 @@ Route::middleware('auth:sanctum')->group(function() {
 
     // список ролей
     Route::get('roles', 'UserController@roles');
+
+    /**
+     * Проекто-зависимые REST-api роуты.
+     */
+    Route::prefix('projects/{project}')->group(function() {
+        Route::apiResources([
+            'sources' => 'SourceController'
+        ]);
+    });
 });
 
