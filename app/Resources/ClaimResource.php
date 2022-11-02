@@ -22,7 +22,7 @@ class ClaimResource extends AbstractResource
                 'code' => $claim->code,
                 'duration' => [
                     'original' => $claim->duration,
-                    'formatted' => duration($claim->duration)
+                    'formatted' => $claim->duration ? duration((int) $claim->duration) : '—'
                 ],
                 'phone' => [
                     'original' => $claim->phone,

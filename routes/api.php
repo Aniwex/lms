@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\ClaimController;
+use App\Http\Controllers\IntegrationController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\SourceController;
+use App\Http\Controllers\TagController;
+use App\Http\Controllers\UserController;
 use App\Http\Response;
 use App\Resources\UserResource;
 use Illuminate\Http\Request;
@@ -29,22 +35,22 @@ Route::middleware('auth:sanctum')->group(function() {
      * Роуты для REST-api взаимодействия.
      */
     Route::apiResources([
-        'integrations' => 'IntegrationController',
-        'users'        => 'UserController',
-        'projects'     => 'ProjectController'
+        'integrations' => IntegrationController::class,
+        'users'        => UserController::class,
+        'projects'     => ProjectController::class
     ]);
 
     // список ролей
-    Route::get('roles', 'UserController@roles');
+    Route::get('roles', [UserController::class, 'roles']);
 
     /**
      * Проекто-зависимые REST-api роуты.
      */
     Route::prefix('projects/{project}')->group(function() {
         Route::apiResources([
-            'sources' => 'SourceController',
-            'tags'    => 'TagController',
-            'claims'  => 'ClaimController'
+            'sources' => SourceController::class,
+            'tags'    => TagController::class,
+            'claims'  => ClaimController::class
         ]);
     });
 });

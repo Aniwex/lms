@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Claim;
 
+use App\Rules\PhoneNumber;
 use Illuminate\Validation\Rule;
 
 /**
@@ -20,7 +21,7 @@ class UpdateClaimRequest extends StoreClaimRequest
             'duration' => ['integer', 'nullable', 'min:1'],
             'datetime' => ['nullable', 'date'],
             'source_id' => ['integer', 'nullable', Rule::exists('sources', 'id')],
-            'phone' => ['nullable', 'regex:/^((8|\+374|\+994|\+995|\+375|\+7|\+380|\+38|\+996|\+998|\+993)[\- ]?)?\(?\d{3,5}\)?[\- ]?\d{1}[\- ]?\d{1}[\- ]?\d{1}[\- ]?\d{1}[\- ]?\d{1}(([\- ]?\d{1})?[\- ]?\d{1})?$/'],
+            'phone' => ['nullable', new PhoneNumber],
             'redirected_to' => ['string', 'nullable', 'max:255'],
             'manager_check' => ['nullable', Rule::in(['targeted', 'untargeted', 'unidentified'])],
             'client_check' => ['nullable', Rule::in(['targeted', 'untargeted', 'unidentified'])],
