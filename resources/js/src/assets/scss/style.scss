@@ -35,8 +35,15 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
     background-color: #fff;
   }
 .choose__project{
-  width:300px;
+  width:100%;
   margin-left: 20px;
+}
+.multiselect-input {
+  width: 416px;
+  height: 36px !important;
+  border-radius: 0.5rem;
+  border-width: 1px;
+  background-color: #fff;
 }
 
 

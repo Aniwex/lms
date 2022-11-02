@@ -11,11 +11,11 @@
       :rows="rowsTags"
       :searchTerm="searchTerm"
       v-if="getTag && user"
-      :role_id="user.role_id"
+      :role_id="user.role.id"
       @arraySearch="pushArraySearch"
     />
     <div
-      v-if="rowSelection.length && user.role_id === 1"
+      v-if="rowSelection.length && user.role.id === 1"
       class="d-flex justify-content-end"
     >
       <b-dropdown class="drop__down-delete" variant="primary" right no-caret>
@@ -64,12 +64,12 @@
         <span v-if="props.column.field === 'name'" class="text-nowrap db__tc">
           <span class="text-nowrap">{{ props.row.name }}</span>
         </span>
-        <!-- Column: type -->
+        <!-- Column: objective -->
         <span
-          v-else-if="props.column.field === 'type'"
+          v-else-if="props.column.field === 'objective'"
           class="text-nowrap db__tc"
         >
-          <div v-if="props.row.type">
+          <div v-if="props.row.objective">
             <check-icon
               style="color: green"
               size="1.5x"
@@ -84,33 +84,53 @@
             ></x-circle-icon>
           </div>
         </span>
-        <!-- Column: plus_words_client -->
+        <!-- Column: client_plus_words -->
         <span
-          v-else-if="props.column.field === 'plus_words_client'"
+          v-else-if="props.column.field === 'client_plus_words'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.plus_words_client }}</span>
+          <span
+            v-for="(words, index) in props.row.client_plus_words"
+            :key="index"
+            class="text-nowrap"
+            >{{ words }}</span
+          >
         </span>
-        <!-- Column: minus_words_client -->
+        <!-- Column: client_minus_words -->
         <span
-          v-else-if="props.column.field === 'minus_words_client'"
+          v-else-if="props.column.field === 'client_minus_words'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.minus_words_client }}</span>
+          <span
+            v-for="(words, index) in props.row.client_minus_words"
+            :key="index"
+            class="text-nowrap"
+            >{{ words }}</span
+          >
         </span>
-        <!-- Column: plus_words_operator -->
+        <!-- Column: operator_plus_words -->
         <span
-          v-else-if="props.column.field === 'plus_words_operator'"
+          v-else-if="props.column.field === 'operator_plus_words'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.plus_words_operator }}</span>
+          <span
+            v-for="(words, index) in props.row.operator_plus_words"
+            :key="index"
+            class="text-nowrap"
+            >{{ words }}</span
+          >
         </span>
-        <!-- Column: minus_words_operator -->
+        <!-- Column: operator_minus_words -->
         <span
-          v-else-if="props.column.field === 'minus_words_operator'"
+          v-else-if="props.column.field === 'operator_minus_words'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.minus_words_operator }}</span>
+          <span
+            v-for="(words, index) in props.row.operator_minus_words"
+            :key="index"
+            class="text-nowrap"
+            >{{ words }}</span
+          >
         </span>
         <span v-else-if="props.column.field === 'action'">
           <span class="db__tc">
@@ -129,7 +149,7 @@
               <b-dropdown-item v-b-modal.modal__seeIntegration>
                 <span>Посмотреть</span>
               </b-dropdown-item>
-              <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
+              <b-dropdown-item v-if="user.role.id === 1" @click="deleteModal">
                 <span>Удалить</span>
               </b-dropdown-item>
             </b-dropdown>
@@ -203,15 +223,14 @@
                   <b-form-input
                     class="row__user-input"
                     v-model="data.name"
-                    type="text"
+                    objective="text"
                     placeholder="Название"
                   />
                 </div>
                 <div class="row__source-lables">
                   <label class="row__lables-label">Тип</label>
                   <b-form-checkbox
-                    v-model="data.type"
-                    value="true"
+                    v-model="data.objective"
                     class="form__checkbox"
                   >
                     Целевой (да/нет)
@@ -219,38 +238,46 @@
                 </div>
                 <div class="row__source-lables">
                   <label class="row__lables-label">Плюс слова клиента</label>
-                  <b-form-input
+                  <b-form-textarea
                     class="row__user-input"
-                    v-model="data.plus_words_client"
-                    type="text"
-                    placeholder="Тип"
+                    style="text-align: left"
+                    placeholder="Плюс слова клиента"
+                    rows="5"
+                    no-resize
+                    v-model="data.client_plus_words"
                   />
                 </div>
                 <div class="row__source-lables">
                   <label class="row__lables-label">Минус слова клиента</label>
-                  <b-form-input
+                  <b-form-textarea
                     class="row__user-input"
-                    v-model="data.minus_words_client"
-                    type="text"
-                    placeholder="Тип"
+                    style="text-align: left"
+                    placeholder="Плюс слова клиента"
+                    rows="5"
+                    no-resize
+                    v-model="data.client_minus_words"
                   />
                 </div>
                 <div class="row__source-lables">
                   <label class="row__lables-label">Плюс слова оператора</label>
-                  <b-form-input
+                  <b-form-textarea
                     class="row__user-input"
-                    v-model="data.plus_words_operator"
-                    type="text"
-                    placeholder="Тип"
+                    style="text-align: left"
+                    placeholder="Плюс слова клиента"
+                    rows="5"
+                    no-resize
+                    v-model="data.operator_plus_words"
                   />
                 </div>
                 <div class="row__source-lables">
                   <label class="row__lables-label">Минус слова оператора</label>
-                  <b-form-input
+                  <b-form-textarea
                     class="row__user-input"
-                    v-model="data.minus_words_operator"
-                    type="text"
-                    placeholder="Тип"
+                    style="text-align: left"
+                    placeholder="Плюс слова клиента"
+                    rows="5"
+                    no-resize
+                    v-model="data.operator_minus_words"
                   />
                 </div>
                 <div class="modal__form-buttons">
@@ -362,30 +389,31 @@ export default {
         },
         {
           label: "Тип",
-          field: "type",
+          field: "objective",
           thClass: "columnCenter",
         },
         {
           label: "Плюс слова клиента",
-          field: "plus_words_client",
+          field: "client_plus_words",
           thClass: "columnCenter",
         },
         {
           label: "Минус слова клиента",
-          field: "minus_words_client",
+          field: "client_minus_words",
           thClass: "columnCenter",
         },
         {
           label: "Плюс слова оператора",
-          field: "plus_words_operator",
+          field: "operator_plus_words",
           thClass: "columnCenter",
         },
         {
           label: "Минус слова оператора",
-          field: "minus_words_operator",
+          field: "operator_minus_words",
           thClass: "columnCenter",
         },
       ],
+      project: [],
       swiperOptions: {
         navigation: {
           nextEl: ".swiper-button-next",
@@ -410,39 +438,51 @@ export default {
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     async getDataUser() {
-      await axios.get("/sanctum/csrf-cookie").then((response) => {
-        axios
-          .get("api/user ")
-          .then((response) => {
-            this.user = response.data;
-            if (this.user.role_id === 1) {
-              const obj = {
-                label: "Действие",
-                field: "action",
-                thClass: "columnCenter",
-                width: "200px",
-              };
-              this.columns.push(obj);
-            }
-          })
-          .catch((error) => {
-            const vNodesMsg = [`${error.response.data.error}`];
-            this.$bvToast.toast([vNodesMsg], {
-              title: `Ошибка`,
-              variant: "danger",
-              solid: true,
-              appendToast: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 3000,
+      if (!this.$store.getters.project) {
+        this.$router.push("/Home");
+      } else {
+        await axios.get("/sanctum/csrf-cookie").then((response) => {
+          axios
+            .get("api/user ")
+            .then((response) => {
+              this.user = response.data;
+              this.getProject;
+              this.getTags();
+              if (this.user.role.id === 1) {
+                const obj = {
+                  label: "Действие",
+                  field: "action",
+                  thClass: "columnCenter",
+                  width: "200px",
+                };
+                this.columns.push(obj);
+              }
+            })
+            .catch((error) => {
+              const vNodesMsg = [`${error.response.data.error}`];
+              this.$bvToast.toast([vNodesMsg], {
+                title: `Ошибка`,
+                variant: "danger",
+                solid: true,
+                appendToast: true,
+                toaster: "b-toaster-top-center",
+                autoHideDelay: 3000,
+              });
             });
-          });
-      });
+        });
+      }
     },
     async getTags() {
       await axios
-        .get("/api/tags")
+        .get("api/projects/" + this.project.id + "/tags")
         .then((response) => {
-          this.rowsTags = response.data;
+          this.rowsTags = response.data.tags;
+          this.rowsTags.filter((item) => {
+            item.client_plus_words = item.client_plus_words.join("\n");
+            item.client_minus_words = item.client_minus_words.join("\n");
+            item.operator_plus_words = item.operator_plus_words.join("\n");
+            item.operator_minus_words = item.operator_minus_words.join("\n");
+          });
           this.getTag = true;
         })
         .catch((error) => {
@@ -484,21 +524,42 @@ export default {
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
+      let temp_client_plus_words = [];
+      let temp_client_minus_words = [];
+      let temp_operator_plus_words = [];
+      let temp_operator_minus_words = [];
+      temp_client_plus_words.push(
+        this.modalArray[this.modalCounter].client_plus_words.split(/(?=\/)|\s/)
+      );
+      temp_client_minus_words.push(
+        this.modalArray[this.modalCounter].client_minus_words.split(/(?=\/)|\s/)
+      );
+      temp_operator_plus_words.push(
+        this.modalArray[this.modalCounter].operator_plus_words.split(
+          /(?=\/)|\s/
+        )
+      );
+      temp_operator_minus_words.push(
+        this.modalArray[this.modalCounter].operator_minus_words.split(
+          /(?=\/)|\s/
+        )
+      );
       try {
         await axios
-          .put("/api/tags/" + this.modalArray[this.modalCounter].id, {
-            id: this.modalArray[this.modalCounter].id,
-            name: this.modalArray[this.modalCounter].name,
-            type: this.modalArray[this.modalCounter].type,
-            plus_words_client:
-              this.modalArray[this.modalCounter].plus_words_client,
-            minus_words_client:
-              this.modalArray[this.modalCounter].minus_words_client,
-            plus_words_operator:
-              this.modalArray[this.modalCounter].plus_words_operator,
-            minus_words_operator:
-              this.modalArray[this.modalCounter].minus_words_operator,
-          })
+          .put(
+            "api/projects/" +
+              this.project.id +
+              "/tags/" +
+              this.modalArray[this.modalCounter].id,
+            {
+              name: this.modalArray[this.modalCounter].name,
+              objective: this.modalArray[this.modalCounter].objective,
+              client_plus_words: temp_client_plus_words[0],
+              client_minus_words: temp_client_minus_words[0],
+              operator_plus_words: temp_operator_plus_words[0],
+              operator_minus_words: temp_operator_minus_words[0],
+            }
+          )
           .then(() => {
             this.$refs["modal__window"].hide();
           })
@@ -535,7 +596,12 @@ export default {
             this.rowsTags.filter((index, i) => {
               if (index.id === this.modalArray.id) {
                 axios
-                  .delete("/api/tags/" + this.modalArray.id)
+                  .delete(
+                    "api/projects/" +
+                      this.project.id +
+                      "/tags/" +
+                      this.modalArray.id
+                  )
                   .then(() => {
                     this.rowsTags.splice(i, 1);
                     if (result.value) {
@@ -589,10 +655,7 @@ export default {
           this.rowsTags.map((index, i) => {
             if (item.id === index.id) {
               axios
-                .delete("/api/tags/" + item.id)
-                .then(() => {
-                  this.rowsTags.splice(i, 1);
-                })
+                .delete("api/projects/" + this.project.id + "/tags/" + item.id)
                 .catch((error) => {
                   const vNodesMsg = [`${error.response.data.error}`];
                   this.$bvToast.toast([vNodesMsg], {
@@ -604,6 +667,7 @@ export default {
                     autoHideDelay: 3000,
                   });
                 });
+              this.rowsTags.splice(i, 1);
             }
           });
         });
@@ -621,10 +685,13 @@ export default {
         return this.rowsTags;
       }
     },
+    getProject() {
+      this.project = this.$store.getters.project;
+      return this.$store.getters.project;
+    },
   },
   created() {
     this.getDataUser();
-    this.getTags();
   },
 };
 </script>

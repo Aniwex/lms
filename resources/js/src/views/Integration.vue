@@ -179,7 +179,7 @@
                     placeholder="Код"
                   />
                 </div>
-                <div class="form__group-options" v-if="data.config.length">
+                <div class="form__group-options" v-if="data.config">
                   <div>
                     <label class="row__lables-label">Настройки </label>
                     <b-form

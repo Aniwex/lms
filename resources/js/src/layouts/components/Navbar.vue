@@ -48,14 +48,13 @@
         <multiselect
           v-model="choose_project"
           :options="get_projects"
-          selectLabel="Нажмите enter для выбора"
-          deselectLabel="Нажмите enter для удаления"
           selectedLabel="Выбрано"
           class="choose__project"
           label="name"
           track-by="name"
           placeholder="Выберите проект"
-          @change="selectProject"
+          @select="selectProject"
+          :showLabels="false"
         >
         </multiselect>
       </div>
@@ -167,50 +166,11 @@ export default {
     };
   },
   methods: {
-    selectProject(project) {
-      this.$store.commit("SET_PROJECT", project);
+    async selectProject(project) {
+      await this.$store.commit("SET_PROJECT", project);
     },
-    get_user() {
-      axios.get("/sanctum/csrf-cookie").then((response) => {
-        axios
-          .get("api/user")
-          .then((response) => {
-            this.user = response.data;
-            console.log(this.user);
-            const token = response.config.headers["X-XSRF-TOKEN"];
-            // const vNodesMsg = [`Вы успешно вошли как  ${response.data.login}`];
-            // this.$bvToast.toast([vNodesMsg], {
-            //   title: `Добро пожаловать`,
-            //   variant: "success",
-            //   solid: true,
-            //   appendToast: true,
-            //   toaster: "b-toaster-top-center",
-            //   autoHideDelay: 3000,
-            // });
-          })
-          .catch((error) => {
-            if (error.response.status === 401) {
-              axios.get("/logout").then((resp) => {
-                localStorage.removeItem(
-                  "x_xsrf_token",
-                  resp.config.headers["X-XSRF-TOKEN"]
-                );
-                this.$router.push("/");
-                this.$store.commit("SET_ENTERED", false);
-              });
-            } else {
-              const vNodesMsg = [`${error.response.data.error}`];
-              this.$bvToast.toast([vNodesMsg], {
-                title: `Ошибка`,
-                variant: "danger",
-                solid: true,
-                appendToast: true,
-                toaster: "b-toaster-top-center",
-                autoHideDelay: 3000,
-              });
-            }
-          });
-      });
+    async get_user() {
+      await this.$store.dispatch("SET_USER");
     },
     logout() {
       this.user.login = undefined;
@@ -224,7 +184,7 @@ export default {
       });
     },
     async setProjects() {
-      await this.$store.dispatch("SET_PROJECTS");
+      await this.$store.dispatch("SET_USER");
     },
   },
 
@@ -234,7 +194,8 @@ export default {
   },
   computed: {
     get_projects() {
-      return this.$store.getters.projects;
+      this.user = this.$store.getters.getUser;
+      return this.$store.getters.getUser.projects;
     },
     isLoggedIn() {
       return this.$store.getters.isLoggedIn;

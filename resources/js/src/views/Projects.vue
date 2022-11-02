@@ -253,6 +253,9 @@
                     :multiple="true"
                     label="login"
                     track-by="login"
+                    placeholder="Выберите пользователя"
+                    selectLabel="Нажмите enter для выбора"
+                    deselectLabel="Нажмите enter для удаления"
                   >
                   </multiselect>
                 </div>
@@ -513,7 +516,6 @@ export default {
     },
     async saveModal() {
       try {
-        console.log(this.users);
         let tempUserId = [];
         this.users.filter((item) => {
           tempUserId.push(item.id);
@@ -529,7 +531,7 @@ export default {
         );
         this.$refs["modal__window"].hide();
         await this.getTableProjects();
-        await this.$store.dispatch("SET_PROJECTS");
+        await this.$store.dispatch("SET_USER");
       } catch (error) {
         const vNodesMsg = [`${error.response.data.error}`];
         this.$bvToast.toast([vNodesMsg], {
@@ -564,7 +566,7 @@ export default {
                   .delete("/api/projects/" + this.modalArray.id)
                   .then(() => {
                     this.rowsProjects.splice(i, 1);
-                    this.$store.dispatch("SET_PROJECTS");
+                    this.$store.dispatch("SET_USER");
                   })
                   .then(() => {
                     if (result.value) {
@@ -661,24 +663,5 @@ export default {
 .row__users-input {
   width: 300px;
   padding: 20px 0px;
-}
-.multiselect-input {
-  width: 416px;
-  height: 36px !important;
-  border-radius: 0.5rem;
-  border-width: 1px;
-  background-color: #fff;
-}
-.multiplay__tag {
-  background-color: #41b883;
-  max-width: 100%;
-  border-radius: 5px;
-  padding: 4px 26px 4px 10px;
-  width: 70px;
-  color: white;
-}
-.remove__item {
-  cursor: pointer;
-  text-align: center;
 }
 </style>

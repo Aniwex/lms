@@ -4,13 +4,18 @@
       <div class="container">
         <div class="form__group">
           <label class="form__label">Интеграция </label>
-          <b-form-select
-            class="form__appeal-input"
-            v-model="integration"
-            :options="options_integration"
-            :state="integration === null ? false : true"
+          <multiselect
+            onclick="this.querySelector('input').focus();"
+            class="multiselect-input"
+            v-model="integration_id"
+            :options="options_integration_id"
+            label="title"
+            track-by="title"
+            placeholder="Выберите интеграцию"
+            selectLabel="Нажмите enter для выбора"
+            deselectLabel="Нажмите enter для удаления"
           >
-          </b-form-select>
+          </multiselect>
         </div>
         <div class="form__group">
           <label class="form__label">Название </label>
@@ -43,7 +48,7 @@
         Отменить
       </b-button>
       <b-button
-        @click="CreateAndAddIntegration"
+        @click="CreateAndAddSource"
         v-ripple.400="'rgba(255, 255, 255, 0.15)'"
         variant="primary"
       >
@@ -52,7 +57,7 @@
         <b-spinner v-if="enterAndAdd" small />
       </b-button>
       <b-button
-        @click="addIntegration"
+        @click="addSource"
         v-ripple.400="'rgba(255, 255, 255, 0.15)'"
         variant="primary"
       >
@@ -96,32 +101,61 @@ export default {
   },
   data() {
     return {
-      integration: null,
+      integration_id: null,
       name: "",
       code: "",
+      dataSource: [],
       enter: false,
       enterAndAdd: false,
-      options_integration: [
-        { value: null, text: "—" },
-        { value: "Roistat", text: "Roistat" },
-        { value: "Задарма", text: "Задарма" },
-        { value: "Марквиз", text: "Марквиз" },
-        { value: "Формы обратной связи", text: "Задарма" },
-      ],
+      options_integration_id: [],
+      project: [],
     };
   },
   methods: {
-    async addIntegration() {
+    async getIntegrations() {
+      await axios
+        .get("api/integrations")
+        .then((response) => {
+          this.options_integration_id = response.data.integrations;
+        })
+        .catch((error) => {
+          const vNodesMsg = [`${error.response.data.error}`];
+          this.$bvToast.toast([vNodesMsg], {
+            title: `Ошибка`,
+            variant: "danger",
+            solid: true,
+            appendToast: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+          });
+        });
+    },
+    async addSource() {
       try {
         if (this.name && this.code) {
-          this.enter = true;
-          await axios.post("/api/sources", {
-            id: Date.now(),
-            integration: this.integration,
-            name: this.name,
-            code: this.code,
-          });
-          this.$router.push("/Sources");
+          await axios
+            .post("api/projects/" + this.project.id + "/sources", {
+              integration_id: this.integration_id.id,
+              name: this.name,
+              code: this.code,
+              data: this.dataSource,
+            })
+            .then(() => {
+              this.enter = true;
+              this.$router.push("/Sources");
+            })
+            .catch((error) => {
+              this.enter = false;
+              const vNodesMsg = [`${error.response.data.error}`];
+              this.$bvToast.toast([vNodesMsg], {
+                name: `Ошибка`,
+                variant: "danger",
+                solid: true,
+                appendToast: true,
+                toaster: "b-toaster-top-center",
+                autoHideDelay: 3000,
+              });
+            });
         } else {
           this.$bvToast.toast("Пожалуйтса заполните все поля", {
             title: `Ошибка`,
@@ -132,19 +166,24 @@ export default {
             autoHideDelay: 2000,
           });
         }
-      } catch (error) {}
+      } catch (error) {
+        
+      }
     },
-    async CreateAndAddIntegration() {
+    async CreateAndAddSource() {
       try {
         if (this.name && this.code) {
           this.enterAndAdd = true;
-          await axios.post("/api/sources", {
-            id: Date.now(),
+          await axios.post("api/projects/" + this.project.id + "/sources", {
+            integration_id: this.integration_id.id,
             name: this.name,
             code: this.code,
+            data: this.dataSource,
           });
+          this.integration_id = [];
           this.name = "";
           this.code = "";
+          this.dataSource = [];
           this.enterAndAdd = false;
         } else {
           this.$bvToast.toast("Пожалуйтса заполните все поля", {
@@ -160,6 +199,12 @@ export default {
     },
   },
   mounted() {
+    if (!this.$store.getters.project) {
+      this.$router.push("/Home");
+    } else {
+      this.getIntegrations();
+      this.project = this.$store.getters.project;
+    }
     this.$store.commit("SET_ENTERED", true);
   },
 };
