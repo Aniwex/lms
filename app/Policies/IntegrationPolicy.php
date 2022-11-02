@@ -14,15 +14,6 @@ class IntegrationPolicy
     use HandlesAuthorization;
 
     /**
-     * @param User $user
-     * @return bool
-     */
-    protected function doesUserHasAccess(User $user) : bool
-    {
-        return $user->isAdmin();
-    }
-
-    /**
      * Determine whether the user can view any models.
      *
      * @param  \App\Models\User  $user
@@ -30,7 +21,7 @@ class IntegrationPolicy
      */
     public function viewAny(User $user)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin() || $user->isManagerWithProjects();
     }
 
     /**
@@ -42,7 +33,7 @@ class IntegrationPolicy
      */
     public function view(User $user, Integration $integration)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin() || $user->isManagerWithProjects();
     }
 
     /**
@@ -53,7 +44,7 @@ class IntegrationPolicy
      */
     public function create(User $user)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin();
     }
 
     /**
@@ -65,7 +56,7 @@ class IntegrationPolicy
      */
     public function update(User $user, Integration $integration)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin();
     }
 
     /**
@@ -77,7 +68,7 @@ class IntegrationPolicy
      */
     public function delete(User $user, Integration $integration)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin();
     }
 
     /**
@@ -89,7 +80,7 @@ class IntegrationPolicy
      */
     public function restore(User $user, Integration $integration)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin();
     }
 
     /**
@@ -101,6 +92,6 @@ class IntegrationPolicy
      */
     public function forceDelete(User $user, Integration $integration)
     {
-        return $this->doesUserHasAccess($user);
+        return $user->isAdmin();
     }
 }

@@ -14,17 +14,23 @@ if (!function_exists('user')) {
 }
 
 
-if (!function_exists('project')) {
+if (!function_exists('current_project')) {
 
     /**
      * Метод для получения активного проекта.
-     * @return int ID проекта, выбранного пользователем.
+     * @return Project|null
      */
-    function project() {
-
-        return optional(Project::find(
-            session()->get('project', null)
-        ))->id;
+    function current_project() : ?Project 
+    {
+        // return optional(Project::find(
+        //     session()->get('project', null)
+        // ))->id;
+        
+        $project = request()->route()->parameter('project');
+        if (!$project instanceof Project) {
+            return Project::whereId($project)->first();
+        }
+        return $project ?? null;
     }
 }
 
@@ -45,7 +51,7 @@ if (!function_exists('userSelectProject')) {
      * @return bool Выбрал ли текущий пользователь активный проект.
      */
     function userSelectProject() {
-        $project = project();
+        $project = current_project();
         return !is_null($project) && !empty($project);
     }
 }

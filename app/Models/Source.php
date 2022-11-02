@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $integration_id ID интеграции
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\Integration $integration Проект
  * @property-read \App\Models\Project $project Интеграция
  * @method static \Illuminate\Database\Eloquent\Builder|Source byProject(?int $projectId = null)
@@ -35,17 +34,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|Source whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Source whereProjectId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Source whereUpdatedAt($value)
- * @method static \Illuminate\Database\Query\Builder|Source withTrashed()
- * @method static \Illuminate\Database\Query\Builder|Source withoutTrashed()
+
  * @mixin \Eloquent
  */
 class Source extends Model
 {
-    use HasFactory, SoftDeletes, HasProject;
+    use HasFactory, HasProject;
 
+    /**
+     * @var array
+     */
     protected $casts = [
         'data' => 'array',
     ];
+
+    /**
+     * @var array
+     */
+    protected $fillable = ['name', 'code', 'data', 'project_id', 'integration_id'];
 
     /**
      * Привязка к интеграции.
