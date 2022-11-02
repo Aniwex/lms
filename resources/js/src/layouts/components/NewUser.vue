@@ -34,13 +34,19 @@
         </div>
         <div class="form__group">
           <label class="form__label">Проекты </label>
-          <v-select
+          <multiselect
             v-model="project"
-            multiple
-            label="title"
             :options="option_project"
-            class="form__appeal-input"
-          />
+            selectLabel="Нажмите enter для выбора"
+            deselectLabel="Нажмите enter для удаления"
+            selectedLabel="Выбрано"
+            :multiple="true"
+            class="multiselect-input"
+            label="name"
+            track-by="name"
+            placeholder="Выберите проект"
+          >
+          </multiselect>
         </div>
       </div>
     </div>
@@ -90,7 +96,6 @@ import "@core/scss/vue/libs/vue-flatpicker.scss";
 import Ripple from "vue-ripple-directive";
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
-
 import axios from "axios";
 export default {
   components: {
@@ -126,9 +131,6 @@ export default {
         .get("api/projects")
         .then((response) => {
           this.option_project = response.data.projects;
-          this.option_project.filter((item) => {
-            item["title"] = item.name;
-          });
         })
         .catch((error) => {
           const vNodesMsg = [`${error.response.data.error}`];
@@ -247,7 +249,6 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 .form__create-sorce {
   width: 1470px;
@@ -288,5 +289,16 @@ input {
 }
 .btn {
   margin-left: 12px;
+}
+.multiselect-input {
+  width: 416px;
+  height: 36px !important;
+  border-radius: 0.5rem;
+  border-width: 1px;
+  background-color: #fff;
+}
+
+[dir] .multiselect__tag {
+  background: red !important;
 }
 </style>

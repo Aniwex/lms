@@ -22,24 +22,29 @@
         variant="primary"
         to="Projects"
         class="navbar__button"
+        v-if="user.role_id === 1"
       >
         Проекты
       </b-button>
-      <b-nav>
+      <b-nav v-if="user.role_id === 1">
         <b-nav-item to="Users" class="navbar__button">
           <user-icon
             size="1.75x"
             class="plus-icon align-middle mr-25"
           ></user-icon>
         </b-nav-item>
-        <b-nav-item to="Integration" class="navbar__button">
+        <b-nav-item
+          to="Integration"
+          class="navbar__button"
+          v-if="user.role_id === 1"
+        >
           <TrendingUpIcon
             size="1.75x"
             class="plus-icon align-middle mr-25"
           ></TrendingUpIcon>
         </b-nav-item>
       </b-nav>
-      <div v-if="get_projects">
+      <div v-if="get_projects && user.role_id === 1">
         <b-form-select
           class="choose__project"
           v-model="choose_project"
@@ -48,7 +53,7 @@
         >
         </b-form-select>
       </div>
-      <div v-else>
+      <div v-if="user.role_id === 1 && !get_projects">
         <b-button variant="primary" disabled class="mr-1">
           <b-spinner small />
           Загрузка...
@@ -213,7 +218,6 @@ export default {
     },
     async setProjects() {
       await this.$store.dispatch("SET_PROJECTS");
-      this.projects = this.$store.getters.projects;
     },
   },
 

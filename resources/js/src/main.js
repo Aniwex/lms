@@ -13,7 +13,9 @@ import vSelect from "vue-select";
 // 3rd party plugins
 import "@/libs/portal-vue";
 import "@/libs/toastification";
-
+import Multiselect from "vue-multiselect";
+import "vue-multiselect/dist/vue-multiselect.min.css";
+Vue.component("multiselect", Multiselect);
 // BSV Plugin Registration
 Vue.use(ToastPlugin);
 Vue.use(ModalPlugin);

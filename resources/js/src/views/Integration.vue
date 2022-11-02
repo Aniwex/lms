@@ -531,19 +531,20 @@ export default {
           })
           .then(() => {
             this.$refs["modal__window"].hide();
+          })
+          .catch((error) => {
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
           });
         await this.getIntegration();
-      } catch (error) {
-        const vNodesMsg = [`${error.response.data.error}`];
-        this.$bvToast.toast([vNodesMsg], {
-          title: `Ошибка`,
-          variant: "danger",
-          solid: true,
-          appendToast: true,
-          toaster: "b-toaster-top-center",
-          autoHideDelay: 3000,
-        });
-      }
+      } catch (error) {}
     },
     async deleteModal() {
       try {
@@ -653,7 +654,7 @@ export default {
   float: right;
 }
 .repeater__form {
-  width: 600px;
+  width: 400px;
   display: block;
   margin: 0 auto;
 }

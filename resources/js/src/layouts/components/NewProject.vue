@@ -77,13 +77,19 @@
         </div>
         <div class="form__group">
           <label class="form__label">Пользователи </label>
-          <v-select
+          <multiselect
             v-model="users"
-            multiple
-            label="title"
             :options="option_users"
-            class="form__appeal-input"
-          />
+            selectLabel="Нажмите enter для выбора"
+            deselectLabel="Нажмите enter для удаления"
+            selectedLabel="Выбрано"
+            :multiple="true"
+            class="multiselect-input"
+            label="login"
+            track-by="login"
+            placeholder="Выберите проект"
+          >
+          </multiselect>
         </div>
       </div>
     </div>
@@ -332,7 +338,13 @@ input {
   flex-direction: row;
   margin: 24px 32px 24px 32px;
 }
-
+.multiselect-input {
+  width: 416px;
+  height: 36px !important;
+  border-radius: 0.5rem;
+  border-width: 1px;
+  background-color: #fff;
+}
 .btn {
   margin-left: 12px;
 }

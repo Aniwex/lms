@@ -5,13 +5,13 @@ import axios from "axios";
 import app from "./app";
 import appConfig from "./app-config";
 import verticalMenu from "./vertical-menu";
-
 Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
         status: "",
         user: {},
+        users: [],
         token: localStorage.getItem("user-token") || "",
         entered: false,
         seeAction: {},
@@ -33,6 +33,9 @@ export default new Vuex.Store({
         SET_USER: (state, payload) => {
             state.user = payload;
         },
+        SET_USERS: (state, payload) => {
+            state.users = payload;
+        },
         SET_PROJECTS: (state, payload) => {
             state.projects = payload;
         },
@@ -51,10 +54,32 @@ export default new Vuex.Store({
                 ctx.commit("SET_PROJECTS", projects);
             });
         },
+        getDataUser: async (ctx) => {
+            await axios
+                .get("/api/users")
+                .then((response) => {
+                    const users = response.data.users;
+                    ctx.commit("SET_USERS", users);
+                })
+                .catch((error) => {
+                    const vNodesMsg = [`${error.response.data.error}`];
+                    this.$bvToast.toast([vNodesMsg], {
+                        title: `Ошибка`,
+                        variant: "danger",
+                        solid: true,
+                        appendToast: true,
+                        toaster: "b-toaster-top-center",
+                        autoHideDelay: 3000,
+                    });
+                });
+        },
     },
     getters: {
         entered: (state) => {
             return state.entered;
+        },
+        getUsers: (state) => {
+            return state.users;
         },
         seeAction: (state) => {
             return state.seeAction;
