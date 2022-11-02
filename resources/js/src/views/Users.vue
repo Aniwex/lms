@@ -11,11 +11,11 @@
       :rows="rowsUsers"
       :searchTerm="searchTerm"
       v-if="getUsers && user"
-      :role_id="user.role_id"
+      :role_id="user.role.id"
       @arraySearch="pushArraySearch"
     />
     <div
-      v-if="rowSelection.length && user.role_id === 1"
+      v-if="rowSelection.length && user.role.id === 1"
       class="d-flex justify-content-end"
     >
       <b-dropdown class="drop__down-delete" variant="primary" right no-caret>
@@ -90,12 +90,12 @@
                 />
               </template>
               <b-dropdown-item
-                v-if="user.role_id === 1"
+                v-if="user.role.id === 1"
                 v-b-modal.modal__seeIntegration
               >
                 <span>Посмотреть</span>
               </b-dropdown-item>
-              <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
+              <b-dropdown-item v-if="user.role.id === 1" @click="deleteModal">
                 <span>Удалить</span>
               </b-dropdown-item>
             </b-dropdown>
@@ -350,7 +350,7 @@ export default {
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     async getTableUsers() {
-      await this.$store.dispatch("getDataUser");
+      await this.$store.dispatch("getDataUsers");
       await axios
         .get("api/roles")
         .then((response) => {
@@ -379,7 +379,7 @@ export default {
           .get("api/user")
           .then((response) => {
             this.user = response.data;
-            if (this.user.role_id === 1) {
+            if (this.user.role.id === 1) {
               const obj = {
                 label: "Действие",
                 field: "action",

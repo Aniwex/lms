@@ -11,7 +11,7 @@
       @arraySearch="pushArraySearch"
       :rows="rows"
       v-if="getDT && user"
-      :role_id="user.role_id"
+      :role_id="user.role.id"
     />
     <!-- filers -->
     <filters
@@ -20,7 +20,7 @@
       @selected="pushSelected"
       :rowSelection="rowSelection"
       :rows="rows"
-      :role_id="user.role_id"
+      :role_id="user.role.id"
       :options_source="options_source"
       v-if="getDT && user"
     />
@@ -104,7 +104,7 @@
               class="dropdown-menu"
               style="min-width: 50px"
               aria-labelledby="dropdownMenuButton"
-              v-if="user.role_id === 1"
+              v-if="user.role.id === 1"
             >
               <button
                 v-for="(m, index) in manager"
@@ -144,7 +144,7 @@
               class="dropdown-menu"
               style="min-width: 50px"
               aria-labelledby="dropdownMenuButton"
-              v-if="user.role_id === 1"
+              v-if="user.role.id === 1"
             >
               <button
                 v-for="(c, index) in client"
@@ -208,7 +208,7 @@
                 <eye-icon size="1x" class="mr-50"></eye-icon>
                 <span>Посмотреть</span>
               </b-dropdown-item>
-              <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
+              <b-dropdown-item v-if="user.role.id === 1" @click="deleteModal">
                 <feather-icon icon="TrashIcon" class="mr-50" />
                 <span>Удалить</span>
               </b-dropdown-item>
@@ -302,7 +302,7 @@
             <h3>Данные для редактирования</h3>
             <div class="container__see-project">
               <div class="row__lables">
-                <div v-if="user.role_id === 1" class="row__date-lables">
+                <div v-if="user.role.id === 1" class="row__date-lables">
                   <label class="row__lables-label">Дата и время</label>
                   <flat-pickr
                     placeholder="Выберите дату и время"
@@ -315,7 +315,7 @@
                     }"
                   />
                 </div>
-                <div v-if="user.role_id === 1" class="row__call-lables">
+                <div v-if="user.role.id === 1" class="row__call-lables">
                   <label class="row__lables-label"
                     >Продолжительность звонка</label
                   >
@@ -351,7 +351,7 @@
                     </b-button>
                   </div>
                 </div>
-                <div v-if="user.role_id === 1" class="row__source-lables">
+                <div v-if="user.role.id === 1" class="row__source-lables">
                   <label class="row__lables-label">Источник</label>
                   <b-form-select
                     class="form__select"
@@ -360,7 +360,7 @@
                   >
                   </b-form-select>
                 </div>
-                <div v-if="user.role_id === 1" class="row__user-lables">
+                <div v-if="user.role.id === 1" class="row__user-lables">
                   <label class="row__lables-label">Пользователь</label>
                   <b-form-input
                     class="row__user-input"
@@ -372,7 +372,7 @@
                   />
                 </div>
                 <div
-                  v-if="user.role_id === 1 || user.role_id === 2"
+                  v-if="user.role.id === 1 || user.role.id === 2"
                   class="row__tag-lables"
                 >
                   <label class="row__lables-label">Тэги</label>
@@ -384,7 +384,7 @@
                   </b-form-select>
                 </div>
                 <div
-                  v-if="user.role_id === 1 || user.role_id === 2"
+                  v-if="user.role.id === 1 || user.role.id === 2"
                   class="row__tag-lables"
                 >
                   <label class="row__lables-label">Проверка менеджера</label>
@@ -396,7 +396,7 @@
                   </b-form-select>
                 </div>
                 <div
-                  v-if="user.role_id === 1 || user.role_id === 2"
+                  v-if="user.role.id === 1 || user.role.id === 2"
                   class="row__comment-manager-lables"
                 >
                   <label class="row__lables-label">Комментарий менеджера</label>
@@ -409,7 +409,7 @@
                     :value="data.commentManager"
                   />
                 </div>
-                <div v-if="user.role_id === 1" class="row__tag-lables">
+                <div v-if="user.role.id === 1" class="row__tag-lables">
                   <label class="row__lables-label">Проверка клиента</label>
                   <b-form-select
                     class="form__select"

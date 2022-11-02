@@ -47,14 +47,50 @@ export default new Vuex.Store({
         SET_PROJECTS: async (ctx) => {
             await axios.get("/api/projects").then((response) => {
                 const projects = response.data.projects;
-                projects.filter((item) => {
-                    item["title"] = item["text"] = item.name;
-                });
-                projects.unshift({ value: null, text: "—" });
                 ctx.commit("SET_PROJECTS", projects);
             });
         },
-        getDataUser: async (ctx) => {
+        SET_USER: async (ctx) => {
+            await axios.get("/sanctum/csrf-cookie").then((response) => {
+                axios
+                  .get("api/user")
+                  .then((response) => {
+                    this.user = response.data;
+                    if (this.user.role.id === 1) {
+                      const obj = {
+                        label: "Действие",
+                        field: "action",
+                        thClass: "columnCenter",
+                        width: "200px",
+                      };
+                      this.columns.push(obj);
+                    }
+                  })
+                  .catch((error) => {
+                    if (error.response.status === 401) {
+                      axios.get("/logout").then((resp) => {
+                        localStorage.removeItem(
+                          "x_xsrf_token",
+                          resp.config.headers["X-XSRF-TOKEN"]
+                        );
+                        this.$router.push("/");
+                        this.$store.commit("SET_ENTERED", false);
+                      });
+                    } else {
+                      const vNodesMsg = [`${error.response.data.error}`];
+                      this.$bvToast.toast([vNodesMsg], {
+                        title: `Ошибка`,
+                        variant: "danger",
+                        solid: true,
+                        appendToast: true,
+                        toaster: "b-toaster-top-center",
+                        autoHideDelay: 3000,
+                      });
+                    }
+                  });
+              });
+        },
+        getDataUsers: async (ctx) => {
             await axios
                 .get("/api/users")
                 .then((response) => {

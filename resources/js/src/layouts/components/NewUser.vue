@@ -130,6 +130,7 @@ export default {
       await axios
         .get("api/projects")
         .then((response) => {
+          console.log(response.data);
           this.option_project = response.data.projects;
         })
         .catch((error) => {

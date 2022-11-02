@@ -87,7 +87,7 @@
             class="multiselect-input"
             label="login"
             track-by="login"
-            placeholder="Выберите проект"
+            placeholder="Выберите пользовтеля"
           >
           </multiselect>
         </div>
