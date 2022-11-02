@@ -85,7 +85,7 @@
         v-ripple.400="'rgba(255, 255, 255, 0.15)'"
         variant="primary"
       >
-        <span v-if="!enter">Добавить обращение</span>
+        <span v-if="!enter">Добавить тэг</span>
         <span v-if="enter">Загрузка...</span>
         <b-spinner v-if="enter" small />
       </b-button>

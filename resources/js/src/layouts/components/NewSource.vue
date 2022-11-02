@@ -61,7 +61,7 @@
         v-ripple.400="'rgba(255, 255, 255, 0.15)'"
         variant="primary"
       >
-        <span v-if="!enter">Добавить интеграцию</span>
+        <span v-if="!enter">Добавить источник</span>
         <span v-if="enter">Загрузка...</span>
         <b-spinner v-if="enter" small />
       </b-button>
