@@ -11,11 +11,11 @@
       :rows="rowsProjects"
       :searchTerm="searchTerm"
       v-if="getProjects && user"
-      :role_id="user.role_id"
+      :role_id="user.role.id"
       @arraySearch="pushArraySearch"
     />
     <div
-      v-if="rowSelection.length && user.role_id === 1"
+      v-if="rowSelection.length && user.role.id === 1"
       class="d-flex justify-content-end"
     >
       <b-dropdown class="drop__down-delete" variant="primary" right no-caret>
@@ -84,13 +84,6 @@
             >Зеркало №{{ index + 1 }} {{ mirrow }} <br
           /></span>
         </span>
-        <!-- Column: users -->
-        <span
-          v-else-if="props.column.field === 'users'"
-          class="text-nowrap db__tc"
-        >
-          <span class="text-nowrap">{{ props.row.users }}</span>
-        </span>
         <span v-else-if="props.column.field === 'action'">
           <span class="db__tc">
             <b-dropdown
@@ -106,12 +99,12 @@
                 />
               </template>
               <b-dropdown-item
-                v-if="user.role_id === 1"
+                v-if="user.role.id === 1"
                 v-b-modal.modal__seeIntegration
               >
                 <span>Посмотреть</span>
               </b-dropdown-item>
-              <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
+              <b-dropdown-item v-if="user.role.id === 1" @click="deleteModal">
                 <span>Удалить</span>
               </b-dropdown-item>
             </b-dropdown>
@@ -182,6 +175,7 @@
               <div class="row__lables">
                 <div class="row__source-lables">
                   <label class="row__lables-label">Название</label>
+
                   <b-form-input
                     class="row__user-input"
                     v-model="data.name"
@@ -198,7 +192,7 @@
                     placeholder="Название"
                   />
                 </div>
-                <div class="form__group-options" v-if="data.mirrows.length">
+                <div class="form__group-options">
                   <div>
                     <label class="row__lables-label">Зеркала</label>
                     <b-form
@@ -219,7 +213,7 @@
                           <b-form-input
                             type="text"
                             placeholder="Значение"
-                            v-model="item.value"
+                            v-model="data.mirrows[index]"
                             class="row__user-input"
                           />
                         </b-form-group>
@@ -248,28 +242,19 @@
                     </b-form>
                   </div>
                 </div>
-                <div v-else>
-                  <label class="row__lables-label db__tc">Настроек нет </label>
-                  <!-- Добавить Button -->
-                  <b-button
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="primary"
-                    @click="repeateAgain"
-                    class="btn__plus-projects"
-                  >
-                    <feather-icon icon="PlusIcon" class="mr-25" />
-                    <span>Добавить ещё</span>
-                  </b-button>
-                </div>
+
                 <div class="row__date-lables">
                   <label class="row__lables-label">Пользователи</label>
-                  <v-select
+                  <multiselect
+                    onclick="this.querySelector('input').focus();"
+                    class="multiselect-input"
                     v-model="users"
-                    multiple
-                    label="title"
-                    :options="option_users"
-                    class="row__users-input"
-                  />
+                    :options="getUsers"
+                    :multiple="true"
+                    label="login"
+                    track-by="login"
+                  >
+                  </multiselect>
                 </div>
                 <div class="modal__form-buttons">
                   <b-button
@@ -306,8 +291,6 @@
 import { VueGoodTable } from "vue-good-table";
 import axios from "axios";
 import "vue-good-table/dist/vue-good-table.css";
-import vSelect from "vue-select";
-import "vue-select/dist/vue-select.css";
 import { Trash2Icon } from "vue-feather-icons";
 import {
   BForm,
@@ -333,6 +316,8 @@ import { Swiper, SwiperSlide } from "vue-awesome-swiper";
 import { MoreVerticalIcon } from "vue-feather-icons";
 import Ripple from "vue-ripple-directive";
 import "swiper/css/swiper.css";
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
 export default {
   components: {
     vSelect,
@@ -392,11 +377,6 @@ export default {
           field: "mirrows",
           thClass: "columnCenter",
         },
-        {
-          label: "Пользователи",
-          field: "users",
-          thClass: "columnCenter",
-        },
       ],
       swiperOptions: {
         navigation: {
@@ -424,9 +404,7 @@ export default {
   },
   methods: {
     repeateAgain() {
-      this.modalArray[this.modalCounter].mirrows.push({
-        value: "",
-      });
+      this.modalArray[this.modalCounter].mirrows.push("");
       this.trHeight += 250;
     },
     removeItem(index) {
@@ -465,12 +443,13 @@ export default {
         });
     },
     async getDataUser() {
+      await this.$store.dispatch("getDataUsers");
       await axios.get("/sanctum/csrf-cookie").then((response) => {
         axios
           .get("api/user")
           .then((response) => {
             this.user = response.data;
-            if (this.user.role_id === 1) {
+            if (this.user.role.id === 1) {
               const obj = {
                 label: "Действие",
                 field: "action",
@@ -511,6 +490,7 @@ export default {
     },
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
+        this.users = [];
         let temp = row;
         this.modalArray = [];
         let i = 0;
@@ -533,13 +513,18 @@ export default {
     },
     async saveModal() {
       try {
+        console.log(this.users);
+        let tempUserId = [];
+        this.users.filter((item) => {
+          tempUserId.push(item.id);
+        });
         await axios.put(
           "/api/projects/" + this.modalArray[this.modalCounter].id,
           {
             name: this.modalArray[this.modalCounter].name,
             mirrows: this.modalArray[this.modalCounter].mirrows,
             domain: this.modalArray[this.modalCounter].domain,
-            users: this.users,
+            users: tempUserId,
           }
         );
         this.$refs["modal__window"].hide();
@@ -643,6 +628,9 @@ export default {
     getProject() {
       return this.$store.getters.project;
     },
+    getUsers() {
+      return this.$store.getters.getUsers;
+    },
     sorted() {
       if (this.arraySearch.length) {
         return this.arraySearch;
@@ -652,12 +640,11 @@ export default {
     },
   },
   created() {
-    this.getDataUser();
     this.getTableProjects();
+    this.getDataUser();
   },
 };
 </script>
-
 <style scoped>
 .btn__plus-projects {
   display: block;
@@ -667,12 +654,31 @@ export default {
   float: right;
 }
 .repeater__form-project {
-  width: 600px;
+  width: 400px;
   display: block;
   margin: 0 auto;
 }
 .row__users-input {
   width: 300px;
   padding: 20px 0px;
+}
+.multiselect-input {
+  width: 416px;
+  height: 36px !important;
+  border-radius: 0.5rem;
+  border-width: 1px;
+  background-color: #fff;
+}
+.multiplay__tag {
+  background-color: #41b883;
+  max-width: 100%;
+  border-radius: 5px;
+  padding: 4px 26px 4px 10px;
+  width: 70px;
+  color: white;
+}
+.remove__item {
+  cursor: pointer;
+  text-align: center;
 }
 </style>

@@ -11,11 +11,11 @@
       :rows="rowsUsers"
       :searchTerm="searchTerm"
       v-if="getUsers && user"
-      :role_id="user.role_id"
+      :role_id="user.role.id"
       @arraySearch="pushArraySearch"
     />
     <div
-      v-if="rowSelection.length && user.role_id === 1"
+      v-if="rowSelection.length && user.role.id === 1"
       class="d-flex justify-content-end"
     >
       <b-dropdown class="drop__down-delete" variant="primary" right no-caret>
@@ -90,12 +90,12 @@
                 />
               </template>
               <b-dropdown-item
-                v-if="user.role_id === 1"
+                v-if="user.role.id === 1"
                 v-b-modal.modal__seeIntegration
               >
                 <span>Посмотреть</span>
               </b-dropdown-item>
-              <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
+              <b-dropdown-item v-if="user.role.id === 1" @click="deleteModal">
                 <span>Удалить</span>
               </b-dropdown-item>
             </b-dropdown>
@@ -350,22 +350,7 @@ export default {
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     async getTableUsers() {
-      await axios
-        .get("api/users")
-        .then((response) => {
-          this.rowsUsers = response.data.users;
-        })
-        .catch((error) => {
-          const vNodesMsg = [`${error.response.data.error}`];
-          this.$bvToast.toast([vNodesMsg], {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
-          });
-        });
+      await this.$store.dispatch("getDataUsers");
       await axios
         .get("api/roles")
         .then((response) => {
@@ -394,7 +379,7 @@ export default {
           .get("api/user")
           .then((response) => {
             this.user = response.data;
-            if (this.user.role_id === 1) {
+            if (this.user.role.id === 1) {
               const obj = {
                 label: "Действие",
                 field: "action",
@@ -438,7 +423,7 @@ export default {
         let temp = row;
         this.modalArray = [];
         let i = 0;
-        this.rowsUsers.filter((item) => {
+        this.$store.getters.getUsers.filter((item) => {
           if (temp.id === item.id) {
             i++;
           }
@@ -491,12 +476,12 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.rowsUsers.length) {
-            this.rowsUsers.filter((index, i) => {
+          if (this.$store.getters.getUsers.length) {
+            this.$store.getters.getUsers.filter((index, i) => {
               if (index.id === this.modalArray.id) {
                 axios
                   .delete("/api/users/" + this.modalArray.id)
-                  .then(() => this.rowsUsers.splice(i, 1))
+                  .then(() => this.$store.getters.getUsers.splice(i, 1))
                   .then(() => {
                     if (result.value) {
                       this.$swal({
@@ -543,12 +528,12 @@ export default {
       }
     },
     deleteSelected() {
-      if (this.rowsUsers.length) {
+      if (this.$store.getters.getUsers.length) {
         this.rowSelection.filter((item) => {
-          this.rowsUsers.map((index, i) => {
+          this.$store.getters.getUsers.map((index, i) => {
             if (item.id === index.id) {
               axios.delete("/api/users/" + item.id);
-              this.rowsUsers.splice(i, 1);
+              this.$store.getters.getUsers.splice(i, 1);
             }
           });
         });
@@ -556,14 +541,11 @@ export default {
     },
   },
   computed: {
-    getProject() {
-      return this.$store.getters.project;
-    },
     sorted() {
       if (this.arraySearch.length) {
         return this.arraySearch;
       } else {
-        return this.rowsUsers;
+        return this.$store.getters.getUsers;
       }
     },
   },

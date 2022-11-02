@@ -11,13 +11,14 @@
         </b-link>
       </li>
     </ul>
-
     <!-- Left Col -->
     <div
       class="bookmark-wrapper align-items-center flex-grow-1 d-none d-lg-flex"
     >
       <dark-Toggler class="d-none d-lg-block" />
+
       <b-button
+        v-if="user.role !== undefined && user.role.id === 1"
         v-ripple.400="'rgba(255, 255, 255, 0.15)'"
         variant="primary"
         to="Projects"
@@ -25,14 +26,18 @@
       >
         Проекты
       </b-button>
-      <b-nav>
+      <b-nav v-if="user.role !== undefined && user.role.id === 1">
         <b-nav-item to="Users" class="navbar__button">
           <user-icon
             size="1.75x"
             class="plus-icon align-middle mr-25"
           ></user-icon>
         </b-nav-item>
-        <b-nav-item to="Integration" class="navbar__button">
+        <b-nav-item
+          to="Integration"
+          class="navbar__button"
+          v-if="user.role !== undefined && user.role.id === 1"
+        >
           <TrendingUpIcon
             size="1.75x"
             class="plus-icon align-middle mr-25"
@@ -40,15 +45,21 @@
         </b-nav-item>
       </b-nav>
       <div v-if="get_projects">
-        <b-form-select
-          class="choose__project"
+        <multiselect
           v-model="choose_project"
           :options="get_projects"
+          selectLabel="Нажмите enter для выбора"
+          deselectLabel="Нажмите enter для удаления"
+          selectedLabel="Выбрано"
+          class="choose__project"
+          label="name"
+          track-by="name"
+          placeholder="Выберите проект"
           @change="selectProject"
         >
-        </b-form-select>
+        </multiselect>
       </div>
-      <div v-else>
+      <div v-if="!get_projects">
         <b-button variant="primary" disabled class="mr-1">
           <b-spinner small />
           Загрузка...
@@ -165,6 +176,7 @@ export default {
           .get("api/user")
           .then((response) => {
             this.user = response.data;
+            console.log(this.user);
             const token = response.config.headers["X-XSRF-TOKEN"];
             // const vNodesMsg = [`Вы успешно вошли как  ${response.data.login}`];
             // this.$bvToast.toast([vNodesMsg], {
@@ -213,7 +225,6 @@ export default {
     },
     async setProjects() {
       await this.$store.dispatch("SET_PROJECTS");
-      this.projects = this.$store.getters.projects;
     },
   },
 

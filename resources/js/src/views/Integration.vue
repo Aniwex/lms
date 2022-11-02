@@ -11,11 +11,11 @@
       :rows="rowsIntegration"
       :searchTerm="searchTerm"
       v-if="getInt && user"
-      :role_id="user.role_id"
+      :role_id="user.role.id"
       @arraySearch="pushArraySearch"
     />
     <div
-      v-if="rowSelection.length && user.role_id === 1"
+      v-if="rowSelection.length && user.role.id === 1"
       class="d-flex justify-content-end"
     >
       <b-dropdown class="drop__down-delete" variant="primary" right no-caret>
@@ -87,12 +87,12 @@
                 />
               </template>
               <b-dropdown-item
-                v-if="user.role_id === 1"
+                v-if="user.role.id === 1"
                 v-b-modal.modal__seeIntegration
               >
                 <span>Посмотреть</span>
               </b-dropdown-item>
-              <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
+              <b-dropdown-item v-if="user.role.id === 1" @click="deleteModal">
                 <span>Удалить</span>
               </b-dropdown-item>
             </b-dropdown>
@@ -451,7 +451,7 @@ export default {
           .get("api/user")
           .then((response) => {
             this.user = response.data;
-            if (this.user.role_id === 1) {
+            if (this.user.role.id === 1) {
               const obj = {
                 label: "Действие",
                 field: "action",
@@ -531,19 +531,20 @@ export default {
           })
           .then(() => {
             this.$refs["modal__window"].hide();
+          })
+          .catch((error) => {
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
           });
         await this.getIntegration();
-      } catch (error) {
-        const vNodesMsg = [`${error.response.data.error}`];
-        this.$bvToast.toast([vNodesMsg], {
-          title: `Ошибка`,
-          variant: "danger",
-          solid: true,
-          appendToast: true,
-          toaster: "b-toaster-top-center",
-          autoHideDelay: 3000,
-        });
-      }
+      } catch (error) {}
     },
     async deleteModal() {
       try {
@@ -653,7 +654,7 @@ export default {
   float: right;
 }
 .repeater__form {
-  width: 600px;
+  width: 400px;
   display: block;
   margin: 0 auto;
 }
