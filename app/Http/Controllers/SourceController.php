@@ -69,8 +69,6 @@ class SourceController extends Controller
      */
     public function show(Project $project, Source $source)
     {
-        if ($source->project_id != $project->id) abort(404);
-
         $source->load(['integration']);
 
         return Response::success()->data([
@@ -107,6 +105,9 @@ class SourceController extends Controller
      */
     public function destroy(Project $project, Source $source)
     {
+        if ($source->claims()->exists()) {
+            return Response::error(422)->message('Невозможно удалить источник, так как он закреплен за одним или несколькими обращениями (заявками).');
+        }
         $source->delete();
         return Response::success()->message('Источник обращения удален');
     }

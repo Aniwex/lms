@@ -6,6 +6,7 @@ use App\Models\Integration;
 use App\Models\Project;
 use App\Models\Source;
 use App\Models\User;
+use App\Policies\ClaimPolicy;
 use App\Policies\IntegrationPolicy;
 use App\Policies\ProjectPolicy;
 use App\Policies\SourcePolicy;
@@ -25,7 +26,8 @@ class AuthServiceProvider extends ServiceProvider
         Project::class => ProjectPolicy::class,
         Integration::class => IntegrationPolicy::class,
         Source::class => SourcePolicy::class,
-        Tag::class => TagPolicy::class
+        Tag::class => TagPolicy::class,
+        Claim::class => ClaimPolicy::class
     ];
 
     /**

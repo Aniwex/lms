@@ -104,6 +104,10 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        if ($project->claims()->exists()) {
+            return Response::error(422)->message('Невозможно удалить проект, так как он имеет одну или несколько заявок (обращений).');
+        }
+
         if ($project->sources()->exists()) {
             return Response::error(422)->message('Невозможно удалить проект, так как он закреплен за одним или несколькими источниками обращений');
         }
