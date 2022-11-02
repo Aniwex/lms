@@ -174,7 +174,7 @@
                   />
                 </div>
                 <div class="row__date-lables">
-                  <label class="row__lables-label">Роли</label>
+                  <label class="row__lables-label">Роль</label>
                   <b-form-select
                     style="display: block; text-align: center"
                     class="form__appeal-input"
@@ -371,9 +371,9 @@ export default {
         .then((response) => {
           this.options_roles = response.data.roles;
           this.options_roles.filter((item, i) => {
-            item["value"] = i + 1;
-            item["text"] = i + 1;
+            item["value"] = item["text"] = i + 1;
           });
+          this.options_roles.unshift({ value: null, text: "—" });
           this.getUsers = true;
         })
         .catch((error) => {

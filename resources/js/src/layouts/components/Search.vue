@@ -56,6 +56,15 @@
         >
           Добавить пользователя
         </b-button>
+        <b-button
+          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+          variant="primary"
+          to="NewProject"
+          v-b-tooltip.hover.top="'Добавить проект'"
+          v-if="this.$route.path === '/Projects'"
+        >
+          Добавить проект
+        </b-button>
       </div>
     </div>
   </div>

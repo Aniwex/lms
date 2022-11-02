@@ -23,13 +23,23 @@
           />
         </div>
         <div class="form__group">
-          <label class="form__label">Id роли </label>
-          <b-form-input
-            class="row__user-input"
-            v-model="role_id"
-            type="text"
-            placeholder="Id роли"
-            :state="role_id !== ''"
+          <label class="form__label">Роли </label>
+          <b-form-select
+            class="form__appeal-input"
+            v-model="role"
+            :options="options_roles"
+            :state="role !== null"
+          >
+          </b-form-select>
+        </div>
+        <div class="form__group">
+          <label class="form__label">Проекты </label>
+          <v-select
+            v-model="project"
+            multiple
+            label="title"
+            :options="option_project"
+            class="form__appeal-input"
           />
         </div>
       </div>
@@ -78,9 +88,13 @@ import {
 import flatPickr from "vue-flatpickr-component";
 import "@core/scss/vue/libs/vue-flatpicker.scss";
 import Ripple from "vue-ripple-directive";
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
+
 import axios from "axios";
 export default {
   components: {
+    vSelect,
     BSpinner,
     BFormInput,
     flatPickr,
@@ -98,21 +112,67 @@ export default {
     return {
       login: "",
       password: "",
-      role_id: "",
       enter: false,
       enterAndAdd: false,
+      options_roles: [],
+      role: null,
+      project: [],
+      option_project: [],
     };
   },
   methods: {
+    async getProjects() {
+      await axios
+        .get("api/projects")
+        .then((response) => {
+          this.option_project = response.data.projects;
+          this.option_project.filter((item) => {
+            item["title"] = item.name;
+          });
+        })
+        .catch((error) => {
+          const vNodesMsg = [`${error.response.data.error}`];
+          this.$bvToast.toast([vNodesMsg], {
+            title: `Ошибка`,
+            variant: "danger",
+            solid: true,
+            appendToast: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+          });
+        });
+    },
+    async getApiRoles() {
+      await axios
+        .get("api/roles")
+        .then((response) => {
+          this.options_roles = response.data.roles;
+          this.options_roles.filter((item, i) => {
+            item["value"] = item["text"] = i + 1;
+          });
+          this.options_roles.unshift({ value: null, text: "—" });
+        })
+        .catch((error) => {
+          const vNodesMsg = [`${error.response.data.error}`];
+          this.$bvToast.toast([vNodesMsg], {
+            title: `Ошибка`,
+            variant: "danger",
+            solid: true,
+            appendToast: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+          });
+        });
+    },
     async addUser() {
       try {
-        if (this.login && this.password && this.role_id) {
+        if (this.login && this.password && this.role) {
           this.enter = true;
           await axios
             .post("/api/users", {
               login: this.login,
               password: this.password,
-              role_id: this.role_id,
+              role_id: this.role,
             })
             .then(() => {
               this.$router.push("/Users");
@@ -143,13 +203,13 @@ export default {
     },
     async CreateAndAddUser() {
       try {
-        if (this.login && this.password && this.role_id) {
+        if (this.login && this.password && this.role) {
           this.enterAndAdd = true;
           await axios
             .post("/api/users", {
               login: this.login,
               password: this.password,
-              role_id: this.role_id,
+              role_id: this.role,
             })
             .catch((error) => {
               this.enter = false;
@@ -182,6 +242,8 @@ export default {
   },
   mounted() {
     this.$store.commit("SET_ENTERED", true);
+    this.getApiRoles();
+    this.getProjects();
   },
 };
 </script>
@@ -224,7 +286,6 @@ input {
   flex-direction: row;
   margin: 24px 32px 24px 32px;
 }
-
 .btn {
   margin-left: 12px;
 }
