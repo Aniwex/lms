@@ -35,6 +35,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Project withAnyTagsOfAnyType($tags)
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Source[] $sources Источники обращений, которые связаны с проектом
  * @property-read int|null $sources_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Claim[] $claims Заявки (обращения) в проекте.
+ * @property-read int|null $claims_count
  * @mixin \Eloquent
  */
 class Project extends Model
@@ -112,5 +114,13 @@ class Project extends Model
     public function sources()
     {
         return $this->hasMany(Source::class);
+    }
+
+    /**
+     * Заявки (обращения) в проекте.
+     */
+    public function claims()
+    {
+        return $this->hasMany(Claim::class);
     }
 }

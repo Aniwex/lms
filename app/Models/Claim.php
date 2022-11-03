@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Models\Traits\HasProject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Заявка (обращение).
@@ -26,7 +25,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $project_id ID проекта
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property-read \App\Models\Project $project Проект к которому относится заявка
  * @property-read \App\Models\Source $source Источник заявки
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Tag[] $tags Теги
@@ -35,7 +33,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|Claim byUser($value) получить заявки пользователя
  * @method static \Illuminate\Database\Eloquent\Builder|Claim newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Claim newQuery()
- * @method static \Illuminate\Database\Query\Builder|Claim onlyTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Claim query()
  * @method static \Illuminate\Database\Eloquent\Builder|Claim whereClientCheck($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Claim whereClientComment($value)
@@ -54,13 +51,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @method static \Illuminate\Database\Eloquent\Builder|Claim whereRedirectedTo($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Claim whereSourceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Claim whereUpdatedAt($value)
- * @method static \Illuminate\Database\Query\Builder|Claim withTrashed()
- * @method static \Illuminate\Database\Query\Builder|Claim withoutTrashed()
  * @mixin \Eloquent
  */
 class Claim extends Model
 {
-    use HasFactory, SoftDeletes, HasProject;
+    use HasFactory, HasProject;
 
     /**
      * @var array
@@ -84,6 +79,8 @@ class Claim extends Model
         // при создании нового объекта генерируем уникальный код
         static::creating(function ($object) {
             $object->code = $object->generateRandomCode();
+            if (!$object->manager_check) $object->manager_check = 'unidentified';
+            if (!$object->client_check) $object->client_check = 'unchecked';
         });
     }
 

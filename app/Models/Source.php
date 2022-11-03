@@ -32,7 +32,8 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|Source whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Source whereProjectId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Source whereUpdatedAt($value)
-
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Claim[] $claims Заявки, у которых указан данный источник.
+ * @property-read int|null $claims_count
  * @mixin \Eloquent
  */
 class Source extends Model
@@ -58,5 +59,13 @@ class Source extends Model
     public function integration() 
     {
         return $this->belongsTo(Integration::class);
+    }
+
+    /**
+     * Заявки, у которых указан данный источник.
+     */
+    public function claims()
+    {
+        return $this->hasMany(Claim::class);
     }
 }

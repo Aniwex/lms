@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read int|null $operator_minus_words_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TagWord[] $operatorPlusWords Плюс-слова оператора
  * @property-read int|null $operator_plus_words_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Claims[] $claims Заявки, за которыми закреплен данный тег.
  * @property-read \App\Models\Project $project Проект
  * @method static Builder|Tag byProject(?int $projectId = null)
  * @method static Builder|Tag newModelQuery()
@@ -60,8 +61,20 @@ class Tag extends Model
         self::deleting(function($model){
             // при удалении тега удаляем все его слова из базы данных
             TagWord::whereTagId($model->id)->delete();
+            // отвязываем теги от заявок
+            $model->claims()->detach();
         });
     }
+
+    /**
+     * Заявки, за которыми закреплен данный тег.
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function claims() 
+    {
+        return $this->belongsToMany(Claim::class);
+    }
+
     /**
      * Переопределяем метод сохранения объекта в базу данных.
      * Используем отдельную таблицу для хранения плюс-минус слов клиента и оператора.
