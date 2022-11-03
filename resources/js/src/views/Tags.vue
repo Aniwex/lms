@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center" v-if="!getTag || !user">
+    <div class="text-center" v-if="!getDataTags || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -10,7 +10,7 @@
     <search
       :rows="rowsTags"
       :searchTerm="searchTerm"
-      v-if="getTag && user"
+      v-if="getDataTags && user"
       :role_id="user.role.id"
       @arraySearch="pushArraySearch"
     />
@@ -39,7 +39,7 @@
     <vue-good-table
       :columns="columns"
       :rows="sorted"
-      v-if="getTag && user"
+      v-if="getDataTags && user"
       :search-options="{
         enabled: true,
       }"
@@ -424,7 +424,6 @@ export default {
           type: "progressbar",
         },
       },
-      getTag: false,
       arraySearch: "",
     };
   },
@@ -438,7 +437,7 @@ export default {
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     async getDataUser() {
-      if (!this.$store.getters.project) {
+      if (!this.getProject) {
         this.$router.push("/Home");
       } else {
         await axios.get("/sanctum/csrf-cookie").then((response) => {
@@ -446,8 +445,6 @@ export default {
             .get("api/user ")
             .then((response) => {
               this.user = response.data;
-              this.getProject;
-              this.getTags();
               if (this.user.role.id === 1) {
                 const obj = {
                   label: "Действие",
@@ -472,31 +469,6 @@ export default {
         });
       }
     },
-    async getTags() {
-      await axios
-        .get("api/projects/" + this.project.id + "/tags")
-        .then((response) => {
-          this.rowsTags = response.data.tags;
-          this.rowsTags.filter((item) => {
-            item.client_plus_words = item.client_plus_words.join("\n");
-            item.client_minus_words = item.client_minus_words.join("\n");
-            item.operator_plus_words = item.operator_plus_words.join("\n");
-            item.operator_minus_words = item.operator_minus_words.join("\n");
-          });
-          this.getTag = true;
-        })
-        .catch((error) => {
-          const vNodesMsg = [`${error.response.data.error}`];
-          this.$bvToast.toast([vNodesMsg], {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
-          });
-        });
-    },
     onCellClick(row) {
       if (row.column.label === "Действие") {
         this.ActionOnProject(row.event.path[0].innerText, row.row);
@@ -507,7 +479,7 @@ export default {
         let temp = row;
         this.modalArray = [];
         let i = 0;
-        this.rowsTags.filter((item) => {
+        this.getDataTags.filter((item) => {
           if (temp.id === item.id) {
             i++;
           }
@@ -548,7 +520,7 @@ export default {
         await axios
           .put(
             "api/projects/" +
-              this.project.id +
+              this.getProject.id +
               "/tags/" +
               this.modalArray[this.modalCounter].id,
             {
@@ -574,7 +546,6 @@ export default {
               autoHideDelay: 3000,
             });
           });
-        await this.getTags();
       } catch (error) {}
     },
     async deleteModal() {
@@ -592,18 +563,18 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.rowsTags.length) {
-            this.rowsTags.filter((index, i) => {
+          if (this.getDataTags.length) {
+            this.getDataTags.filter((index, i) => {
               if (index.id === this.modalArray.id) {
                 axios
                   .delete(
                     "api/projects/" +
-                      this.project.id +
+                      this.getProject.id +
                       "/tags/" +
                       this.modalArray.id
                   )
                   .then(() => {
-                    this.rowsTags.splice(i, 1);
+                    this.getDataTags.splice(i, 1);
                     if (result.value) {
                       this.$swal({
                         icon: "success",
@@ -650,12 +621,14 @@ export default {
       }
     },
     deleteSelected() {
-      if (this.rowsTags.length) {
+      if (this.getDataTags.length) {
         this.rowSelection.filter((item) => {
-          this.rowsTags.map((index, i) => {
+          this.getDataTags.map((index, i) => {
             if (item.id === index.id) {
               axios
-                .delete("api/projects/" + this.project.id + "/tags/" + item.id)
+                .delete(
+                  "api/projects/" + this.getProject.id + "/tags/" + item.id
+                )
                 .catch((error) => {
                   const vNodesMsg = [`${error.response.data.error}`];
                   this.$bvToast.toast([vNodesMsg], {
@@ -667,7 +640,7 @@ export default {
                     autoHideDelay: 3000,
                   });
                 });
-              this.rowsTags.splice(i, 1);
+              this.getDataTags.splice(i, 1);
             }
           });
         });
@@ -682,16 +655,19 @@ export default {
       if (this.arraySearch.length) {
         return this.arraySearch;
       } else {
-        return this.rowsTags;
+        return this.getDataTags;
       }
     },
+    getDataTags() {
+      return this.$store.getters.getTags;
+    },
     getProject() {
-      this.project = this.$store.getters.project;
       return this.$store.getters.project;
     },
   },
   created() {
     this.getDataUser();
+    this.getProject;
   },
 };
 </script>

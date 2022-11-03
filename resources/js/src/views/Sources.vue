@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center" v-if="!getSources || !user">
+    <div class="text-center" v-if="!getDataSources || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -10,7 +10,7 @@
     <search
       :rows="rowsSource"
       :searchTerm="searchTerm"
-      v-if="getSources && user"
+      v-if="getDataSources && user"
       :role_id="user.role.id"
       @arraySearch="pushArraySearch"
     />
@@ -39,7 +39,7 @@
     <vue-good-table
       :columns="columns"
       :rows="sorted"
-      v-if="getSources && user"
+      v-if="getDataSources && user"
       :search-options="{
         enabled: true,
       }"
@@ -356,57 +356,24 @@ export default {
       this.modalCounter--;
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
-    async getSource() {
-      await axios
-        .get(" api/projects/" + this.project.id + "/sources")
-        .then((response) => {
-          this.rowsSource = response.data.sources;
-          this.getSources = true;
-        })
-        .catch((error) => {
-          const vNodesMsg = [`${error.response.data.error}`];
-          this.$bvToast.toast([vNodesMsg], {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
-          });
-        });
-    },
     async getDataUser() {
       if (!this.$store.getters.project) {
         this.$router.push("/Home");
       } else {
         await axios.get("/sanctum/csrf-cookie").then((response) => {
-          axios
-            .get("api/user ")
-            .then((response) => {
-              this.user = response.data;
-              this.getProject;
-              this.getSource();
-              if (this.user.role.id === 1) {
-                const obj = {
-                  label: "Действие",
-                  field: "action",
-                  thClass: "columnCenter",
-                  width: "200px",
-                };
-                this.columns.push(obj);
-              }
-            })
-            .catch((error) => {
-              const vNodesMsg = [`${error.response.data.error}`];
-              this.$bvToast.toast([vNodesMsg], {
-                title: `Ошибка`,
-                variant: "danger",
-                solid: true,
-                appendToast: true,
-                toaster: "b-toaster-top-center",
-                autoHideDelay: 3000,
-              });
-            });
+          axios.get("api/user ").then((response) => {
+            this.user = response.data;
+            this.getProject;
+            if (this.user.role.id === 1) {
+              const obj = {
+                label: "Действие",
+                field: "action",
+                thClass: "columnCenter",
+                width: "200px",
+              };
+              this.columns.push(obj);
+            }
+          });
         });
       }
     },
@@ -420,7 +387,7 @@ export default {
         let temp = row;
         this.modalArray = [];
         let i = 0;
-        this.rowsSource.filter((item) => {
+        this.getDataSources.filter((item) => {
           if (temp.id === item.id) {
             i++;
           }
@@ -454,7 +421,6 @@ export default {
           .then(() => {
             this.$refs["modal__window"].hide();
           });
-        await this.getSource();
       } catch (error) {
         const vNodesMsg = [`${error.response.data.error}`];
         this.$bvToast.toast([vNodesMsg], {
@@ -482,8 +448,8 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.rowsSource.length) {
-            this.rowsSource.filter((index, i) => {
+          if (this.getDataSources.length) {
+            this.getDataSources.filter((index, i) => {
               if (index.id === this.modalArray.id) {
                 axios
                   .delete(
@@ -493,7 +459,7 @@ export default {
                       this.modalArray.id
                   )
                   .then(() => {
-                    this.rowsSource.splice(i, 1);
+                    this.getDataSources.splice(i, 1);
                     if (result.value) {
                       this.$swal({
                         icon: "success",
@@ -540,9 +506,9 @@ export default {
       }
     },
     deleteSelected() {
-      if (this.rowsSource.length) {
+      if (this.getDataSources.length) {
         this.rowSelection.filter((item) => {
-          this.rowsSource.map((index, i) => {
+          this.getDataSources.map((index, i) => {
             if (item.id === index.id) {
               axios
                 .delete(
@@ -559,7 +525,7 @@ export default {
                     autoHideDelay: 3000,
                   });
                 });
-              this.rowsSource.splice(i, 1);
+              this.getDataSources.splice(i, 1);
             }
           });
         });
@@ -571,8 +537,11 @@ export default {
       if (this.arraySearch.length) {
         return this.arraySearch;
       } else {
-        return this.rowsSource;
+        return this.getDataSources;
       }
+    },
+    getDataSources() {
+      return this.$store.getters.getSources;
     },
     getProject() {
       this.project = this.$store.getters.project;

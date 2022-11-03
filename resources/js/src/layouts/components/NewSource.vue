@@ -141,6 +141,7 @@ export default {
               data: this.dataSource,
             })
             .then(() => {
+              this.$store.dispatch("getSourceTable");
               this.enter = true;
               this.$router.push("/Sources");
             })
@@ -166,20 +167,22 @@ export default {
             autoHideDelay: 2000,
           });
         }
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     },
     async CreateAndAddSource() {
       try {
         if (this.name && this.code) {
           this.enterAndAdd = true;
-          await axios.post("api/projects/" + this.project.id + "/sources", {
-            integration_id: this.integration_id.id,
-            name: this.name,
-            code: this.code,
-            data: this.dataSource,
-          });
+          await axios
+            .post("api/projects/" + this.project.id + "/sources", {
+              integration_id: this.integration_id.id,
+              name: this.name,
+              code: this.code,
+              data: this.dataSource,
+            })
+            .then(() => {
+              this.$store.dispatch("getSourceTable");
+            });
           this.integration_id = [];
           this.name = "";
           this.code = "";

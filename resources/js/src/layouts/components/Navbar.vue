@@ -44,9 +44,9 @@
           ></TrendingUpIcon>
         </b-nav-item>
       </b-nav>
-      <div v-if="get_projects">
+      <div v-if="get_projects && get_choose_project">
         <multiselect
-          v-model="choose_project"
+          v-model="get_choose_project"
           :options="get_projects"
           selectedLabel="Выбрано"
           class="choose__project"
@@ -168,6 +168,9 @@ export default {
   methods: {
     async selectProject(project) {
       await this.$store.commit("SET_PROJECT", project);
+      await this.$store.dispatch("getDataTable");
+      await this.$store.dispatch("getSourceTable");
+      await this.$store.dispatch("getTagsTable");
     },
     async get_user() {
       await this.$store.dispatch("SET_USER");
@@ -196,6 +199,9 @@ export default {
     get_projects() {
       this.user = this.$store.getters.getUser;
       return this.$store.getters.getUser.projects;
+    },
+    get_choose_project() {
+      return this.$store.getters.project;
     },
     isLoggedIn() {
       return this.$store.getters.isLoggedIn;

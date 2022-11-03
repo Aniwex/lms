@@ -6,7 +6,7 @@
           <label class="form__apeal-label">Дата и время</label>
           <flat-pickr
             placeholder="Выберите дату и время"
-            v-model="dateAppeal"
+            v-model="datetime"
             class="form__apeal-control row__date-pickr"
             :config="{
               enableTime: true,
@@ -14,8 +14,8 @@
               enableSeconds: true,
             }"
             :class="{
-              nonActiveDatePicr: !dateAppeal,
-              activeDatePicr: dateAppeal,
+              nonActiveDatePicr: !datetime,
+              activeDatePicr: datetime,
             }"
           />
         </div>
@@ -24,14 +24,12 @@
           <div>
             <b-form-spinbutton
               class="form__spinbutton"
-              v-model="selected.rangeAppeal"
+              v-model="selected.duration"
               min="0"
               max="1000"
               step="10"
-              @input="inputSpinButton"
               :state="
-                selected.rangeAppeal === '0 секунд' ||
-                selected.rangeAppeal === 0
+                selected.duration === '0 секунд' || selected.duration === 0
                   ? false
                   : true
               "
@@ -44,9 +42,9 @@
           <div>
             <b-form-select
               class="form__appeal-input"
-              v-model="selected.source"
-              :options="options_source"
-              :state="selected.source === null ? false : true"
+              v-model="selected.source_id"
+              :options="options_source_id"
+              :state="selected.source_id === null ? false : true"
             >
             </b-form-select>
             <!-- <b-form-checkbox
@@ -64,20 +62,26 @@
             class="form__appeal-input"
             type="text"
             placeholder="+7 (999) 999-99-99"
-            v-model="form.phone"
+            v-model="phone"
             v-mask="'+7 (###) ###-##-##'"
-            :state="form.phone === '' || form.phone === null ? false : true"
+            :state="phone === '' || phone === null ? false : true"
           />
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Тэги </label>
-          <b-form-select
-            class="form__appeal-input"
-            v-model="selected.tag"
-            :options="options_tag"
-            :state="selected.tag === null ? false : true"
+          <multiselect
+            v-model="selected.tags"
+            :options="options_tags"
+            selectLabel="Нажмите enter для выбора"
+            deselectLabel="Нажмите enter для удаления"
+            selectedLabel="Выбрано"
+            :multiple="true"
+            class="multiselect-input"
+            label="value"
+            track-by="value"
+            placeholder="Выберите тэг"
           >
-          </b-form-select>
+          </multiselect>
         </div>
       </div>
     </div>
@@ -86,14 +90,18 @@
       <div class="container__appeal">
         <div class="form__appeal-group">
           <label class="form__apeal-label">Признак целевого</label>
-          <b-form-select
-            style="display: block; text-align: center"
-            class="form__appeal-input"
-            v-model="selected.manager"
-            :options="options_manager"
-            :state="selected.manager === null ? false : true"
+          <multiselect
+            v-model="selected.manager_check"
+            :options="options_manager_check"
+            selectLabel="Нажмите enter для выбора"
+            deselectLabel="Нажмите enter для удаления"
+            selectedLabel="Выбрано"
+            class="multiselect-input"
+            label="value"
+            track-by="value"
+            placeholder="Выберите целевое"
           >
-          </b-form-select>
+          </multiselect>
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Комментарий</label>
@@ -102,7 +110,7 @@
             placeholder="Комментарий"
             rows="5"
             no-resize
-            v-model="selected.commentManager"
+            v-model="selected.manager_comment"
           />
         </div>
       </div>
@@ -112,14 +120,18 @@
       <div class="container__appeal">
         <div class="form__appeal-group">
           <label class="form__apeal-label">Признак целевого</label>
-          <b-form-select
-            style="display: block; text-align: center"
-            class="form__appeal-input"
-            v-model="selected.client"
-            :options="options_client"
-            :state="selected.client === null ? false : true"
+          <multiselect
+            v-model="selected.client_check"
+            :options="options_client_check"
+            selectLabel="Нажмите enter для выбора"
+            deselectLabel="Нажмите enter для удаления"
+            selectedLabel="Выбрано"
+            class="multiselect-input"
+            label="value"
+            track-by="value"
+            placeholder="Выберите целевое"
           >
-          </b-form-select>
+          </multiselect>
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Комментарий</label>
@@ -128,7 +140,7 @@
             placeholder="Комментарий"
             rows="5"
             no-resize
-            v-model="selected.commentClient"
+            v-model="selected.client_comment"
           />
         </div>
       </div>
@@ -193,82 +205,95 @@ export default {
   },
   data() {
     return {
-      dateAppeal: null,
+      datetime: "",
       value_spinbutton: "",
       selected: {
-        tag: null,
-        rangeAppeal: 0,
-        source: null,
-        manager: null,
-        client: null,
+        tags: null,
+        duration: 0,
+        source_id: null,
+        manager_check: null,
+        client_check: null,
         redirected: "",
-        commentManager: "",
-        commentClient: "",
+        manager_comment: "",
+        client_comment: "",
       },
+      temp_manager_comment: [],
+      temp_client_comment: [],
       enter: false,
       flatpicr: false,
-      options_tag: [
-        { value: null, text: "—" },
-        { value: "балкон", text: "балкон" },
-        { value: "окна", text: "окна" },
-      ],
-      options_source: [
+      options_tags: [{ value: "балкон" }, { value: "окна" }],
+      options_source_id: [
         {
           value: null,
           text: "—",
         },
         {
-          value: "Задарма: Adwords на nw61.ru + Я.Объявления",
-          text: "Задарма: Adwords на nw61.ru + Я.Объявления",
+          value: 1,
+          text: 1,
         },
-        { value: "Задарма: Оконский Директ", text: "Задарма: Оконский Директ" },
+        { value: 2, text: 2 },
       ],
-      options_manager: [
-        { value: null, text: "—" },
-        { value: "целевой", text: "целевой" },
-        { value: "не целевой", text: "не целевой" },
-        { value: "не установленный", text: "не установленный" },
+      options_manager_check: [
+        { value: "целевой" },
+        { value: "не целевой" },
+        { value: "не установленный" },
       ],
-      options_client: [
-        { value: null, text: "—" },
-        { value: "целевой", text: "целевой" },
-        { value: "не целевой", text: "не целевой" },
-        { value: "не проверенный", text: "не проверенный" },
+      options_client_check: [
+        { value: "целевой" },
+        { value: "не целевой" },
+        { value: "не проверенный" },
       ],
       selectedCheckBox: false,
-      form: {
-        phone: null,
-      },
+      phone: null,
       dateNtim: null,
     };
   },
   methods: {
     async addAppeal() {
+      // this.temp_manager_comment.push(
+      //   this.selected.manager_comment.split(/(?=\/)|\s/)
+      // );
+      // this.temp_client_comment.push(
+      //   this.selected.client_comment.split(/(?=\/)|\s/)
+      // );
+      console.log("duration = " + this.selected.duration);
+      console.log("datetime = " + this.datetime);
+      console.log("source_id = " + this.selected.source_id);
+      console.log("phone = " + this.phone);
+      console.log("manager_check = " + this.selected.manager_check);
+      console.log("client_check = " + this.selected.client_check);
+      console.log("manager_comment = " + this.selected.manager_comment);
+      console.log("client_comment = " + this.selected.client_comment);
+      console.log("tags = " + this.selected.tags);
       try {
         if (
-          this.dateAppeal &&
-          this.selected.rangeAppeal &&
-          this.selected.source &&
-          this.form.phone &&
-          this.selected.tag &&
-          this.selected.client &&
-          this.selected.manager &&
-          this.form.phone.length === 18
+          this.datetime &&
+          this.selected.duration &&
+          this.selected.source_id &&
+          this.phone &&
+          this.selected.tags &&
+          this.selected.client_check &&
+          this.selected.manager_check &&
+          this.phone.length === 18
         ) {
-          this.enter = true;
-          await axios.post("/api/data", {
-            id: Date.now(),
-            date: this.dateAppeal,
-            call: this.selected.rangeAppeal,
-            source: this.selected.source,
-            user: this.form.phone,
-            tag: this.selected.tag,
-            client: this.selected.client,
-            manager: this.selected.manager,
-            commentManager: this.selected.commentManager,
-            commentClient: this.selected.commentClient,
-          });
-          this.$router.push("/Home");
+          await axios
+            .post("api/projects/" + this.getProject.id + "/claims", {
+              datetime: this.datetime,
+              duration: this.selected.duration,
+              source_id: this.selected.source_id,
+              phone: this.phone,
+              tags: this.selected.tags,
+              client_check: this.selected.client_check,
+              manager_check: this.selected.manager_check,
+              manager_comment: this.selected.manager_comment,
+              client_comment: this.selected.client_comment,
+              redirected_to: "",
+              data: [],
+            })
+            .then(() => {
+              this.enter = true;
+              this.$router.push("/Home");
+            });
         } else {
           this.$bvToast.toast("Пожалуйтса заполните все поля", {
             title: `Ошибка`,
@@ -279,41 +304,50 @@ export default {
             autoHideDelay: 2000,
           });
         }
-      } catch (error) {}
+      } catch (error) {
+        const vNodesMsg = [`${error.response.data.error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
+      }
     },
     async CreateAndAddAppeal() {
       try {
         if (
-          this.dateAppeal &&
-          this.selected.rangeAppeal &&
-          this.selected.source &&
-          this.form.phone &&
-          this.selected.tag &&
-          this.selected.client &&
-          this.selected.manager &&
-          this.form.phone.length === 18
+          this.datetime &&
+          this.selected.duration &&
+          this.selected.source_id &&
+          this.phone &&
+          this.selected.tags &&
+          this.selected.client_check &&
+          this.selected.manager_check &&
+          this.phone.length === 18
         ) {
-          await axios.post("/api/data", {
-            id: Date.now(),
-            date: this.dateAppeal,
-            call: this.selected.rangeAppeal,
-            source: this.selected.source,
-            user: this.form.phone,
-            tag: this.selected.tag,
-            client: this.selected.client,
-            manager: this.selected.manager,
-            commentManager: this.selected.commentManager,
-            commentClient: this.selected.commentClient,
+          await axios.post(" api/projects/{project}/claims", {
+            datetime: this.datetime,
+            duration: this.selected.duration,
+            source_id: this.selected.source_id,
+            phone: this.phone,
+            tags: this.selected.tags,
+            client_check: this.selected.client_check,
+            manager_check: this.selected.manager_check,
+            manager_comment: this.selected.manager_comment,
+            client_comment: this.selected.client_comment,
           });
-          this.dateAppeal = null;
-          this.selected.rangeAppeal = 0;
-          this.selected.source = null;
-          this.form.phone = null;
-          this.selected.tag = null;
-          this.selected.manager = null;
-          this.selected.client = null;
-          this.selected.commentManager = null;
-          this.selected.commentClient = null;
+          this.datetime = null;
+          this.selected.duration = 0;
+          this.selected.source_id = null;
+          this.phone = null;
+          this.selected.tags = null;
+          this.selected.manager_check = null;
+          this.selected.client_check = null;
+          this.selected.manager_comment = null;
+          this.selected.client_comment = null;
         } else {
           this.$bvToast.toast("Пожалуйтса заполните все поля", {
             title: `Ошибка`,
@@ -324,13 +358,31 @@ export default {
             autoHideDelay: 2000,
           });
         }
-      } catch (error) {}
+      } catch (error) {
+        const vNodesMsg = [`${error.response.data.error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
+      }
     },
-    inputSpinButton(call) {
-      this.selected.rangeAppeal = call + " секунд";
+    // inputSpinButton(duration) {
+    //   this.selected.duration = duration + " секунд";
+    // },
+  },
+  computed: {
+    getProject() {
+      return this.$store.getters.project;
     },
   },
   mounted() {
+    if (!this.$store.getters.project) {
+      this.$router.push("/Home");
+    }
     this.$store.commit("SET_ENTERED", true);
   },
 };
@@ -338,10 +390,10 @@ export default {
 
 <style scoped>
 .nonActiveDatePicr {
-  border:1px solid #ea5455;
+  border: 1px solid #ea5455;
 }
 .activeDatePicr {
-  border:1px solid #28c76f;
+  border: 1px solid #28c76f;
   background: #fff;
 }
 .text-manager {

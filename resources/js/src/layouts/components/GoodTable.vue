@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="text-center" v-if="!getDT || !user">
+  <div v-if="getProject !== ''">
+    <div class="text-center" v-if="!getDataTable || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -10,7 +10,7 @@
     <search
       @arraySearch="pushArraySearch"
       :rows="rows"
-      v-if="getDT && user"
+      v-if="getDataTable && user"
       :role_id="user.role.id"
     />
     <!-- filers -->
@@ -21,13 +21,13 @@
       :rowSelection="rowSelection"
       :rows="rows"
       :role_id="user.role.id"
-      :options_source="options_source"
-      v-if="getDT && user"
+      :options_source_id="options_source_id"
+      v-if="getDataTable && user"
     />
 
     <!-- table -->
     <vue-good-table
-      v-if="getDT"
+      v-if="getDataTable"
       :columns="columns"
       :rows="sorted"
       :search-options="{
@@ -51,24 +51,27 @@
     >
       <template slot="table-row" slot-scope="props">
         <!-- Column: Name -->
-        <!-- Column: Date -->
-        <span v-if="props.column.field === 'Date'" class="text-nowrap db__tc">
-          <span class="text-nowrap">{{ props.row.date }}</span>
-        </span>
-        <!-- Column: call -->
+        <!-- Column: datetime -->
         <span
-          v-else-if="props.column.field === 'call'"
+          v-if="props.column.field === 'datetime'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.call }}</span>
+          <span class="text-nowrap">{{ props.row.datetime }}</span>
         </span>
-        <!-- Column: source -->
-        <span v-else-if="props.column.field === 'source'">
-          <span>{{ props.row.source }}</span>
+        <!-- Column: duration -->
+        <span
+          v-else-if="props.column.field === 'duration'"
+          class="text-nowrap db__tc"
+        >
+          <span class="text-nowrap">{{ props.row.duration }}</span>
         </span>
-        <!-- Column: user -->
-        <span class="db__tc" v-else-if="props.column.field === 'user'">
-          <span class="text-nowrap">{{ props.row.user }}</span>
+        <!-- Column: source_id  -->
+        <span v-else-if="props.column.field === 'source_id '">
+          <span>{{ props.row.source_id }}</span>
+        </span>
+        <!-- Column: phone  -->
+        <span class="db__tc" v-else-if="props.column.field === 'phone '">
+          <span class="text-nowrap">{{ props.row.phone }}</span>
           <div v-for="(history, index) in historyArray" :key="index">
             <b-button
               v-if="history === props.row.id"
@@ -81,8 +84,8 @@
             </b-button>
           </div>
         </span>
-        <!-- Column: Managment -->
-        <span v-else-if="props.column.field === 'Managment'">
+        <!-- Column: manager_check -->
+        <span v-else-if="props.column.field === 'manager_check'">
           <div class="dropdown db__tc">
             <b-button
               v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -107,7 +110,7 @@
               v-if="user.role.id === 1"
             >
               <button
-                v-for="(m, index) in manager"
+                v-for="(m, index) in manager_check"
                 :key="index"
                 class="dropdown-item"
                 @click="changeIconManager(props.row.id, m)"
@@ -121,8 +124,8 @@
             </div>
           </div>
         </span>
-        <!-- Column: Client -->
-        <span v-else-if="props.column.field === 'Client'">
+        <!-- Column: client_check -->
+        <span v-else-if="props.column.field === 'client_check'">
           <div class="dropdown db__tc">
             <b-button
               v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -147,7 +150,7 @@
               v-if="user.role.id === 1"
             >
               <button
-                v-for="(c, index) in client"
+                v-for="(c, index) in client_check"
                 :key="index"
                 class="dropdown-item"
                 @click="changeIconClient(props.row.id, c)"
@@ -162,25 +165,25 @@
           </div>
         </span>
         <!-- Column: tags -->
-        <span v-else-if="props.column.field === 'tag'">
+        <span v-else-if="props.column.field === 'tags'">
           <b-badge pill variant="success" class="badge-glow db__tc">{{
-            props.row.tag
+            props.row.tags
           }}</b-badge>
         </span>
-        <!-- Column: commentManager -->
+        <!-- Column: manager_comment -->
         <span
           class="comment-manager"
           style="word-break: break-all"
-          v-else-if="props.column.field === 'commentManager'"
+          v-else-if="props.column.field === 'manager_comment'"
         >
-          <span>{{ props.row.commentManager }}</span>
+          <span>{{ props.row.manager_comment }}</span>
         </span>
-        <!-- Column: commentClient -->
+        <!-- Column: client_comment -->
         <span
           style="word-break: break-all"
-          v-else-if="props.column.field === 'commentClient'"
+          v-else-if="props.column.field === 'client_comment'"
         >
-          <span>{{ props.row.commentClient }}</span>
+          <span>{{ props.row.client_comment }}</span>
         </span>
         <!-- Column: Status -->
         <span v-else-if="props.column.field === 'status'">
@@ -204,7 +207,7 @@
                   class="text-body align-middle mr-25"
                 />
               </template>
-              <b-dropdown-item v-b-modal.modal__seeProject>
+              <b-dropdown-item>
                 <eye-icon size="1x" class="mr-50"></eye-icon>
                 <span>Посмотреть</span>
               </b-dropdown-item>
@@ -302,26 +305,26 @@
             <h3>Данные для редактирования</h3>
             <div class="container__see-project">
               <div class="row__lables">
-                <div v-if="user.role.id === 1" class="row__date-lables">
+                <div v-if="user.role.id === 1" class="row__datetime-lables">
                   <label class="row__lables-label">Дата и время</label>
                   <flat-pickr
                     placeholder="Выберите дату и время"
-                    v-model="data.date"
-                    class="form-control row__date-pickr"
+                    v-model="data.datetime"
+                    class="form-control row__datetime-pickr"
                     :config="{
                       enableTime: true,
-                      dateFormat: 'd.m.Y H:i:s',
+                      datetimeFormat: 'd.m.Y H:i:s',
                       enableSeconds: true,
                     }"
                   />
                 </div>
-                <div v-if="user.role.id === 1" class="row__call-lables">
+                <div v-if="user.role.id === 1" class="row__duration-lables">
                   <label class="row__lables-label"
                     >Продолжительность звонка</label
                   >
                   <div class="modal__input">
                     <b-button
-                      @click="quantity_minus(data.call)"
+                      @click="quantity_minus(data.duration)"
                       type="button"
                       size="sm"
                       v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -334,7 +337,7 @@
                     </b-button>
                     <b-form-input
                       class="input__number form-control"
-                      v-model="data.call"
+                      v-model="data.duration"
                       readonly="readonly"
                     />
                     <b-button
@@ -342,7 +345,7 @@
                       variant="primary"
                       type="button"
                       size="sm"
-                      @click="quantity_plus(data.call)"
+                      @click="quantity_plus(data.duration)"
                     >
                       <plus-icon
                         size="1x"
@@ -351,12 +354,12 @@
                     </b-button>
                   </div>
                 </div>
-                <div v-if="user.role.id === 1" class="row__source-lables">
+                <div v-if="user.role.id === 1" class="row__source -lables">
                   <label class="row__lables-label">Источник</label>
                   <b-form-select
                     class="form__select"
-                    v-model="data.source"
-                    :options="options_source"
+                    v-model="data.source_id"
+                    :options="options_source_id"
                   >
                   </b-form-select>
                 </div>
@@ -366,7 +369,7 @@
                     class="row__user-input"
                     type="text"
                     placeholder="+7 (999) 999-99-99"
-                    v-model="data.user"
+                    v-model="data.phone"
                     v-mask="'+7 (###) ###-##-##'"
                     maxlength="18"
                   />
@@ -378,7 +381,7 @@
                   <label class="row__lables-label">Тэги</label>
                   <b-form-select
                     class="form__select"
-                    v-model="data.tag"
+                    v-model="data.tags"
                     :options="options_tags"
                   >
                   </b-form-select>
@@ -390,7 +393,7 @@
                   <label class="row__lables-label">Проверка менеджера</label>
                   <b-form-select
                     class="form__select"
-                    v-model="data.manager"
+                    v-model="data.manager_check"
                     :options="options_manager"
                   >
                   </b-form-select>
@@ -405,15 +408,15 @@
                     placeholder="Комментарий менеджера"
                     rows="5"
                     no-resize
-                    v-model="data.commentManager"
-                    :value="data.commentManager"
+                    v-model="data.manager_comment"
+                    :value="data.manager_comment"
                   />
                 </div>
                 <div v-if="user.role.id === 1" class="row__tag-lables">
                   <label class="row__lables-label">Проверка клиента</label>
                   <b-form-select
                     class="form__select"
-                    v-model="data.client"
+                    v-model="data.client_check"
                     :options="options_client"
                   >
                   </b-form-select>
@@ -425,8 +428,8 @@
                     placeholder="Комментарий клиента"
                     rows="5"
                     no-resize
-                    v-model="data.commentClient"
-                    :value="data.commentClient"
+                    v-model="data.client_comment"
+                    :value="data.client_comment"
                   />
                 </div>
                 <div class="modal__form-buttons">
@@ -474,6 +477,22 @@
         <div slot="pagination" class="swiper-pagination" />
       </swiper>
     </b-modal>
+  </div>
+  <div v-else>
+    <h3>Список доступных проектов</h3>
+    <multiselect
+      v-model="project"
+      :options="option_project"
+      selectLabel="Нажмите enter для выбора"
+      deselectLabel="Нажмите enter для удаления"
+      selectedLabel="Выбрано"
+      class="multiselect-input"
+      label="name"
+      track-by="name"
+      placeholder="Выберите проект"
+      @select="selectProject"
+    >
+    </multiselect>
   </div>
 </template>
 
@@ -561,14 +580,14 @@ export default {
       perfectScrollbarSettings: {
         maxScrollbarLength: 150,
       },
-      manager: [
+      manager_check: [
         { value: "целевой", icon: "CheckIcon" },
         { value: "не целевой", icon: "XCircleIcon" },
         { value: "не установленный", icon: "XSquareIcon" },
       ],
       managerObject: {},
       clientObject: {},
-      client: [
+      client_check: [
         { value: "целевой", icon: "CheckIcon" },
         { value: "не целевой", icon: "XCircleIcon" },
         { value: "не проверенный", icon: "XSquareIcon" },
@@ -578,55 +597,55 @@ export default {
       columns: [
         {
           label: "Дата и время",
-          field: "Date",
+          field: "datetime",
           width: "100px",
           thClass: "columnCenter",
         },
         {
           label: "Продол. звонка",
-          field: "call",
-          width: "80px",
+          field: "duration",
+          width: "120px",
           thClass: "columnCenter",
         },
         {
           label: "Источник",
-          field: "source",
-          width: "230px",
+          field: "source_id ",
+          width: "200px",
           thClass: "columnCenter",
         },
         {
           label: "Пользователь",
-          field: "user",
+          field: "phone",
           thClass: "columnCenter",
           width: "180px",
         },
         {
           label: "Менеджер",
-          field: "Managment",
+          field: "manager_check",
           width: "130px",
           thClass: "columnCenter",
         },
         {
           label: "Клиент",
-          field: "Client",
+          field: "client_check",
           width: "130px",
           thClass: "columnCenter",
           // tdClass: 'text-center', пользовательский класс для ячеек таблицы
         },
         {
           label: "Тэги обращения",
-          field: "tag",
+          field: "tags",
           width: "130px",
           thClass: "columnCenter",
         },
         {
           label: "Комментарий менеджера",
-          field: "commentManager",
+          field: "manager_comment",
           thClass: "columnCenter",
         },
         {
           label: "Комментарий клиента",
-          field: "commentClient",
+          field: "client_comment",
           thClass: "columnCenter",
         },
         {
@@ -642,7 +661,7 @@ export default {
         { value: "балкон", text: "балкон" },
         { value: "окна", text: "окна" },
       ],
-      options_source: [
+      options_source_id: [
         {
           value: null,
           text: "—",
@@ -666,7 +685,7 @@ export default {
         { value: "не проверенный", text: "не проверенный" },
       ],
       rows: [],
-      user: "",
+      phone: "",
       searchTerm: "",
       sortedFilter: [],
       arr: [],
@@ -691,27 +710,40 @@ export default {
       },
       checkboxUser: [],
       arrayChat: [],
-      getDT: false,
-      project: "",
+      project: [],
+      option_project: [],
+      user: "",
     };
   },
   methods: {
-    quantity_minus(call) {
-      let temp = call.toString().replace(/[^0-9]/g, "");
-      call = Number(temp);
-      if (call >= 10) {
-        call -= 10;
-        this.modalArray[this.modalCounter].call = "";
-        this.modalArray[this.modalCounter].call += call + " секунд";
+    async selectProject(project) {
+      await this.$store.commit("SET_PROJECT", project);
+      await this.$store.dispatch("getDataTable");
+      await this.$store.dispatch("getSourceTable");
+      await this.$store.dispatch("getTagsTable");
+    },
+    showProjectModal() {
+      this.$refs["project__modal"].show();
+    },
+    async saveProjectModal() {
+      await this.$store.commit("SET_PROJECT", this.project);
+    },
+    quantity_minus(duration) {
+      let temp = duration.toString().replace(/[^0-9]/g, "");
+      duration = Number(temp);
+      if (duration >= 10) {
+        duration -= 10;
+        this.modalArray[this.modalCounter].duration = "";
+        this.modalArray[this.modalCounter].duration += duration + " секунд";
       }
     },
-    quantity_plus(call) {
-      call = call.toString().replace(/[^0-9]/g, "");
-      call = Number(call);
-      call += 10;
+    quantity_plus(duration) {
+      duration = duration.toString().replace(/[^0-9]/g, "");
+      duration = Number(duration);
+      duration += 10;
 
-      this.modalArray[this.modalCounter].call = "";
-      this.modalArray[this.modalCounter].call += call + " секунд";
+      this.modalArray[this.modalCounter].duration = "";
+      this.modalArray[this.modalCounter].duration += duration + " секунд";
     },
     changeSlideNext() {
       this.modalCounter++;
@@ -748,11 +780,11 @@ export default {
       this.selected = select;
     },
     resetFilters() {
-      this.selected.tag = null;
-      this.selected.source = null;
-      this.selected.date = null;
-      this.selected.manager = null;
-      this.selected.client = null;
+      this.selected.tags = null;
+      this.selected.source_id = null;
+      this.selected.datetime = null;
+      this.selected.manager_check = null;
+      this.selected.client_check = null;
       this.selected.deleted = null;
       this.selected.value_range = 0;
       this.phone = "";
@@ -764,6 +796,7 @@ export default {
           .get("api/user ")
           .then((response) => {
             this.user = response.data;
+            this.option_project = this.user.projects;
           })
           .catch((error) => {
             if (error.response.status === 401) {
@@ -789,48 +822,6 @@ export default {
           });
       });
     },
-    async getDataTable() {
-      try {
-        axios
-          .get("/api/data")
-          .then((response) => {
-            this.rows = response.data;
-            this.getDT = true;
-            this.rows.forEach((row) => {
-              const activeManager =
-                this.manager.find((m) => m.value == row.manager) || null;
-              this.$set(this.managerObject, row.id, activeManager);
-              const activeClient =
-                this.client.find((c) => c.value == row.client) || null;
-              this.$set(this.clientObject, row.id, activeClient);
-            });
-            this.historyArray = [];
-            this.rows.filter((row, index, k) => {
-              k = 0;
-              for (let i = 0; i < index; i++) {
-                if (row.user === this.rows[i].user) {
-                  k++;
-                  if (k < 2) {
-                    this.historyArray.push(this.rows[i].id);
-                  }
-                }
-              }
-            });
-            this.historyArray = [...new Set(this.historyArray)];
-          })
-          .catch((error) => {
-            const vNodesMsg = [`${error.response.data.error}`];
-            this.$bvToast.toast([vNodesMsg], {
-              title: `Ошибка`,
-              variant: "danger",
-              solid: true,
-              appendToast: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 3000,
-            });
-          });
-      } catch (error) {}
-    },
     selectionChanged(params) {
       this.rowSelection = params.selectedRows;
       if (this.rowSelection.length) {
@@ -840,10 +831,10 @@ export default {
       }
     },
     historyUser(row) {
-      this.searchTerm = row.user;
+      this.searchTerm = row.phone;
       this.arraySearch = [];
-      this.rows.filter((item) => {
-        if (item.user === this.searchTerm) {
+      this.getDataTable.filter((item) => {
+        if (item.phone === this.searchTerm) {
           this.arraySearch.push(item);
         }
       });
@@ -858,7 +849,7 @@ export default {
         let temp = row;
         this.modalArray = [];
         let i = 0;
-        this.rows.filter((item) => {
+        this.getDataTable.filter((item) => {
           if (temp.id === item.id) {
             i++;
           }
@@ -887,13 +878,13 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.rows.length) {
-            this.rows.filter((index, i) => {
+          if (this.getDataTable.length) {
+            this.getDataTable.filter((index, i) => {
               if (index.id === this.modalArray.id) {
                 axios
                   .delete("/api/data/" + this.modalArray.id)
                   .then(() => {
-                    this.rows.splice(i, 1);
+                    this.getDataTable.splice(i, 1);
                     if (result.value) {
                       this.$swal({
                         icon: "success",
@@ -934,20 +925,23 @@ export default {
     hideModal() {
       this.$refs["modal__window"].hide();
     },
+    hideProjectModal() {
+      this.$refs["project__modal"].hide();
+    },
     async saveModal() {
       try {
         await axios
           .put("/api/data/" + this.modalArray[this.modalCounter].id, {
             id: this.modalArray[this.modalCounter].id,
-            date: this.modalArray[this.modalCounter].date,
-            call: this.modalArray[this.modalCounter].call,
-            commentManager: this.modalArray[this.modalCounter].commentManager,
-            source: this.modalArray[this.modalCounter].source,
-            user: this.modalArray[this.modalCounter].user,
-            tag: this.modalArray[this.modalCounter].tag,
-            commentClient: this.modalArray[this.modalCounter].commentClient,
-            manager: this.modalArray[this.modalCounter].manager,
-            client: this.modalArray[this.modalCounter].client,
+            datetime: this.modalArray[this.modalCounter].datetime,
+            duration: this.modalArray[this.modalCounter].duration,
+            manager_comment: this.modalArray[this.modalCounter].manager_comment,
+            source_id: this.modalArray[this.modalCounter].source_id,
+            phone: this.modalArray[this.modalCounter].phone,
+            tags: this.modalArray[this.modalCounter].tags,
+            client_comment: this.modalArray[this.modalCounter].client_comment,
+            manager_check: this.modalArray[this.modalCounter].manager_check,
+            client_check: this.modalArray[this.modalCounter].client_check,
             dialog: this.modalArray[this.modalCounter].dialog,
           })
           .then(() => {
@@ -969,24 +963,26 @@ export default {
       } catch (error) {}
     },
     async changeIconManager(id, manager) {
-      this.rows.map((row) => {
+      this.getDataTable.map((row) => {
         if (row.id === id) {
-          row.manager = manager.value;
+          row.manager_check = manager_check.value;
           axios
             .put("/api/data/" + id, {
               id: id,
-              date: row.date,
-              call: row.call,
-              commentManager: row.commentManager,
-              source: row.source,
-              user: row.user,
-              tag: row.tag,
-              commentClient: row.commentClient,
-              manager: manager.value,
-              client: row.client,
+              datetime: row.datetime,
+              duration: row.duration,
+              manager_comment: row.manager_comment,
+              source_id: row.source_id,
+              phone: row.phone,
+              tags: row.tags,
+              client_comment: row.client_comment,
+              manager_check: manager_check.value,
+              client_check: row.client_check,
             })
             .then(() => {
-              this.$set(this.managerObject, id, manager);
+              let manager_object = {};
+              this.$set(manager_object, id, manager_check);
+              this.$store.commit("SET_MANAGER_OBJECT", manager_object);
             })
             .catch((error) => {
               const vNodesMsg = [`${error.response.data.error}`];
@@ -1003,24 +999,26 @@ export default {
       });
     },
     changeIconClient(id, client) {
-      this.rows.map((row) => {
+      this.getDataTable.map((row) => {
         if (row.id === id) {
-          row.client = client.value;
+          row.client_check = client_check.value;
           axios
             .put("/api/data/" + id, {
               id: id,
-              date: row.date,
-              call: row.call,
-              commentManager: row.commentManager,
-              source: row.source,
-              user: row.user,
-              tag: row.tag,
-              commentClient: row.commentClient,
-              manager: row.manager,
-              client: client.value,
+              datetime: row.datetime,
+              duration: row.duration,
+              manager_comment: row.manager_comment,
+              source_id: row.source_id,
+              phone: row.phone,
+              tags: row.tags,
+              client_comment: row.client_comment,
+              manager_check: row.manager_check,
+              client_check: client_check.value,
             })
             .then(() => {
-              this.$set(this.clientObject, id, client);
+              let client_object = {};
+              this.$set(client_object, id, client_check);
+              this.$store.commit("SET_CLIENT_OBJECT", client_object);
             })
             .catch((error) => {
               const vNodesMsg = [`${error.response.data.error}`];
@@ -1040,11 +1038,11 @@ export default {
     //   try {
     //     let j = 0;
     //     this.modalPrevCounter = 0;
-    //     for (let i in this.rows) {
-    //       if (this.rows[i].id === this.modalArrayNext[0].id) {
+    //     for (let i in this.getDataTable) {
+    //       if (this.getDataTable[i].id === this.modalArrayNext[0].id) {
     //         this.modalCounter = i;
     //         this.modalArrayNext = [];
-    //         this.modalArrayNext.push(this.rows[j + 1]);
+    //         this.modalArrayNext.push(this.getDataTable[j + 1]);
     //         this.modalArray = this.modalArrayNext[0];
     //       } else {
     //         j++;
@@ -1057,19 +1055,22 @@ export default {
     // prevAppeal() {
     //   let j = this.modalCounter;
     //   this.modalPrevCounter = this.modalPrevCounter + 1;
-    //   for (let i in this.rows) {
-    //     if (this.rows[j - this.modalPrevCounter].id === undefined) {
+    //   for (let i in this.getDataTable) {
+    //     if (this.getDataTable[j - this.modalPrevCounter].id === undefined) {
     //     }
     //     this.modalArrayNext = [];
-    //     this.modalArrayNext.push(this.rows[j - this.modalPrevCounter]);
+    //     this.modalArrayNext.push(this.getDataTable[j - this.modalPrevCounter]);
     //     this.modalArray = this.modalArrayNext[0];
     //   }
     // },
-    inputSpinButton(call) {
-      this.modalArray[this.modalCounter].call = call + " секунд";
+    inputSpinButton(duration) {
+      this.modalArray[this.modalCounter].duration = duration + " секунд";
     },
   },
   computed: {
+    getDataTable() {
+      return this.$store.getters.getClaims;
+    },
     sorted() {
       if (this.arraySearch.length) {
         return this.arraySearch;
@@ -1091,12 +1092,14 @@ export default {
         });
         return filteredRows;
       } else {
-        return this.rows;
+        return this.getDataTable;
       }
+    },
+    getProject() {
+      return this.$store.getters.project;
     },
   },
   created() {
-    this.getDataTable();
     this.getDataUser();
   },
 };
@@ -1105,7 +1108,7 @@ export default {
 @import "~@core/scss/base/pages/app-chat.scss";
 @import "~@core/scss/base/pages/app-chat-list.scss";
 </style>
-// :dateFormatOptions="{
+// :datetimeFormatOptions="{
 //                   year: 'numeric',
 //                   month: 'numeric',
 //                   day: 'numeric',

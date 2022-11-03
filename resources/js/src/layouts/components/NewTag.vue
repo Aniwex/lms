@@ -172,6 +172,7 @@ export default {
               operator_minus_words: this.temp_operator_minus_words[0],
             })
             .then(() => {
+              this.$store.dispatch("getTagsTable");
               this.enter = true;
               this.$router.push("/Tags");
             });
@@ -212,14 +213,18 @@ export default {
       );
       try {
         if (this.name) {
-          await axios.post("api/projects/" + this.project.id + "/tags", {
-            name: this.name,
-            objective: this.objective,
-            client_plus_words: this.temp_client_plus_words[0],
-            client_minus_words: this.temp_client_minus_words[0],
-            operator_plus_words: this.temp_operator_plus_words[0],
-            operator_minus_words: this.temp_operator_minus_words[0],
-          });
+          await axios
+            .post("api/projects/" + this.project.id + "/tags", {
+              name: this.name,
+              objective: this.objective,
+              client_plus_words: this.temp_client_plus_words[0],
+              client_minus_words: this.temp_client_minus_words[0],
+              operator_plus_words: this.temp_operator_plus_words[0],
+              operator_minus_words: this.temp_operator_minus_words[0],
+            })
+            .then(() => {
+              this.$store.dispatch("getTagsTable");
+            });
           this.name = "";
           this.objective = false;
           this.client_plus_words = "";
@@ -252,6 +257,7 @@ export default {
       this.selected.rangeAppeal = call + " секунд";
     },
   },
+
   mounted() {
     if (!this.$store.getters.project) {
       this.$router.push("/Home");
