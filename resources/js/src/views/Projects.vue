@@ -151,7 +151,7 @@
         </div>
       </template>
     </vue-good-table>
-    <!-- modal see project -->
+    <!-- modal see integration -->
     <b-modal
       id="modal__seeIntegration"
       centered
@@ -160,6 +160,8 @@
       size="lg"
       ref="modal__window"
       hide-footer
+      no-close-on-esc
+      no-close-on-backdrop
     >
       <swiper
         class="swiper-navigations"

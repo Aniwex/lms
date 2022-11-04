@@ -9,7 +9,7 @@
     <!-- search input -->
     <search
       @arraySearch="pushArraySearch"
-      :rows="rows"
+      :rows="getDataTable"
       v-if="getDataTable && user"
       :role_id="user.role.id"
     />
@@ -19,8 +19,9 @@
       @arrayCheckboxUser="pushChangeCheckBox"
       @selected="pushSelected"
       :rowSelection="rowSelection"
-      :rows="rows"
+      :rows="getDataTable"
       :role_id="user.role.id"
+      :project="getProject"
       :options_source_id="options_source_id"
       v-if="getDataTable && user"
     />
@@ -85,7 +86,7 @@
           </div>
         </span>
         <!-- Column: manager_check -->
-        <span v-else-if="props.column.field === 'manager_check'">
+        <!-- <span v-else-if="props.column.field === 'manager_check'">
           <div class="dropdown db__tc">
             <b-button
               v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -123,9 +124,9 @@
               </button>
             </div>
           </div>
-        </span>
+        </span> -->
         <!-- Column: client_check -->
-        <span v-else-if="props.column.field === 'client_check'">
+        <!-- <span v-else-if="props.column.field === 'client_check'">
           <div class="dropdown db__tc">
             <b-button
               v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -163,7 +164,7 @@
               </button>
             </div>
           </div>
-        </span>
+        </span> -->
         <!-- Column: tags -->
         <span v-else-if="props.column.field === 'tags'">
           <b-badge pill variant="success" class="badge-glow db__tc">{{
@@ -207,7 +208,7 @@
                   class="text-body align-middle mr-25"
                 />
               </template>
-              <b-dropdown-item>
+              <b-dropdown-item v-b-modal.modal__seeProject>
                 <eye-icon size="1x" class="mr-50"></eye-icon>
                 <span>Посмотреть</span>
               </b-dropdown-item>
@@ -261,238 +262,54 @@
       </template>
     </vue-good-table>
     <!-- modal see project -->
-    <b-modal
+    <ModalSeeProject
       id="modal__seeProject"
-      centered
-      title="Просмотр обращения"
-      cancel-title="Отмена"
-      size="lg"
-      ref="modal__window"
-      hide-footer
-    >
-      <swiper
-        class="swiper-navigations"
-        :options="swiperOptions"
-        :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-        @slideNextTransitionStart="changeSlideNext"
-        @slidePrevTransitionStart="changeSlidePrev"
-      >
-        <swiper-slide v-for="(data, index) in modalArray" :key="index"
-          ><div class="see-project__form">
-            <h3 style="margin-top: 30px">Диалог</h3>
-            <div
-              class="dialog__none"
-              v-if="arrayChat === undefined || arrayChat.length === 0"
-            >
-              <p class="dialog__none-item">Диалог отсутствует</p>
-            </div>
-            <div class="container__dialog" v-else>
-              <div
-                v-for="(msgGrp, index) in arrayChat"
-                :key="index"
-                class="chat-content"
-              >
-                <p
-                  :class="{
-                    message_operator: msgGrp.value === 'operator',
-                    message_subscriber: msgGrp.value === 'subscriber',
-                  }"
-                >
-                  {{ msgGrp.message }}
-                </p>
-              </div>
-            </div>
-            <h3>Данные для редактирования</h3>
-            <div class="container__see-project">
-              <div class="row__lables">
-                <div v-if="user.role.id === 1" class="row__datetime-lables">
-                  <label class="row__lables-label">Дата и время</label>
-                  <flat-pickr
-                    placeholder="Выберите дату и время"
-                    v-model="data.datetime"
-                    class="form-control row__datetime-pickr"
-                    :config="{
-                      enableTime: true,
-                      datetimeFormat: 'd.m.Y H:i:s',
-                      enableSeconds: true,
-                    }"
-                  />
-                </div>
-                <div v-if="user.role.id === 1" class="row__duration-lables">
-                  <label class="row__lables-label"
-                    >Продолжительность звонка</label
-                  >
-                  <div class="modal__input">
-                    <b-button
-                      @click="quantity_minus(data.duration)"
-                      type="button"
-                      size="sm"
-                      v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                      variant="primary"
-                    >
-                      <minus-icon
-                        size="1x"
-                        class="plus-icon align-middle mr-25"
-                      ></minus-icon>
-                    </b-button>
-                    <b-form-input
-                      class="input__number form-control"
-                      v-model="data.duration"
-                      readonly="readonly"
-                    />
-                    <b-button
-                      v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                      variant="primary"
-                      type="button"
-                      size="sm"
-                      @click="quantity_plus(data.duration)"
-                    >
-                      <plus-icon
-                        size="1x"
-                        class="plus-icon align-middle mr-25"
-                      ></plus-icon>
-                    </b-button>
-                  </div>
-                </div>
-                <div v-if="user.role.id === 1" class="row__source -lables">
-                  <label class="row__lables-label">Источник</label>
-                  <b-form-select
-                    class="form__select"
-                    v-model="data.source_id"
-                    :options="options_source_id"
-                  >
-                  </b-form-select>
-                </div>
-                <div v-if="user.role.id === 1" class="row__user-lables">
-                  <label class="row__lables-label">Пользователь</label>
-                  <b-form-input
-                    class="row__user-input"
-                    type="text"
-                    placeholder="+7 (999) 999-99-99"
-                    v-model="data.phone"
-                    v-mask="'+7 (###) ###-##-##'"
-                    maxlength="18"
-                  />
-                </div>
-                <div
-                  v-if="user.role.id === 1 || user.role.id === 2"
-                  class="row__tag-lables"
-                >
-                  <label class="row__lables-label">Тэги</label>
-                  <b-form-select
-                    class="form__select"
-                    v-model="data.tags"
-                    :options="options_tags"
-                  >
-                  </b-form-select>
-                </div>
-                <div
-                  v-if="user.role.id === 1 || user.role.id === 2"
-                  class="row__tag-lables"
-                >
-                  <label class="row__lables-label">Проверка менеджера</label>
-                  <b-form-select
-                    class="form__select"
-                    v-model="data.manager_check"
-                    :options="options_manager"
-                  >
-                  </b-form-select>
-                </div>
-                <div
-                  v-if="user.role.id === 1 || user.role.id === 2"
-                  class="row__comment-manager-lables"
-                >
-                  <label class="row__lables-label">Комментарий менеджера</label>
-                  <b-form-textarea
-                    class="form__textarea-manager"
-                    placeholder="Комментарий менеджера"
-                    rows="5"
-                    no-resize
-                    v-model="data.manager_comment"
-                    :value="data.manager_comment"
-                  />
-                </div>
-                <div v-if="user.role.id === 1" class="row__tag-lables">
-                  <label class="row__lables-label">Проверка клиента</label>
-                  <b-form-select
-                    class="form__select"
-                    v-model="data.client_check"
-                    :options="options_client"
-                  >
-                  </b-form-select>
-                </div>
-                <div class="row__comment-client-lables">
-                  <label class="row__lables-label">Комментарий клиента</label>
-                  <b-form-textarea
-                    class="form__textarea-client"
-                    placeholder="Комментарий клиента"
-                    rows="5"
-                    no-resize
-                    v-model="data.client_comment"
-                    :value="data.client_comment"
-                  />
-                </div>
-                <div class="modal__form-buttons">
-                  <!-- <b-button
-                    v-if="rows[0].id !== data.id"
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="secondary"
-                    @click="prevAppeal"
-                  >
-                    Назад
-                  </b-button> -->
-                  <b-button
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="secondary"
-                    @click="hideModal"
-                  >
-                    Отменить
-                  </b-button>
-                  <b-button
-                    @click="saveModal"
-                    class="form__button-margin"
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="primary"
-                  >
-                    Сохранить
-                  </b-button>
-                  <!-- <b-button
-                    v-if="rows[rows.length - 1].id !== data.id"
-                    @click="nextAppeal"
-                    class="form__button-margin"
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="primary"
-                  >
-                    Вперёд
-                  </b-button> -->
-                </div>
-              </div>
-            </div>
-          </div>
-        </swiper-slide>
-
-        <!-- Arrows -->
-        <div slot="button-next" class="swiper-button-next" />
-        <div slot="button-prev" class="swiper-button-prev" />
-        <div slot="pagination" class="swiper-pagination" />
-      </swiper>
-    </b-modal>
+      :user="user"
+      :modalArray="modalArray"
+      :options_source_id="getSourceTable"
+      :options_tags="getTagsTable"
+      :options_manager="options_manager"
+      :options_client="options_client"
+    ></ModalSeeProject>
   </div>
   <div v-else>
-    <h3>Список доступных проектов</h3>
-    <multiselect
-      v-model="project"
-      :options="option_project"
-      selectLabel="Нажмите enter для выбора"
-      deselectLabel="Нажмите enter для удаления"
-      selectedLabel="Выбрано"
-      class="multiselect-input"
-      label="name"
-      track-by="name"
-      placeholder="Выберите проект"
-      @select="selectProject"
+    <b-button
+      style="display: none"
+      v-b-modal.Project__modal
+      class="form__button-margin"
+      v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+      variant="primary"
     >
-    </multiselect>
+      Сохранить
+    </b-button>
+    <b-modal
+      id="Project__modal"
+      cancel-variant="secondary"
+      centered
+      title="Выберите проект"
+      ref="b_modal"
+      modal-close="false"
+      no-close-on-esc
+      no-close-on-backdrop
+      hide-header-close
+      hide-footer
+    >
+      <h3 class="list__projects">Список доступных проектов</h3>
+      <multiselect
+        v-model="project"
+        :options="option_project"
+        selectLabel="Нажмите enter для выбора"
+        deselectLabel="Нажмите enter для удаления"
+        selectedLabel="Выбрано"
+        class="multiselect-input"
+        label="name"
+        track-by="name"
+        placeholder="Выберите проект"
+        @select="selectProject"
+        style="margin: 20px"
+      >
+      </multiselect>
+    </b-modal>
   </div>
 </template>
 
@@ -515,7 +332,7 @@ import {
   BFormTextarea,
   BSpinner,
 } from "bootstrap-vue";
-
+import ModalSeeProject from "./ModalSeeProject.vue";
 import Search from "./Search.vue";
 import Filters from "./Filters.vue";
 import { Swiper, SwiperSlide } from "vue-awesome-swiper";
@@ -540,6 +357,7 @@ import {
 } from "vue-feather-icons";
 export default {
   components: {
+    ModalSeeProject,
     BSpinner,
     Filters,
     Search,
@@ -580,18 +398,8 @@ export default {
       perfectScrollbarSettings: {
         maxScrollbarLength: 150,
       },
-      manager_check: [
-        { value: "целевой", icon: "CheckIcon" },
-        { value: "не целевой", icon: "XCircleIcon" },
-        { value: "не установленный", icon: "XSquareIcon" },
-      ],
       managerObject: {},
       clientObject: {},
-      client_check: [
-        { value: "целевой", icon: "CheckIcon" },
-        { value: "не целевой", icon: "XCircleIcon" },
-        { value: "не проверенный", icon: "XSquareIcon" },
-      ],
       pageLength: 10,
       dir: false,
       columns: [
@@ -656,22 +464,8 @@ export default {
         },
       ],
       selected: {},
-      options_tags: [
-        { value: null, text: "—" },
-        { value: "балкон", text: "балкон" },
-        { value: "окна", text: "окна" },
-      ],
-      options_source_id: [
-        {
-          value: null,
-          text: "—",
-        },
-        {
-          value: "Задарма: Adwords на nw61.ru + Я.Объявления",
-          text: "Задарма: Adwords на nw61.ru + Я.Объявления",
-        },
-        { value: "Задарма: Оконский Директ", text: "Задарма: Оконский Директ" },
-      ],
+      options_tags: [],
+      options_source_id: [],
       options_manager: [
         { value: null, text: "—" },
         { value: "целевой", text: "целевой" },
@@ -882,9 +676,13 @@ export default {
             this.getDataTable.filter((index, i) => {
               if (index.id === this.modalArray.id) {
                 axios
-                  .delete("/api/data/" + this.modalArray.id)
+                  .delete(
+                    "api/projects/" +
+                      this.getProject.id +
+                      "/claims/" +
+                      this.modalArray.id
+                  )
                   .then(() => {
-                    this.getDataTable.splice(i, 1);
                     if (result.value) {
                       this.$swal({
                         icon: "success",
@@ -907,6 +705,7 @@ export default {
                       autoHideDelay: 3000,
                     });
                   });
+                this.getDataTable.splice(i, 1);
               }
             });
           } else if (result.dismiss === "cancel") {
@@ -928,40 +727,7 @@ export default {
     hideProjectModal() {
       this.$refs["project__modal"].hide();
     },
-    async saveModal() {
-      try {
-        await axios
-          .put("/api/data/" + this.modalArray[this.modalCounter].id, {
-            id: this.modalArray[this.modalCounter].id,
-            datetime: this.modalArray[this.modalCounter].datetime,
-            duration: this.modalArray[this.modalCounter].duration,
-            manager_comment: this.modalArray[this.modalCounter].manager_comment,
-            source_id: this.modalArray[this.modalCounter].source_id,
-            phone: this.modalArray[this.modalCounter].phone,
-            tags: this.modalArray[this.modalCounter].tags,
-            client_comment: this.modalArray[this.modalCounter].client_comment,
-            manager_check: this.modalArray[this.modalCounter].manager_check,
-            client_check: this.modalArray[this.modalCounter].client_check,
-            dialog: this.modalArray[this.modalCounter].dialog,
-          })
-          .then(() => {
-            this.$refs["modal__window"].hide();
-          })
-          .catch((error) => {
-            const vNodesMsg = [`${error.response.data.error}`];
-            this.$bvToast.toast([vNodesMsg], {
-              title: `Ошибка`,
-              variant: "danger",
-              solid: true,
-              appendToast: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 3000,
-            });
-          });
 
-        await this.getDataTable();
-      } catch (error) {}
-    },
     async changeIconManager(id, manager) {
       this.getDataTable.map((row) => {
         if (row.id === id) {
@@ -1034,35 +800,6 @@ export default {
         }
       });
     },
-    // nextAppeal() {
-    //   try {
-    //     let j = 0;
-    //     this.modalPrevCounter = 0;
-    //     for (let i in this.getDataTable) {
-    //       if (this.getDataTable[i].id === this.modalArrayNext[0].id) {
-    //         this.modalCounter = i;
-    //         this.modalArrayNext = [];
-    //         this.modalArrayNext.push(this.getDataTable[j + 1]);
-    //         this.modalArray = this.modalArrayNext[0];
-    //       } else {
-    //         j++;
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.log(error.message);
-    //   }
-    // },
-    // prevAppeal() {
-    //   let j = this.modalCounter;
-    //   this.modalPrevCounter = this.modalPrevCounter + 1;
-    //   for (let i in this.getDataTable) {
-    //     if (this.getDataTable[j - this.modalPrevCounter].id === undefined) {
-    //     }
-    //     this.modalArrayNext = [];
-    //     this.modalArrayNext.push(this.getDataTable[j - this.modalPrevCounter]);
-    //     this.modalArray = this.modalArrayNext[0];
-    //   }
-    // },
     inputSpinButton(duration) {
       this.modalArray[this.modalCounter].duration = duration + " секунд";
     },
@@ -1070,6 +807,12 @@ export default {
   computed: {
     getDataTable() {
       return this.$store.getters.getClaims;
+    },
+    getTagsTable() {
+      return this.$store.getters.getTags;
+    },
+    getSourceTable() {
+      return this.$store.getters.getSources;
     },
     sorted() {
       if (this.arraySearch.length) {
@@ -1101,6 +844,9 @@ export default {
   },
   created() {
     this.getDataUser();
+  },
+  mounted() {
+    this.$bvModal.show("Project__modal");
   },
 };
 </script>

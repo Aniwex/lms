@@ -178,6 +178,7 @@ export default {
     logout() {
       this.user.login = undefined;
       axios.get("/logout").then((resp) => {
+        this.$store.commit("SET_PROJECT", "");
         localStorage.removeItem(
           "x_xsrf_token",
           resp.config.headers["X-XSRF-TOKEN"]
@@ -192,10 +193,16 @@ export default {
   },
 
   created() {
+    if (!this.getProject) {
+      this.$router.push("/Home");
+    }
     this.get_user();
     this.setProjects();
   },
   computed: {
+    getProject() {
+      return this.$store.getters.project;
+    },
     get_projects() {
       this.user = this.$store.getters.getUser;
       return this.$store.getters.getUser.projects;

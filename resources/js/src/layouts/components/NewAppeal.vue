@@ -10,12 +10,8 @@
             class="form__apeal-control row__date-pickr"
             :config="{
               enableTime: true,
-              dateFormat: 'd.m.Y H:i:s',
+              dateFormat: 'Y-m-d H:i:s',
               enableSeconds: true,
-            }"
-            :class="{
-              nonActiveDatePicr: !datetime,
-              activeDatePicr: datetime,
             }"
           />
         </div>
@@ -40,13 +36,18 @@
         <div class="form__appeal-group">
           <label class="form__apeal-label">Источник</label>
           <div>
-            <b-form-select
-              class="form__appeal-input"
+            <multiselect
               v-model="selected.source_id"
-              :options="options_source_id"
-              :state="selected.source_id === null ? false : true"
+              :options="getSourceTable"
+              selectLabel="Нажмите enter для выбора"
+              deselectLabel="Нажмите enter для удаления"
+              selectedLabel="Выбрано"
+              class="multiselect-input"
+              label="name"
+              track-by="name"
+              placeholder="Выберите источник"
             >
-            </b-form-select>
+            </multiselect>
             <!-- <b-form-checkbox
               v-model="selectedCheckBox"
               value="true"
@@ -70,15 +71,15 @@
         <div class="form__appeal-group">
           <label class="form__apeal-label">Тэги </label>
           <multiselect
-            v-model="selected.tags"
-            :options="options_tags"
+            v-model="tags"
+            :options="getTagsTable"
             selectLabel="Нажмите enter для выбора"
             deselectLabel="Нажмите enter для удаления"
             selectedLabel="Выбрано"
             :multiple="true"
             class="multiselect-input"
-            label="value"
-            track-by="value"
+            label="name"
+            track-by="name"
             placeholder="Выберите тэг"
           >
           </multiselect>
@@ -207,10 +208,10 @@ export default {
     return {
       datetime: "",
       value_spinbutton: "",
+      tags: [],
       selected: {
-        tags: null,
         duration: 0,
-        source_id: null,
+        source_id: [],
         manager_check: null,
         client_check: null,
         redirected: "",
@@ -250,47 +251,33 @@ export default {
   },
   methods: {
     async addAppeal() {
-      // this.temp_manager_comment.push(
-      //   this.selected.manager_comment.split(/(?=\/)|\s/)
-      // );
-      // this.temp_client_comment.push(
-      //   this.selected.client_comment.split(/(?=\/)|\s/)
-      // );
-      console.log("duration = " + this.selected.duration);
-      console.log("datetime = " + this.datetime);
-      console.log("source_id = " + this.selected.source_id);
-      console.log("phone = " + this.phone);
-      console.log("manager_check = " + this.selected.manager_check);
-      console.log("client_check = " + this.selected.client_check);
-      console.log("manager_comment = " + this.selected.manager_comment);
-      console.log("client_comment = " + this.selected.client_comment);
-      console.log("tags = " + this.selected.tags);
+      // console.log("duration = " + this.selected.duration);
+      // console.log("datetime = " + this.datetime);
+      // console.log("source_id = " + this.selected.source_id.id);
+      // console.log("phone = " + this.phone);
+      // console.log("manager_check = " + this.selected.manager_check.value);
+      // console.log("client_check = " + this.selected.client_check.value);
+      // console.log("manager_comment = " + this.selected.manager_comment);
+      // console.log("client_comment = " + this.selected.client_comment);
+      let tempTagsId = [];
+      this.tags.filter((item) => {
+        tempTagsId.push(item.id);
+      });
+      console.log("tags = " + tempTagsId);
       try {
-        if (
-          this.datetime &&
-          this.selected.duration &&
-          this.selected.source_id &&
-          this.phone &&
-          this.selected.tags &&
-          this.selected.client_check &&
-          this.selected.manager_check &&
-          this.phone.length === 18
-        ) {
+        if (this.selected.duration) {
           await axios
             .post("api/projects/" + this.getProject.id + "/claims", {
-              datetime: this.datetime,
               duration: this.selected.duration,
-              source_id: this.selected.source_id,
+              datetime: this.datetime,
+              source_id: this.selected.source_id.id,
               phone: this.phone,
-              tags: this.selected.tags,
-              client_check: this.selected.client_check,
-              manager_check: this.selected.manager_check,
               manager_comment: this.selected.manager_comment,
               client_comment: this.selected.client_comment,
-              redirected_to: "",
-              data: [],
+              tags: tempTagsId,
             })
             .then(() => {
+              this.$store.dispatch("getDataTable");
               this.enter = true;
               this.$router.push("/Home");
             });
@@ -323,27 +310,31 @@ export default {
           this.selected.duration &&
           this.selected.source_id &&
           this.phone &&
-          this.selected.tags &&
+          this.tags &&
           this.selected.client_check &&
           this.selected.manager_check &&
           this.phone.length === 18
         ) {
-          await axios.post(" api/projects/{project}/claims", {
-            datetime: this.datetime,
-            duration: this.selected.duration,
-            source_id: this.selected.source_id,
-            phone: this.phone,
-            tags: this.selected.tags,
-            client_check: this.selected.client_check,
-            manager_check: this.selected.manager_check,
-            manager_comment: this.selected.manager_comment,
-            client_comment: this.selected.client_comment,
-          });
+          await axios
+            .post(" api/projects/{project}/claims", {
+              datetime: this.datetime,
+              duration: this.selected.duration,
+              source_id: this.selected.source_id,
+              phone: this.phone,
+              tags: this.tags,
+              client_check: this.selected.client_check,
+              manager_check: this.selected.manager_check,
+              manager_comment: this.selected.manager_comment,
+              client_comment: this.selected.client_comment,
+            })
+            .then(() => {
+              this.$store.dispatch("getDataTable");
+            });
           this.datetime = null;
           this.selected.duration = 0;
           this.selected.source_id = null;
           this.phone = null;
-          this.selected.tags = null;
+          this.tags = null;
           this.selected.manager_check = null;
           this.selected.client_check = null;
           this.selected.manager_comment = null;
@@ -377,6 +368,12 @@ export default {
   computed: {
     getProject() {
       return this.$store.getters.project;
+    },
+    getTagsTable() {
+      return this.$store.getters.getTags;
+    },
+    getSourceTable() {
+      return this.$store.getters.getSources;
     },
   },
   mounted() {

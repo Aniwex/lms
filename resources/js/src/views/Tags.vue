@@ -8,7 +8,7 @@
     </div>
     <!-- search input -->
     <search
-      :rows="rowsTags"
+      :rows="getDataTags"
       :searchTerm="searchTerm"
       v-if="getDataTags && user"
       :role_id="user.role.id"
@@ -205,6 +205,8 @@
       size="lg"
       ref="modal__window"
       hide-footer
+      no-close-on-esc
+      no-close-on-backdrop
     >
       <swiper
         class="swiper-navigations"

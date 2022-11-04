@@ -8,7 +8,7 @@
     </div>
     <!-- search input -->
     <search
-      :rows="rowsSource"
+      :rows="getDataSources"
       :searchTerm="searchTerm"
       v-if="getDataSources && user"
       :role_id="user.role.id"
@@ -161,6 +161,8 @@
       size="lg"
       ref="modal__window"
       hide-footer
+      no-close-on-esc
+      no-close-on-backdrop
     >
       <swiper
         class="swiper-navigations"
@@ -401,6 +403,8 @@ export default {
       }
     },
     hideModal() {
+      this.modalArray = this.getDataSources;
+      console.log(this.modalArray);
       this.$refs["modal__window"].hide();
     },
     async saveModal() {

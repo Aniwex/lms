@@ -174,7 +174,7 @@ export default {
     Ripple,
     // "b-tooltip": VBTooltip,
   },
-  props: ["options_source", "rows", "rowSelection", "role_id"],
+  props: ["options_source", "rows", "rowSelection", "role_id", "project"],
   data() {
     return {
       selected: {
@@ -298,7 +298,9 @@ export default {
         this.rowSelection.filter((item) => {
           return this.rows.map((index, i) => {
             if (item.id === index.id) {
-              axios.delete("/api/data/" + item.id);
+              axios.delete(
+                "api/projects/" + this.project + "/claims/" + item.id
+              );
               this.rows.splice(i, 1);
             }
           });
