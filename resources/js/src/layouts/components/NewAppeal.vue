@@ -98,8 +98,8 @@
             deselectLabel="Нажмите enter для удаления"
             selectedLabel="Выбрано"
             class="multiselect-input"
-            label="value"
-            track-by="value"
+            label="text"
+            track-by="text"
             placeholder="Выберите целевое"
           >
           </multiselect>
@@ -128,8 +128,8 @@
             deselectLabel="Нажмите enter для удаления"
             selectedLabel="Выбрано"
             class="multiselect-input"
-            label="value"
-            track-by="value"
+            label="text"
+            track-by="text"
             placeholder="Выберите целевое"
           >
           </multiselect>
@@ -235,14 +235,14 @@ export default {
         { value: 2, text: 2 },
       ],
       options_manager_check: [
-        { value: "целевой" },
-        { value: "не целевой" },
-        { value: "не установленный" },
+        { value: "targeted", text: "целевой" },
+        { value: "untargeted", text: "не целевой" },
+        { value: "unidentified", text: "не установленный" },
       ],
       options_client_check: [
-        { value: "целевой" },
-        { value: "не целевой" },
-        { value: "не проверенный" },
+        { value: "targeted", text: "целевой" },
+        { value: "untargeted", text: "не целевой" },
+        { value: "unchecked", text: "не проверенный" },
       ],
       selectedCheckBox: false,
       phone: null,
@@ -251,19 +251,13 @@ export default {
   },
   methods: {
     async addAppeal() {
-      // console.log("duration = " + this.selected.duration);
-      // console.log("datetime = " + this.datetime);
-      // console.log("source_id = " + this.selected.source_id.id);
-      // console.log("phone = " + this.phone);
-      // console.log("manager_check = " + this.selected.manager_check.value);
-      // console.log("client_check = " + this.selected.client_check.value);
-      // console.log("manager_comment = " + this.selected.manager_comment);
-      // console.log("client_comment = " + this.selected.client_comment);
+      console.log("manager_check = " + this.selected.manager_check.value);
+      console.log("client_check = " + this.selected.client_check.value);
+
       let tempTagsId = [];
       this.tags.filter((item) => {
         tempTagsId.push(item.id);
       });
-      console.log("tags = " + tempTagsId);
       try {
         if (this.selected.duration) {
           await axios
@@ -272,6 +266,8 @@ export default {
               datetime: this.datetime,
               source_id: this.selected.source_id.id,
               phone: this.phone,
+              manager_check: this.selected.manager_check.value,
+              client_check: this.selected.client_check.value,
               manager_comment: this.selected.manager_comment,
               client_comment: this.selected.client_comment,
               tags: tempTagsId,

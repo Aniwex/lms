@@ -22,7 +22,7 @@
       :rows="getDataTable"
       :role_id="user.role.id"
       :project="getProject"
-      :options_source_id="options_source_id"
+      :options_source="options_source"
       v-if="getDataTable && user"
     />
 
@@ -64,15 +64,15 @@
           v-else-if="props.column.field === 'duration'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.duration }}</span>
+          <span class="text-nowrap">{{ props.row.duration.formatted }}</span>
         </span>
-        <!-- Column: source_id  -->
-        <span v-else-if="props.column.field === 'source_id '">
-          <span>{{ props.row.source_id }}</span>
+        <!-- Column: source  -->
+        <span v-else-if="props.column.field === 'source '">
+          <span>{{ props.row.source.name }}</span>
         </span>
         <!-- Column: phone  -->
-        <span class="db__tc" v-else-if="props.column.field === 'phone '">
-          <span class="text-nowrap">{{ props.row.phone }}</span>
+        <span class="db__tc" v-else-if="props.column.field === 'phone'">
+          <span class="text-nowrap">{{ props.row.phone.formatted }}</span>
           <div v-for="(history, index) in historyArray" :key="index">
             <b-button
               v-if="history === props.row.id"
@@ -85,8 +85,8 @@
             </b-button>
           </div>
         </span>
-        <!-- Column: manager_check -->
-        <!-- <span v-else-if="props.column.field === 'manager_check'">
+        <!-- Column: manager -->
+        <span v-else-if="props.column.field === 'manager'">
           <div class="dropdown db__tc">
             <b-button
               v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -98,11 +98,18 @@
               aria-expanded="false"
             >
               <feather-icon
-                v-if="managerObject[props.row.id]"
-                :icon="managerObject[props.row.id].icon"
+                v-if="getManagerObject[props.row.id]"
+                :icon="getManagerObject[props.row.id].icon"
                 size="16"
                 class="align-middle mr-25"
               />
+              <div v-else>
+                <feather-icon
+                  icon="SlashIcon"
+                  size="16"
+                  class="align-middle mr-25"
+                />
+              </div>
             </b-button>
             <div
               class="dropdown-menu"
@@ -111,7 +118,7 @@
               v-if="user.role.id === 1"
             >
               <button
-                v-for="(m, index) in manager_check"
+                v-for="(m, index) in getManager"
                 :key="index"
                 class="dropdown-item"
                 @click="changeIconManager(props.row.id, m)"
@@ -124,9 +131,9 @@
               </button>
             </div>
           </div>
-        </span> -->
-        <!-- Column: client_check -->
-        <!-- <span v-else-if="props.column.field === 'client_check'">
+        </span>
+        <!-- Column: client -->
+        <span v-else-if="props.column.field === 'client'">
           <div class="dropdown db__tc">
             <b-button
               v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -138,11 +145,18 @@
               aria-expanded="false"
             >
               <feather-icon
-                v-if="clientObject[props.row.id]"
-                :icon="clientObject[props.row.id].icon"
+                v-if="getClientObject[props.row.id]"
+                :icon="getClientObject[props.row.id].icon"
                 size="16"
                 class="align-middle mr-25"
               />
+              <div v-else>
+                <feather-icon
+                  icon="SlashIcon"
+                  size="16"
+                  class="align-middle mr-25"
+                />
+              </div>
             </b-button>
             <div
               class="dropdown-menu"
@@ -151,7 +165,7 @@
               v-if="user.role.id === 1"
             >
               <button
-                v-for="(c, index) in client_check"
+                v-for="(c, index) in getClient"
                 :key="index"
                 class="dropdown-item"
                 @click="changeIconClient(props.row.id, c)"
@@ -164,12 +178,18 @@
               </button>
             </div>
           </div>
-        </span> -->
+        </span>
         <!-- Column: tags -->
         <span v-else-if="props.column.field === 'tags'">
-          <b-badge pill variant="success" class="badge-glow db__tc">{{
-            props.row.tags
-          }}</b-badge>
+          <b-badge
+            v-for="(tag, index) in props.row.tags"
+            :key="index"
+            pill
+            variant="success"
+            style="margin-top: 10px"
+            class="badge-glow db__tc"
+            >{{ tag.name }}</b-badge
+          >
         </span>
         <!-- Column: manager_comment -->
         <span
@@ -266,7 +286,7 @@
       id="modal__seeProject"
       :user="user"
       :modalArray="modalArray"
-      :options_source_id="getSourceTable"
+      :options_source="getSourceTable"
       :options_tags="getTagsTable"
       :options_manager="options_manager"
       :options_client="options_client"
@@ -345,6 +365,7 @@ import Ripple from "vue-ripple-directive";
 import "@core/scss/vue/libs/vue-select.scss";
 import axios from "axios";
 import {
+  SlashIcon,
   CheckIcon,
   XCircleIcon,
   AlertCircleIcon,
@@ -417,7 +438,7 @@ export default {
         },
         {
           label: "Источник",
-          field: "source_id ",
+          field: "source ",
           width: "200px",
           thClass: "columnCenter",
         },
@@ -429,19 +450,19 @@ export default {
         },
         {
           label: "Менеджер",
-          field: "manager_check",
+          field: "manager",
           width: "130px",
           thClass: "columnCenter",
         },
         {
           label: "Клиент",
-          field: "client_check",
+          field: "client",
           width: "130px",
           thClass: "columnCenter",
           // tdClass: 'text-center', пользовательский класс для ячеек таблицы
         },
         {
-          label: "Тэги обращения",
+          label: "Тэги",
           field: "tags",
           width: "130px",
           thClass: "columnCenter",
@@ -465,7 +486,7 @@ export default {
       ],
       selected: {},
       options_tags: [],
-      options_source_id: [],
+      options_source: [],
       options_manager: [
         { value: null, text: "—" },
         { value: "целевой", text: "целевой" },
@@ -479,7 +500,6 @@ export default {
         { value: "не проверенный", text: "не проверенный" },
       ],
       rows: [],
-      phone: "",
       searchTerm: "",
       sortedFilter: [],
       arr: [],
@@ -575,10 +595,10 @@ export default {
     },
     resetFilters() {
       this.selected.tags = null;
-      this.selected.source_id = null;
+      this.selected.source = null;
       this.selected.datetime = null;
-      this.selected.manager_check = null;
-      this.selected.client_check = null;
+      this.selected.manager = null;
+      this.selected.client = null;
       this.selected.deleted = null;
       this.selected.value_range = 0;
       this.phone = "";
@@ -731,23 +751,27 @@ export default {
     async changeIconManager(id, manager) {
       this.getDataTable.map((row) => {
         if (row.id === id) {
-          row.manager_check = manager_check.value;
+          row.manager.check.text = manager.value;
+          let tempTagsId = [];
+          row.tags.filter((item) => {
+            tempTagsId.push(item.id);
+          });
+          console.log("client_check = " + row.client.check.value);
           axios
-            .put("/api/data/" + id, {
-              id: id,
+            .put(" api/projects/" + this.getProject.id + "/claims/" + id, {
               datetime: row.datetime,
-              duration: row.duration,
+              duration: row.duration.original,
               manager_comment: row.manager_comment,
-              source_id: row.source_id,
-              phone: row.phone,
-              tags: row.tags,
               client_comment: row.client_comment,
-              manager_check: manager_check.value,
-              client_check: row.client_check,
+              source_id: row.source.id,
+              phone: row.phone.original,
+              tags: tempTagsId,
+              manager_check: row.manager.check.value,
+              client_check: row.client.check.value,
             })
             .then(() => {
               let manager_object = {};
-              this.$set(manager_object, id, manager_check);
+              this.$set(manager_object, id, manager);
               this.$store.commit("SET_MANAGER_OBJECT", manager_object);
             })
             .catch((error) => {
@@ -767,23 +791,23 @@ export default {
     changeIconClient(id, client) {
       this.getDataTable.map((row) => {
         if (row.id === id) {
-          row.client_check = client_check.value;
+          row.client = client.value;
           axios
             .put("/api/data/" + id, {
               id: id,
               datetime: row.datetime,
               duration: row.duration,
               manager_comment: row.manager_comment,
-              source_id: row.source_id,
+              source: row.source,
               phone: row.phone,
               tags: row.tags,
               client_comment: row.client_comment,
-              manager_check: row.manager_check,
-              client_check: client_check.value,
+              manager: row.manager,
+              client: client.value,
             })
             .then(() => {
               let client_object = {};
-              this.$set(client_object, id, client_check);
+              this.$set(client_object, id, client);
               this.$store.commit("SET_CLIENT_OBJECT", client_object);
             })
             .catch((error) => {
@@ -806,6 +830,22 @@ export default {
   },
   computed: {
     getDataTable() {
+      let managerObject = {};
+      let clientObject = {};
+      this.$store.getters.getClaims.forEach((row) => {
+        const activeManager =
+          this.$store.getters.manager.find(
+            (m) => m.value == row.manager.check.text
+          ) || null;
+        this.$set(managerObject, row.id, activeManager);
+        this.$store.commit("SET_MANAGER_OBJECT", managerObject);
+        const activeClient =
+          this.$store.getters.client.find(
+            (c) => c.value == row.client.check.text
+          ) || null;
+        this.$set(clientObject, row.id, activeClient);
+        this.$store.commit("SET_CLIENT_OBJECT", clientObject);
+      });
       return this.$store.getters.getClaims;
     },
     getTagsTable() {
@@ -840,6 +880,18 @@ export default {
     },
     getProject() {
       return this.$store.getters.project;
+    },
+    getManager() {
+      return this.$store.getters.manager;
+    },
+    getClient() {
+      return this.$store.getters.client;
+    },
+    getManagerObject() {
+      return this.$store.getters.getManagerObject;
+    },
+    getClientObject() {
+      return this.$store.getters.getClientObject;
     },
   },
   created() {

@@ -21,13 +21,13 @@ export default new Vuex.Store({
         claims: [],
         sources: [],
         tags: [],
-        manager_check: [
-            { value: "целевой", icon: "CheckIcon" },
+        manager: [
+            { value: "целевой", icon: "CheckCircleIcon" },
             { value: "не целевой", icon: "XCircleIcon" },
             { value: "не установленный", icon: "XSquareIcon" },
         ],
-        client_check: [
-            { value: "целевой", icon: "CheckIcon" },
+        client: [
+            { value: "целевой", icon: "CheckCircleIcon" },
             { value: "не целевой", icon: "XCircleIcon" },
             { value: "не проверенный", icon: "XSquareIcon" },
         ],
@@ -116,22 +116,6 @@ export default new Vuex.Store({
                 .then((response) => {
                     let claims = response.data.claims;
                     ctx.commit("SET_CLAIMS", claims);
-                    let managerObject = {};
-                    let clientObject = {};
-                    claims.forEach((row) => {
-                        const activeManager =
-                            ctx.getters.manager_check.find(
-                                (m) => m.value == row.manager_check
-                            ) || null;
-                        this.$set(managerObject, row.id, activeManager);
-                        ctx.commit("SET_MANAGER_OBJECT", managerObject);
-                        const activeClient =
-                            ctx.getters.client_check.find(
-                                (c) => c.value == row.client_check
-                            ) || null;
-                        this.$set(clientObject, row.id, activeClient);
-                        ctx.commit("SET_CLIENT_OBJECT", clientObject);
-                    });
                     claims.filter((row, index, k) => {
                         k = 0;
                         for (let i = 0; i < index; i++) {
@@ -241,11 +225,11 @@ export default new Vuex.Store({
         getClientObject: (state) => {
             return state.client_object;
         },
-        manager_check: (state) => {
-            return state.manager_check;
+        manager: (state) => {
+            return state.manager;
         },
-        client_check: (state) => {
-            return state.client_check;
+        client: (state) => {
+            return state.client;
         },
         historyArray: (state) => {
             return state.historyArray;
