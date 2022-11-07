@@ -34,7 +34,10 @@ class ClaimController extends Controller
     {
         return Response::success()->data([
             'claims' => ClaimCollection::makeArray(
-                Claim::byProject($project->id)->with(['source', 'tags'])->get()
+                Claim::byProject($project->id)
+                    ->with(['source', 'tags'])
+                    ->orderBy('datetime', 'desc')
+                    ->get()
             )
         ]);
     }

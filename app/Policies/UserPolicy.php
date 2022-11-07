@@ -77,7 +77,7 @@ class UserPolicy
      */
     public function delete(User $user, User $model)
     {
-        return $this->doesUserHasAccess($user) && !$model->isAdmin();
+        return $this->doesUserHasAccess($user) && $user->id != $model->id;
     }
 
     /**

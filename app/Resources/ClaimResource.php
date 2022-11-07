@@ -21,8 +21,8 @@ class ClaimResource extends AbstractResource
                 'datetime' => $claim->datetime->format('Y-m-d H:i:s'),
                 'code' => $claim->code,
                 'duration' => [
-                    'original' => $claim->duration,
-                    'formatted' => duration($claim->duration)
+                    'original' => $claim->duration ?? 0,
+                    'formatted' => $claim->duration ? duration($claim->duration) : 0
                 ],
                 'phone' => [
                     'original' => $claim->phone,

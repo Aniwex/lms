@@ -19,7 +19,7 @@ class StoreProjectRequest extends Request
     {
         return [
             'name' => ['string', 'nullable', 'max:255'],
-            'domain' => ['string', 'required', 'unique:projects', 'max:255'],
+            'domain' => ['required', 'string', 'unique:projects', 'max:255'],
             'mirrows' => ['array', 'nullable'],
             'mirrows.*' => ['required', 'string', 'max:255'],
             'users' => ['array', 'nullable'],
