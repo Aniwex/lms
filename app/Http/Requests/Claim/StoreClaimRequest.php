@@ -4,6 +4,7 @@ namespace App\Http\Requests\Claim;
 
 use App\Http\Requests\Request;
 use App\Rules\PhoneNumber;
+use App\Models\Claim;
 use Illuminate\Validation\Rule;
 
 /**
@@ -24,8 +25,8 @@ class StoreClaimRequest extends Request
             'source_id' => ['integer', 'required', Rule::exists('sources', 'id')],
             'phone' => ['required', new PhoneNumber],
             'redirected_to' => ['string', 'nullable', 'max:255'],
-            'manager_check' => ['nullable', Rule::in(['targeted', 'untargeted', 'unidentified'])],
-            'client_check' => ['nullable', Rule::in(['targeted', 'untargeted', 'unidentified'])],
+            'manager_check' => ['nullable', Rule::in(array_keys(Claim::managerCheckValues()))],
+            'client_check' => ['nullable', Rule::in(array_keys(Claim::clientCheckValues()))],
             'manager_comment' => ['nullable', 'string'],
             'client_comment' => ['nullable', 'string'],
             'data' => ['array', 'nullable'],

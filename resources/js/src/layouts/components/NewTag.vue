@@ -7,14 +7,14 @@
           <b-form-input
             class="form__appeal-input"
             v-model="name"
-            type="text"
+            objective="text"
             placeholder="Название"
             :state="name !== ''"
           />
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Тип</label>
-          <b-form-checkbox v-model="type" value="true">
+          <b-form-checkbox v-model="objective">
             Целевой (да/нет)
           </b-form-checkbox>
         </div>
@@ -30,7 +30,7 @@
             placeholder="Плюс слова клиента"
             rows="5"
             no-resize
-            v-model="plus_words_client"
+            v-model="client_plus_words"
           />
         </div>
         <div class="form__appeal-group">
@@ -40,7 +40,7 @@
             placeholder="Минус слова клиента"
             rows="5"
             no-resize
-            v-model="minus_words_client"
+            v-model="client_minus_words"
           />
         </div>
         <div class="form__appeal-group">
@@ -50,7 +50,7 @@
             placeholder="Плюс слова оператора"
             rows="5"
             no-resize
-            v-model="plus_words_operator"
+            v-model="operator_plus_words"
           />
         </div>
         <div class="form__appeal-group">
@@ -60,7 +60,7 @@
             placeholder="Минус слова оператора"
             rows="5"
             no-resize
-            v-model="minus_words_operator"
+            v-model="operator_minus_words"
           />
         </div>
       </div>
@@ -85,7 +85,7 @@
         v-ripple.400="'rgba(255, 255, 255, 0.15)'"
         variant="primary"
       >
-        <span v-if="!enter">Добавить обращение</span>
+        <span v-if="!enter">Добавить тэг</span>
         <span v-if="enter">Загрузка...</span>
         <b-spinner v-if="enter" small />
       </b-button>
@@ -128,34 +128,54 @@ export default {
       dateAppeal: null,
       value_spinbutton: "",
       name: "",
-      type: false,
-      plus_words_client: "",
-      minus_words_client: "",
-      plus_words_operator: "",
-      minus_words_operator: "",
+      objective: false,
+      client_plus_words: "",
+      client_minus_words: "",
+      operator_plus_words: "",
+      operator_minus_words: "",
       enter: false,
       selectedCheckBox: false,
       form: {
         phone: null,
       },
       dateNtim: null,
+      project: [],
+      temp_client_plus_words: [],
+      temp_client_minus_words: [],
+      temp_operator_plus_words: [],
+      temp_operator_minus_words: [],
     };
   },
   methods: {
     async addAppeal() {
+      this.temp_client_plus_words.push(
+        this.client_plus_words.split(/(?=\/)|\s/)
+      );
+      this.temp_client_minus_words.push(
+        this.client_minus_words.split(/(?=\/)|\s/)
+      );
+      this.temp_operator_plus_words.push(
+        this.operator_plus_words.split(/(?=\/)|\s/)
+      );
+      this.temp_operator_minus_words.push(
+        this.operator_minus_words.split(/(?=\/)|\s/)
+      );
       try {
-        if (this.name && this.type) {
-          this.enter = true;
-          await axios.post("/api/tags", {
-            id: Date.now(),
-            name: this.name,
-            type: this.type,
-            plus_words_client: this.plus_words_client,
-            minus_words_client: this.minus_words_client,
-            plus_words_operator: this.plus_words_operator,
-            minus_words_operator: this.minus_words_operator,
-          });
-          this.$router.push("/Tags");
+        if (this.name) {
+          await axios
+            .post("api/projects/" + this.project.id + "/tags", {
+              name: this.name,
+              objective: this.objective,
+              client_plus_words: this.temp_client_plus_words[0],
+              client_minus_words: this.temp_client_minus_words[0],
+              operator_plus_words: this.temp_operator_plus_words[0],
+              operator_minus_words: this.temp_operator_minus_words[0],
+            })
+            .then(() => {
+              this.$store.dispatch("getTagsTable");
+              this.enter = true;
+              this.$router.push("/Tags");
+            });
         } else {
           this.$bvToast.toast("Пожалуйтса заполните все поля", {
             title: `Ошибка`,
@@ -166,27 +186,51 @@ export default {
             autoHideDelay: 2000,
           });
         }
-      } catch (error) {}
+      } catch (error) {
+        const vNodesMsg = [`${error.response.data.error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
+      }
     },
     async CreateAndAddAppeal() {
+      this.temp_client_plus_words.push(
+        this.client_plus_words.split(/(?=\/)|\s/)
+      );
+      this.temp_client_minus_words.push(
+        this.client_minus_words.split(/(?=\/)|\s/)
+      );
+      this.temp_operator_plus_words.push(
+        this.operator_plus_words.split(/(?=\/)|\s/)
+      );
+      this.temp_operator_minus_words.push(
+        this.operator_minus_words.split(/(?=\/)|\s/)
+      );
       try {
-        if (this.name && this.type) {
-          await axios.post("/api/tags", {
-            id: Date.now(),
-            name: this.name,
-            type: this.type,
-            plus_words_client: this.plus_words_client,
-            minus_words_client: this.minus_words_client,
-            plus_words_operator: this.plus_words_operator,
-            minus_words_operator: this.minus_words_operator,
-          });
-          this.name = null;
-          this.type = 0;
-          this.selected.source = null;
-          this.plus_words_client = null;
-          this.minus_words_client = null;
-          this.plus_words_operator = null;
-          this.minus_words_operator = null;
+        if (this.name) {
+          await axios
+            .post("api/projects/" + this.project.id + "/tags", {
+              name: this.name,
+              objective: this.objective,
+              client_plus_words: this.temp_client_plus_words[0],
+              client_minus_words: this.temp_client_minus_words[0],
+              operator_plus_words: this.temp_operator_plus_words[0],
+              operator_minus_words: this.temp_operator_minus_words[0],
+            })
+            .then(() => {
+              this.$store.dispatch("getTagsTable");
+            });
+          this.name = "";
+          this.objective = false;
+          this.client_plus_words = "";
+          this.client_minus_words = "";
+          this.operator_plus_words = "";
+          this.operator_minus_words = "";
         } else {
           this.$bvToast.toast("Пожалуйтса заполните все поля", {
             title: `Ошибка`,
@@ -197,13 +241,29 @@ export default {
             autoHideDelay: 2000,
           });
         }
-      } catch (error) {}
+      } catch (error) {
+        const vNodesMsg = [`${error.response.data.error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
+      }
     },
     inputSpinButton(call) {
       this.selected.rangeAppeal = call + " секунд";
     },
   },
+
   mounted() {
+    if (!this.$store.getters.project) {
+      this.$router.push("/Home");
+    } else {
+      this.project = this.$store.getters.project;
+    }
     this.$store.commit("SET_ENTERED", true);
   },
 };

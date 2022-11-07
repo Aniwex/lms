@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="text-center" v-if="!getDT || !user">
+  <div v-if="getProject !== ''">
+    <div class="text-center" v-if="!getDataTable || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -9,8 +9,8 @@
     <!-- search input -->
     <search
       @arraySearch="pushArraySearch"
-      :rows="rows"
-      v-if="getDT && user"
+      :rows="getDataTable"
+      v-if="getDataTable && user"
       :role_id="user.role.id"
     />
     <!-- filers -->
@@ -19,15 +19,16 @@
       @arrayCheckboxUser="pushChangeCheckBox"
       @selected="pushSelected"
       :rowSelection="rowSelection"
-      :rows="rows"
+      :rows="getDataTable"
       :role_id="user.role.id"
+      :project="getProject"
       :options_source="options_source"
-      v-if="getDT && user"
+      v-if="getDataTable && user"
     />
 
     <!-- table -->
     <vue-good-table
-      v-if="getDT"
+      v-if="getDataTable"
       :columns="columns"
       :rows="sorted"
       :search-options="{
@@ -51,24 +52,27 @@
     >
       <template slot="table-row" slot-scope="props">
         <!-- Column: Name -->
-        <!-- Column: Date -->
-        <span v-if="props.column.field === 'Date'" class="text-nowrap db__tc">
-          <span class="text-nowrap">{{ props.row.date }}</span>
-        </span>
-        <!-- Column: call -->
+        <!-- Column: datetime -->
         <span
-          v-else-if="props.column.field === 'call'"
+          v-if="props.column.field === 'datetime'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.call }}</span>
+          <span class="text-nowrap">{{ props.row.datetime }}</span>
         </span>
-        <!-- Column: source -->
-        <span v-else-if="props.column.field === 'source'">
-          <span>{{ props.row.source }}</span>
+        <!-- Column: duration -->
+        <span
+          v-else-if="props.column.field === 'duration'"
+          class="text-nowrap db__tc"
+        >
+          <span class="text-nowrap">{{ props.row.duration.formatted }}</span>
         </span>
-        <!-- Column: user -->
-        <span class="db__tc" v-else-if="props.column.field === 'user'">
-          <span class="text-nowrap">{{ props.row.user }}</span>
+        <!-- Column: source  -->
+        <span v-else-if="props.column.field === 'source '">
+          <span>{{ props.row.source.name }}</span>
+        </span>
+        <!-- Column: phone  -->
+        <span class="db__tc" v-else-if="props.column.field === 'phone'">
+          <span class="text-nowrap">{{ props.row.phone.formatted }}</span>
           <div v-for="(history, index) in historyArray" :key="index">
             <b-button
               v-if="history === props.row.id"
@@ -81,8 +85,8 @@
             </b-button>
           </div>
         </span>
-        <!-- Column: Managment -->
-        <span v-else-if="props.column.field === 'Managment'">
+        <!-- Column: manager -->
+        <span v-else-if="props.column.field === 'manager'">
           <div class="dropdown db__tc">
             <b-button
               v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -94,11 +98,18 @@
               aria-expanded="false"
             >
               <feather-icon
-                v-if="managerObject[props.row.id]"
-                :icon="managerObject[props.row.id].icon"
+                v-if="getManagerObject[props.row.id]"
+                :icon="getManagerObject[props.row.id].icon"
                 size="16"
                 class="align-middle mr-25"
               />
+              <div v-else>
+                <feather-icon
+                  icon="SlashIcon"
+                  size="16"
+                  class="align-middle mr-25"
+                />
+              </div>
             </b-button>
             <div
               class="dropdown-menu"
@@ -107,7 +118,7 @@
               v-if="user.role.id === 1"
             >
               <button
-                v-for="(m, index) in manager"
+                v-for="(m, index) in getManager"
                 :key="index"
                 class="dropdown-item"
                 @click="changeIconManager(props.row.id, m)"
@@ -121,8 +132,8 @@
             </div>
           </div>
         </span>
-        <!-- Column: Client -->
-        <span v-else-if="props.column.field === 'Client'">
+        <!-- Column: client -->
+        <span v-else-if="props.column.field === 'client'">
           <div class="dropdown db__tc">
             <b-button
               v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -134,11 +145,18 @@
               aria-expanded="false"
             >
               <feather-icon
-                v-if="clientObject[props.row.id]"
-                :icon="clientObject[props.row.id].icon"
+                v-if="getClientObject[props.row.id]"
+                :icon="getClientObject[props.row.id].icon"
                 size="16"
                 class="align-middle mr-25"
               />
+              <div v-else>
+                <feather-icon
+                  icon="SlashIcon"
+                  size="16"
+                  class="align-middle mr-25"
+                />
+              </div>
             </b-button>
             <div
               class="dropdown-menu"
@@ -147,7 +165,7 @@
               v-if="user.role.id === 1"
             >
               <button
-                v-for="(c, index) in client"
+                v-for="(c, index) in getClient"
                 :key="index"
                 class="dropdown-item"
                 @click="changeIconClient(props.row.id, c)"
@@ -162,25 +180,31 @@
           </div>
         </span>
         <!-- Column: tags -->
-        <span v-else-if="props.column.field === 'tag'">
-          <b-badge pill variant="success" class="badge-glow db__tc">{{
-            props.row.tag
-          }}</b-badge>
+        <span v-else-if="props.column.field === 'tags'">
+          <b-badge
+            v-for="(tag, index) in props.row.tags"
+            :key="index"
+            pill
+            variant="success"
+            style="margin-top: 10px"
+            class="badge-glow db__tc"
+            >{{ tag.name }}</b-badge
+          >
         </span>
-        <!-- Column: commentManager -->
+        <!-- Column: manager_comment -->
         <span
           class="comment-manager"
           style="word-break: break-all"
-          v-else-if="props.column.field === 'commentManager'"
+          v-else-if="props.column.field === 'manager_comment'"
         >
-          <span>{{ props.row.commentManager }}</span>
+          <span>{{ props.row.manager_comment }}</span>
         </span>
-        <!-- Column: commentClient -->
+        <!-- Column: client_comment -->
         <span
           style="word-break: break-all"
-          v-else-if="props.column.field === 'commentClient'"
+          v-else-if="props.column.field === 'client_comment'"
         >
-          <span>{{ props.row.commentClient }}</span>
+          <span>{{ props.row.client_comment }}</span>
         </span>
         <!-- Column: Status -->
         <span v-else-if="props.column.field === 'status'">
@@ -258,221 +282,53 @@
       </template>
     </vue-good-table>
     <!-- modal see project -->
-    <b-modal
+    <ModalSeeProject
       id="modal__seeProject"
+      :user="user"
+      :modalArray="modalArray"
+      :options_source="getSourceTable"
+      :options_tags="getTagsTable"
+      :options_manager="options_manager"
+      :options_client="options_client"
+    ></ModalSeeProject>
+  </div>
+  <div v-else>
+    <b-button
+      style="display: none"
+      v-b-modal.Project__modal
+      class="form__button-margin"
+      v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+      variant="primary"
+    >
+      Сохранить
+    </b-button>
+    <b-modal
+      id="Project__modal"
+      cancel-variant="secondary"
       centered
-      title="Просмотр обращения"
-      cancel-title="Отмена"
-      size="lg"
-      ref="modal__window"
+      title="Выберите проект"
+      ref="b_modal"
+      modal-close="false"
+      no-close-on-esc
+      no-close-on-backdrop
+      hide-header-close
       hide-footer
     >
-      <swiper
-        class="swiper-navigations"
-        :options="swiperOptions"
-        :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-        @slideNextTransitionStart="changeSlideNext"
-        @slidePrevTransitionStart="changeSlidePrev"
+      <h3 class="list__projects">Список доступных проектов</h3>
+      <multiselect
+        v-model="project"
+        :options="option_project"
+        selectLabel="Нажмите enter для выбора"
+        deselectLabel="Нажмите enter для удаления"
+        selectedLabel="Выбрано"
+        class="multiselect-input"
+        label="name"
+        track-by="name"
+        placeholder="Выберите проект"
+        @select="selectProject"
+        style="margin: 20px"
       >
-        <swiper-slide v-for="(data, index) in modalArray" :key="index"
-          ><div class="see-project__form">
-            <h3 style="margin-top: 30px">Диалог</h3>
-            <div
-              class="dialog__none"
-              v-if="arrayChat === undefined || arrayChat.length === 0"
-            >
-              <p class="dialog__none-item">Диалог отсутствует</p>
-            </div>
-            <div class="container__dialog" v-else>
-              <div
-                v-for="(msgGrp, index) in arrayChat"
-                :key="index"
-                class="chat-content"
-              >
-                <p
-                  :class="{
-                    message_operator: msgGrp.value === 'operator',
-                    message_subscriber: msgGrp.value === 'subscriber',
-                  }"
-                >
-                  {{ msgGrp.message }}
-                </p>
-              </div>
-            </div>
-            <h3>Данные для редактирования</h3>
-            <div class="container__see-project">
-              <div class="row__lables">
-                <div v-if="user.role.id === 1" class="row__date-lables">
-                  <label class="row__lables-label">Дата и время</label>
-                  <flat-pickr
-                    placeholder="Выберите дату и время"
-                    v-model="data.date"
-                    class="form-control row__date-pickr"
-                    :config="{
-                      enableTime: true,
-                      dateFormat: 'd.m.Y H:i:s',
-                      enableSeconds: true,
-                    }"
-                  />
-                </div>
-                <div v-if="user.role.id === 1" class="row__call-lables">
-                  <label class="row__lables-label"
-                    >Продолжительность звонка</label
-                  >
-                  <div class="modal__input">
-                    <b-button
-                      @click="quantity_minus(data.call)"
-                      type="button"
-                      size="sm"
-                      v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                      variant="primary"
-                    >
-                      <minus-icon
-                        size="1x"
-                        class="plus-icon align-middle mr-25"
-                      ></minus-icon>
-                    </b-button>
-                    <b-form-input
-                      class="input__number form-control"
-                      v-model="data.call"
-                      readonly="readonly"
-                    />
-                    <b-button
-                      v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                      variant="primary"
-                      type="button"
-                      size="sm"
-                      @click="quantity_plus(data.call)"
-                    >
-                      <plus-icon
-                        size="1x"
-                        class="plus-icon align-middle mr-25"
-                      ></plus-icon>
-                    </b-button>
-                  </div>
-                </div>
-                <div v-if="user.role.id === 1" class="row__source-lables">
-                  <label class="row__lables-label">Источник</label>
-                  <b-form-select
-                    class="form__select"
-                    v-model="data.source"
-                    :options="options_source"
-                  >
-                  </b-form-select>
-                </div>
-                <div v-if="user.role.id === 1" class="row__user-lables">
-                  <label class="row__lables-label">Пользователь</label>
-                  <b-form-input
-                    class="row__user-input"
-                    type="text"
-                    placeholder="+7 (999) 999-99-99"
-                    v-model="data.user"
-                    v-mask="'+7 (###) ###-##-##'"
-                    maxlength="18"
-                  />
-                </div>
-                <div
-                  v-if="user.role.id === 1 || user.role.id === 2"
-                  class="row__tag-lables"
-                >
-                  <label class="row__lables-label">Тэги</label>
-                  <b-form-select
-                    class="form__select"
-                    v-model="data.tag"
-                    :options="options_tags"
-                  >
-                  </b-form-select>
-                </div>
-                <div
-                  v-if="user.role.id === 1 || user.role.id === 2"
-                  class="row__tag-lables"
-                >
-                  <label class="row__lables-label">Проверка менеджера</label>
-                  <b-form-select
-                    class="form__select"
-                    v-model="data.manager"
-                    :options="options_manager"
-                  >
-                  </b-form-select>
-                </div>
-                <div
-                  v-if="user.role.id === 1 || user.role.id === 2"
-                  class="row__comment-manager-lables"
-                >
-                  <label class="row__lables-label">Комментарий менеджера</label>
-                  <b-form-textarea
-                    class="form__textarea-manager"
-                    placeholder="Комментарий менеджера"
-                    rows="5"
-                    no-resize
-                    v-model="data.commentManager"
-                    :value="data.commentManager"
-                  />
-                </div>
-                <div v-if="user.role.id === 1" class="row__tag-lables">
-                  <label class="row__lables-label">Проверка клиента</label>
-                  <b-form-select
-                    class="form__select"
-                    v-model="data.client"
-                    :options="options_client"
-                  >
-                  </b-form-select>
-                </div>
-                <div class="row__comment-client-lables">
-                  <label class="row__lables-label">Комментарий клиента</label>
-                  <b-form-textarea
-                    class="form__textarea-client"
-                    placeholder="Комментарий клиента"
-                    rows="5"
-                    no-resize
-                    v-model="data.commentClient"
-                    :value="data.commentClient"
-                  />
-                </div>
-                <div class="modal__form-buttons">
-                  <!-- <b-button
-                    v-if="rows[0].id !== data.id"
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="secondary"
-                    @click="prevAppeal"
-                  >
-                    Назад
-                  </b-button> -->
-                  <b-button
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="secondary"
-                    @click="hideModal"
-                  >
-                    Отменить
-                  </b-button>
-                  <b-button
-                    @click="saveModal"
-                    class="form__button-margin"
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="primary"
-                  >
-                    Сохранить
-                  </b-button>
-                  <!-- <b-button
-                    v-if="rows[rows.length - 1].id !== data.id"
-                    @click="nextAppeal"
-                    class="form__button-margin"
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="primary"
-                  >
-                    Вперёд
-                  </b-button> -->
-                </div>
-              </div>
-            </div>
-          </div>
-        </swiper-slide>
-
-        <!-- Arrows -->
-        <div slot="button-next" class="swiper-button-next" />
-        <div slot="button-prev" class="swiper-button-prev" />
-        <div slot="pagination" class="swiper-pagination" />
-      </swiper>
+      </multiselect>
     </b-modal>
   </div>
 </template>
@@ -496,7 +352,7 @@ import {
   BFormTextarea,
   BSpinner,
 } from "bootstrap-vue";
-
+import ModalSeeProject from "./ModalSeeProject.vue";
 import Search from "./Search.vue";
 import Filters from "./Filters.vue";
 import { Swiper, SwiperSlide } from "vue-awesome-swiper";
@@ -509,6 +365,7 @@ import Ripple from "vue-ripple-directive";
 import "@core/scss/vue/libs/vue-select.scss";
 import axios from "axios";
 import {
+  SlashIcon,
   CheckIcon,
   XCircleIcon,
   AlertCircleIcon,
@@ -521,6 +378,7 @@ import {
 } from "vue-feather-icons";
 export default {
   components: {
+    ModalSeeProject,
     BSpinner,
     Filters,
     Search,
@@ -561,72 +419,62 @@ export default {
       perfectScrollbarSettings: {
         maxScrollbarLength: 150,
       },
-      manager: [
-        { value: "целевой", icon: "CheckIcon" },
-        { value: "не целевой", icon: "XCircleIcon" },
-        { value: "не установленный", icon: "XSquareIcon" },
-      ],
       managerObject: {},
       clientObject: {},
-      client: [
-        { value: "целевой", icon: "CheckIcon" },
-        { value: "не целевой", icon: "XCircleIcon" },
-        { value: "не проверенный", icon: "XSquareIcon" },
-      ],
       pageLength: 10,
       dir: false,
       columns: [
         {
           label: "Дата и время",
-          field: "Date",
+          field: "datetime",
           width: "100px",
           thClass: "columnCenter",
         },
         {
           label: "Продол. звонка",
-          field: "call",
-          width: "80px",
+          field: "duration",
+          width: "120px",
           thClass: "columnCenter",
         },
         {
           label: "Источник",
-          field: "source",
-          width: "230px",
+          field: "source ",
+          width: "200px",
           thClass: "columnCenter",
         },
         {
           label: "Пользователь",
-          field: "user",
+          field: "phone",
           thClass: "columnCenter",
           width: "180px",
         },
         {
           label: "Менеджер",
-          field: "Managment",
+          field: "manager",
           width: "130px",
           thClass: "columnCenter",
         },
         {
           label: "Клиент",
-          field: "Client",
+          field: "client",
           width: "130px",
           thClass: "columnCenter",
           // tdClass: 'text-center', пользовательский класс для ячеек таблицы
         },
         {
-          label: "Тэги обращения",
-          field: "tag",
+          label: "Тэги",
+          field: "tags",
           width: "130px",
           thClass: "columnCenter",
         },
         {
           label: "Комментарий менеджера",
-          field: "commentManager",
+          field: "manager_comment",
           thClass: "columnCenter",
         },
         {
           label: "Комментарий клиента",
-          field: "commentClient",
+          field: "client_comment",
           thClass: "columnCenter",
         },
         {
@@ -637,22 +485,8 @@ export default {
         },
       ],
       selected: {},
-      options_tags: [
-        { value: null, text: "—" },
-        { value: "балкон", text: "балкон" },
-        { value: "окна", text: "окна" },
-      ],
-      options_source: [
-        {
-          value: null,
-          text: "—",
-        },
-        {
-          value: "Задарма: Adwords на nw61.ru + Я.Объявления",
-          text: "Задарма: Adwords на nw61.ru + Я.Объявления",
-        },
-        { value: "Задарма: Оконский Директ", text: "Задарма: Оконский Директ" },
-      ],
+      options_tags: [],
+      options_source: [],
       options_manager: [
         { value: null, text: "—" },
         { value: "целевой", text: "целевой" },
@@ -666,7 +500,6 @@ export default {
         { value: "не проверенный", text: "не проверенный" },
       ],
       rows: [],
-      user: "",
       searchTerm: "",
       sortedFilter: [],
       arr: [],
@@ -691,27 +524,40 @@ export default {
       },
       checkboxUser: [],
       arrayChat: [],
-      getDT: false,
-      project: "",
+      project: [],
+      option_project: [],
+      user: "",
     };
   },
   methods: {
-    quantity_minus(call) {
-      let temp = call.toString().replace(/[^0-9]/g, "");
-      call = Number(temp);
-      if (call >= 10) {
-        call -= 10;
-        this.modalArray[this.modalCounter].call = "";
-        this.modalArray[this.modalCounter].call += call + " секунд";
+    async selectProject(project) {
+      await this.$store.commit("SET_PROJECT", project);
+      await this.$store.dispatch("getDataTable");
+      await this.$store.dispatch("getSourceTable");
+      await this.$store.dispatch("getTagsTable");
+    },
+    showProjectModal() {
+      this.$refs["project__modal"].show();
+    },
+    async saveProjectModal() {
+      await this.$store.commit("SET_PROJECT", this.project);
+    },
+    quantity_minus(duration) {
+      let temp = duration.toString().replace(/[^0-9]/g, "");
+      duration = Number(temp);
+      if (duration >= 10) {
+        duration -= 10;
+        this.modalArray[this.modalCounter].duration = "";
+        this.modalArray[this.modalCounter].duration += duration + " секунд";
       }
     },
-    quantity_plus(call) {
-      call = call.toString().replace(/[^0-9]/g, "");
-      call = Number(call);
-      call += 10;
+    quantity_plus(duration) {
+      duration = duration.toString().replace(/[^0-9]/g, "");
+      duration = Number(duration);
+      duration += 10;
 
-      this.modalArray[this.modalCounter].call = "";
-      this.modalArray[this.modalCounter].call += call + " секунд";
+      this.modalArray[this.modalCounter].duration = "";
+      this.modalArray[this.modalCounter].duration += duration + " секунд";
     },
     changeSlideNext() {
       this.modalCounter++;
@@ -748,9 +594,9 @@ export default {
       this.selected = select;
     },
     resetFilters() {
-      this.selected.tag = null;
+      this.selected.tags = null;
       this.selected.source = null;
-      this.selected.date = null;
+      this.selected.datetime = null;
       this.selected.manager = null;
       this.selected.client = null;
       this.selected.deleted = null;
@@ -764,6 +610,7 @@ export default {
           .get("api/user ")
           .then((response) => {
             this.user = response.data;
+            this.option_project = this.user.projects;
           })
           .catch((error) => {
             if (error.response.status === 401) {
@@ -789,48 +636,6 @@ export default {
           });
       });
     },
-    async getDataTable() {
-      try {
-        axios
-          .get("/api/data")
-          .then((response) => {
-            this.rows = response.data;
-            this.getDT = true;
-            this.rows.forEach((row) => {
-              const activeManager =
-                this.manager.find((m) => m.value == row.manager) || null;
-              this.$set(this.managerObject, row.id, activeManager);
-              const activeClient =
-                this.client.find((c) => c.value == row.client) || null;
-              this.$set(this.clientObject, row.id, activeClient);
-            });
-            this.historyArray = [];
-            this.rows.filter((row, index, k) => {
-              k = 0;
-              for (let i = 0; i < index; i++) {
-                if (row.user === this.rows[i].user) {
-                  k++;
-                  if (k < 2) {
-                    this.historyArray.push(this.rows[i].id);
-                  }
-                }
-              }
-            });
-            this.historyArray = [...new Set(this.historyArray)];
-          })
-          .catch((error) => {
-            const vNodesMsg = [`${error.response.data.error}`];
-            this.$bvToast.toast([vNodesMsg], {
-              title: `Ошибка`,
-              variant: "danger",
-              solid: true,
-              appendToast: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 3000,
-            });
-          });
-      } catch (error) {}
-    },
     selectionChanged(params) {
       this.rowSelection = params.selectedRows;
       if (this.rowSelection.length) {
@@ -840,10 +645,10 @@ export default {
       }
     },
     historyUser(row) {
-      this.searchTerm = row.user;
+      this.searchTerm = row.phone;
       this.arraySearch = [];
-      this.rows.filter((item) => {
-        if (item.user === this.searchTerm) {
+      this.getDataTable.filter((item) => {
+        if (item.phone === this.searchTerm) {
           this.arraySearch.push(item);
         }
       });
@@ -858,7 +663,7 @@ export default {
         let temp = row;
         this.modalArray = [];
         let i = 0;
-        this.rows.filter((item) => {
+        this.getDataTable.filter((item) => {
           if (temp.id === item.id) {
             i++;
           }
@@ -887,13 +692,17 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.rows.length) {
-            this.rows.filter((index, i) => {
+          if (this.getDataTable.length) {
+            this.getDataTable.filter((index, i) => {
               if (index.id === this.modalArray.id) {
                 axios
-                  .delete("/api/data/" + this.modalArray.id)
+                  .delete(
+                    "api/projects/" +
+                      this.getProject.id +
+                      "/claims/" +
+                      this.modalArray.id
+                  )
                   .then(() => {
-                    this.rows.splice(i, 1);
                     if (result.value) {
                       this.$swal({
                         icon: "success",
@@ -916,6 +725,7 @@ export default {
                       autoHideDelay: 3000,
                     });
                   });
+                this.getDataTable.splice(i, 1);
               }
             });
           } else if (result.dismiss === "cancel") {
@@ -934,59 +744,35 @@ export default {
     hideModal() {
       this.$refs["modal__window"].hide();
     },
-    async saveModal() {
-      try {
-        await axios
-          .put("/api/data/" + this.modalArray[this.modalCounter].id, {
-            id: this.modalArray[this.modalCounter].id,
-            date: this.modalArray[this.modalCounter].date,
-            call: this.modalArray[this.modalCounter].call,
-            commentManager: this.modalArray[this.modalCounter].commentManager,
-            source: this.modalArray[this.modalCounter].source,
-            user: this.modalArray[this.modalCounter].user,
-            tag: this.modalArray[this.modalCounter].tag,
-            commentClient: this.modalArray[this.modalCounter].commentClient,
-            manager: this.modalArray[this.modalCounter].manager,
-            client: this.modalArray[this.modalCounter].client,
-            dialog: this.modalArray[this.modalCounter].dialog,
-          })
-          .then(() => {
-            this.$refs["modal__window"].hide();
-          })
-          .catch((error) => {
-            const vNodesMsg = [`${error.response.data.error}`];
-            this.$bvToast.toast([vNodesMsg], {
-              title: `Ошибка`,
-              variant: "danger",
-              solid: true,
-              appendToast: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 3000,
-            });
-          });
-
-        await this.getDataTable();
-      } catch (error) {}
+    hideProjectModal() {
+      this.$refs["project__modal"].hide();
     },
+
     async changeIconManager(id, manager) {
-      this.rows.map((row) => {
+      this.getDataTable.map((row) => {
         if (row.id === id) {
-          row.manager = manager.value;
+          row.manager.check.text = manager.value;
+          let tempTagsId = [];
+          row.tags.filter((item) => {
+            tempTagsId.push(item.id);
+          });
+          console.log("client_check = " + row.client.check.value);
           axios
-            .put("/api/data/" + id, {
-              id: id,
-              date: row.date,
-              call: row.call,
-              commentManager: row.commentManager,
-              source: row.source,
-              user: row.user,
-              tag: row.tag,
-              commentClient: row.commentClient,
-              manager: manager.value,
-              client: row.client,
+            .put(" api/projects/" + this.getProject.id + "/claims/" + id, {
+              datetime: row.datetime,
+              duration: row.duration.original,
+              manager_comment: row.manager_comment,
+              client_comment: row.client_comment,
+              source_id: row.source.id,
+              phone: row.phone.original,
+              tags: tempTagsId,
+              manager_check: row.manager.check.value,
+              client_check: row.client.check.value,
             })
             .then(() => {
-              this.$set(this.managerObject, id, manager);
+              let manager_object = {};
+              this.$set(manager_object, id, manager);
+              this.$store.commit("SET_MANAGER_OBJECT", manager_object);
             })
             .catch((error) => {
               const vNodesMsg = [`${error.response.data.error}`];
@@ -1003,24 +789,26 @@ export default {
       });
     },
     changeIconClient(id, client) {
-      this.rows.map((row) => {
+      this.getDataTable.map((row) => {
         if (row.id === id) {
           row.client = client.value;
           axios
             .put("/api/data/" + id, {
               id: id,
-              date: row.date,
-              call: row.call,
-              commentManager: row.commentManager,
+              datetime: row.datetime,
+              duration: row.duration,
+              manager_comment: row.manager_comment,
               source: row.source,
-              user: row.user,
-              tag: row.tag,
-              commentClient: row.commentClient,
+              phone: row.phone,
+              tags: row.tags,
+              client_comment: row.client_comment,
               manager: row.manager,
               client: client.value,
             })
             .then(() => {
-              this.$set(this.clientObject, id, client);
+              let client_object = {};
+              this.$set(client_object, id, client);
+              this.$store.commit("SET_CLIENT_OBJECT", client_object);
             })
             .catch((error) => {
               const vNodesMsg = [`${error.response.data.error}`];
@@ -1036,40 +824,36 @@ export default {
         }
       });
     },
-    // nextAppeal() {
-    //   try {
-    //     let j = 0;
-    //     this.modalPrevCounter = 0;
-    //     for (let i in this.rows) {
-    //       if (this.rows[i].id === this.modalArrayNext[0].id) {
-    //         this.modalCounter = i;
-    //         this.modalArrayNext = [];
-    //         this.modalArrayNext.push(this.rows[j + 1]);
-    //         this.modalArray = this.modalArrayNext[0];
-    //       } else {
-    //         j++;
-    //       }
-    //     }
-    //   } catch (error) {
-    //     console.log(error.message);
-    //   }
-    // },
-    // prevAppeal() {
-    //   let j = this.modalCounter;
-    //   this.modalPrevCounter = this.modalPrevCounter + 1;
-    //   for (let i in this.rows) {
-    //     if (this.rows[j - this.modalPrevCounter].id === undefined) {
-    //     }
-    //     this.modalArrayNext = [];
-    //     this.modalArrayNext.push(this.rows[j - this.modalPrevCounter]);
-    //     this.modalArray = this.modalArrayNext[0];
-    //   }
-    // },
-    inputSpinButton(call) {
-      this.modalArray[this.modalCounter].call = call + " секунд";
+    inputSpinButton(duration) {
+      this.modalArray[this.modalCounter].duration = duration + " секунд";
     },
   },
   computed: {
+    getDataTable() {
+      let managerObject = {};
+      let clientObject = {};
+      this.$store.getters.getClaims.forEach((row) => {
+        const activeManager =
+          this.$store.getters.manager.find(
+            (m) => m.value == row.manager.check.text
+          ) || null;
+        this.$set(managerObject, row.id, activeManager);
+        this.$store.commit("SET_MANAGER_OBJECT", managerObject);
+        const activeClient =
+          this.$store.getters.client.find(
+            (c) => c.value == row.client.check.text
+          ) || null;
+        this.$set(clientObject, row.id, activeClient);
+        this.$store.commit("SET_CLIENT_OBJECT", clientObject);
+      });
+      return this.$store.getters.getClaims;
+    },
+    getTagsTable() {
+      return this.$store.getters.getTags;
+    },
+    getSourceTable() {
+      return this.$store.getters.getSources;
+    },
     sorted() {
       if (this.arraySearch.length) {
         return this.arraySearch;
@@ -1091,13 +875,30 @@ export default {
         });
         return filteredRows;
       } else {
-        return this.rows;
+        return this.getDataTable;
       }
+    },
+    getProject() {
+      return this.$store.getters.project;
+    },
+    getManager() {
+      return this.$store.getters.manager;
+    },
+    getClient() {
+      return this.$store.getters.client;
+    },
+    getManagerObject() {
+      return this.$store.getters.getManagerObject;
+    },
+    getClientObject() {
+      return this.$store.getters.getClientObject;
     },
   },
   created() {
-    this.getDataTable();
     this.getDataUser();
+  },
+  mounted() {
+    this.$bvModal.show("Project__modal");
   },
 };
 </script>
@@ -1105,7 +906,7 @@ export default {
 @import "~@core/scss/base/pages/app-chat.scss";
 @import "~@core/scss/base/pages/app-chat-list.scss";
 </style>
-// :dateFormatOptions="{
+// :datetimeFormatOptions="{
 //                   year: 'numeric',
 //                   month: 'numeric',
 //                   day: 'numeric',

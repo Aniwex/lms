@@ -234,7 +234,7 @@ export default {
           .then(() => {
             this.$router.push("/Projects");
           });
-        await this.$store.dispatch("SET_PROJECTS");
+        await this.$store.dispatch("SET_USER");
       } catch (error) {
         this.enter = false;
         const vNodesMsg = [`${error.response.data.error}`];
@@ -267,7 +267,7 @@ export default {
             users: tempUserId,
           })
           .then(() => {
-            this.$store.dispatch("SET_PROJECTS");
+            this.$store.dispatch("SET_USER");
             this.mirrows = [{ value: "" }];
             this.name = "";
             this.domain = "";
@@ -337,13 +337,6 @@ input {
 
   flex-direction: row;
   margin: 24px 32px 24px 32px;
-}
-.multiselect-input {
-  width: 416px;
-  height: 36px !important;
-  border-radius: 0.5rem;
-  border-width: 1px;
-  background-color: #fff;
 }
 .btn {
   margin-left: 12px;

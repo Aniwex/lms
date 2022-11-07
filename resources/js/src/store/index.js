@@ -18,11 +18,36 @@ export default new Vuex.Store({
         searchHistory: "",
         projects: "",
         project: "",
+        claims: [],
+        sources: [],
+        tags: [],
+        manager: [
+            { value: "целевой", icon: "CheckCircleIcon" },
+            { value: "не целевой", icon: "XCircleIcon" },
+            { value: "не установленный", icon: "XSquareIcon" },
+        ],
+        client: [
+            { value: "целевой", icon: "CheckCircleIcon" },
+            { value: "не целевой", icon: "XCircleIcon" },
+            { value: "не проверенный", icon: "XSquareIcon" },
+        ],
+        historyArray: [],
+        manager_object: {},
+        client_object: {},
     },
 
     mutations: {
         SET_ENTERED: (state, response) => {
             state.entered = response;
+        },
+        SET_CLAIMS: (state, response) => {
+            state.claims = response;
+        },
+        SET_SOURCES: (state, response) => {
+            state.sources = response;
+        },
+        SET_TAGS: (state, response) => {
+            state.tags = response;
         },
         SET_SEEACTION: (state, payload) => {
             state.seeAction = payload;
@@ -42,6 +67,15 @@ export default new Vuex.Store({
         SET_PROJECT: (state, payload) => {
             state.project = payload;
         },
+        SET_HISTORY_ARRAY: (state, payload) => {
+            state.historyArray = payload;
+        },
+        SET_MANAGER_OBJECT: (state, payload) => {
+            state.manager_object = payload;
+        },
+        SET_CLIENT_OBJECT: (state, payload) => {
+            state.client_object = payload;
+        },
     },
     actions: {
         SET_PROJECTS: async (ctx) => {
@@ -50,45 +84,89 @@ export default new Vuex.Store({
                 ctx.commit("SET_PROJECTS", projects);
             });
         },
+        getSourceTable: async (ctx) => {
+            await axios
+                .get(" api/projects/" + ctx.getters.project.id + "/sources")
+                .then((response) => {
+                    let sources = response.data.sources;
+                    ctx.commit("SET_SOURCES", sources);
+                });
+        },
+        getTagsTable: async (ctx) => {
+            await axios
+                .get(" api/projects/" + ctx.getters.project.id + "/tags")
+                .then((response) => {
+                    let tags = response.data.tags;
+                    tags.filter((item) => {
+                        item.client_plus_words =
+                            item.client_plus_words.join("\n");
+                        item.client_minus_words =
+                            item.client_minus_words.join("\n");
+                        item.operator_plus_words =
+                            item.operator_plus_words.join("\n");
+                        item.operator_minus_words =
+                            item.operator_minus_words.join("\n");
+                    });
+                    ctx.commit("SET_TAGS", tags);
+                });
+        },
+        getDataTable: async (ctx) => {
+            axios
+                .get("api/projects/" + ctx.getters.project.id + "/claims")
+                .then((response) => {
+                    let claims = response.data.claims;
+                    ctx.commit("SET_CLAIMS", claims);
+                    claims.filter((row, index, k) => {
+                        k = 0;
+                        for (let i = 0; i < index; i++) {
+                            if (row.phone === claims[i].phone) {
+                                k++;
+                                if (k < 2) {
+                                    // historyArray.push(this.rows[i].id);
+                                    ctx.commit(
+                                        "SET_HISTORY_ARRAY",
+                                        this.rows[i].id
+                                    );
+                                }
+                            }
+                        }
+                    });
+                    ctx.commit("SET_HISTORY_ARRAY", [
+                        ...new Set(ctx.getters.historyArray),
+                    ]);
+                });
+        },
         SET_USER: async (ctx) => {
             await axios.get("/sanctum/csrf-cookie").then((response) => {
                 axios
-                  .get("api/user")
-                  .then((response) => {
-                    this.user = response.data;
-                    if (this.user.role.id === 1) {
-                      const obj = {
-                        label: "Действие",
-                        field: "action",
-                        thClass: "columnCenter",
-                        width: "200px",
-                      };
-                      this.columns.push(obj);
-                    }
-                  })
-                  .catch((error) => {
-                    if (error.response.status === 401) {
-                      axios.get("/logout").then((resp) => {
-                        localStorage.removeItem(
-                          "x_xsrf_token",
-                          resp.config.headers["X-XSRF-TOKEN"]
-                        );
-                        this.$router.push("/");
-                        this.$store.commit("SET_ENTERED", false);
-                      });
-                    } else {
-                      const vNodesMsg = [`${error.response.data.error}`];
-                      this.$bvToast.toast([vNodesMsg], {
-                        title: `Ошибка`,
-                        variant: "danger",
-                        solid: true,
-                        appendToast: true,
-                        toaster: "b-toaster-top-center",
-                        autoHideDelay: 3000,
-                      });
-                    }
-                  });
-              });
+                    .get("api/user")
+                    .then((response) => {
+                        const user = response.data;
+                        ctx.commit("SET_USER", user);
+                    })
+                    .catch((error) => {
+                        if (error.response.status === 401) {
+                            axios.get("/logout").then((resp) => {
+                                localStorage.removeItem(
+                                    "x_xsrf_token",
+                                    resp.config.headers["X-XSRF-TOKEN"]
+                                );
+                                this.$router.push("/");
+                                this.$store.commit("SET_ENTERED", false);
+                            });
+                        } else {
+                            const vNodesMsg = [`${error.response.data.error}`];
+                            this.$bvToast.toast([vNodesMsg], {
+                                title: `Ошибка`,
+                                variant: "danger",
+                                solid: true,
+                                appendToast: true,
+                                toaster: "b-toaster-top-center",
+                                autoHideDelay: 3000,
+                            });
+                        }
+                    });
+            });
         },
         getDataUsers: async (ctx) => {
             await axios
@@ -123,14 +201,38 @@ export default new Vuex.Store({
         searchHistory: (state) => {
             return state.searchHistory;
         },
-        user: (state) => {
-            return state.user;
-        },
         projects: (state) => {
             return state.projects;
         },
         project: (state) => {
             return state.project;
+        },
+        getUser: (state) => {
+            return state.user;
+        },
+        getClaims: (state) => {
+            return state.claims;
+        },
+        getSources: (state) => {
+            return state.sources;
+        },
+        getTags: (state) => {
+            return state.tags;
+        },
+        getManagerObject: (state) => {
+            return state.manager_object;
+        },
+        getClientObject: (state) => {
+            return state.client_object;
+        },
+        manager: (state) => {
+            return state.manager;
+        },
+        client: (state) => {
+            return state.client;
+        },
+        historyArray: (state) => {
+            return state.historyArray;
         },
     },
     modules: {
