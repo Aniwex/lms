@@ -225,14 +225,14 @@ router.beforeEach((to, from, next) => {
         (to.name === "Home" ||
             to.name === "Добавить обращение" ||
             to.name === "Tags" ||
+            to.name === "Users" ||
             to.name === "Sources" ||
             to.name === "Integration" ||
             to.name === "Добавить интеграцию" ||
             to.name === "Добавить пользователя" ||
             to.name === "Добавить тэг" ||
             to.name === "Добавить иcточник" ||
-            to.name === "Добавить проект" ||
-            to.name === "Users") &&
+            to.name === "Добавить проект") &&
         !token
     ) {
         return next({

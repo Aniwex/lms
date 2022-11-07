@@ -6,16 +6,12 @@
           <label class="form__apeal-label">Дата и время</label>
           <flat-pickr
             placeholder="Выберите дату и время"
-            v-model="dateAppeal"
+            v-model="datetime"
             class="form__apeal-control row__date-pickr"
             :config="{
               enableTime: true,
-              dateFormat: 'd.m.Y H:i:s',
+              dateFormat: 'Y-m-d H:i:s',
               enableSeconds: true,
-            }"
-            :class="{
-              nonActiveDatePicr: !dateAppeal,
-              activeDatePicr: dateAppeal,
             }"
           />
         </div>
@@ -24,14 +20,12 @@
           <div>
             <b-form-spinbutton
               class="form__spinbutton"
-              v-model="selected.rangeAppeal"
+              v-model="selected.duration"
               min="0"
               max="1000"
               step="10"
-              @input="inputSpinButton"
               :state="
-                selected.rangeAppeal === '0 секунд' ||
-                selected.rangeAppeal === 0
+                selected.duration === '0 секунд' || selected.duration === 0
                   ? false
                   : true
               "
@@ -42,13 +36,18 @@
         <div class="form__appeal-group">
           <label class="form__apeal-label">Источник</label>
           <div>
-            <b-form-select
-              class="form__appeal-input"
-              v-model="selected.source"
-              :options="options_source"
-              :state="selected.source === null ? false : true"
+            <multiselect
+              v-model="selected.source_id"
+              :options="getSourceTable"
+              selectLabel="Нажмите enter для выбора"
+              deselectLabel="Нажмите enter для удаления"
+              selectedLabel="Выбрано"
+              class="multiselect-input"
+              label="name"
+              track-by="name"
+              placeholder="Выберите источник"
             >
-            </b-form-select>
+            </multiselect>
             <!-- <b-form-checkbox
               v-model="selectedCheckBox"
               value="true"
@@ -64,20 +63,26 @@
             class="form__appeal-input"
             type="text"
             placeholder="+7 (999) 999-99-99"
-            v-model="form.phone"
+            v-model="phone"
             v-mask="'+7 (###) ###-##-##'"
-            :state="form.phone === '' || form.phone === null ? false : true"
+            :state="phone === '' || phone === null ? false : true"
           />
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Тэги </label>
-          <b-form-select
-            class="form__appeal-input"
-            v-model="selected.tag"
-            :options="options_tag"
-            :state="selected.tag === null ? false : true"
+          <multiselect
+            v-model="tags"
+            :options="getTagsTable"
+            selectLabel="Нажмите enter для выбора"
+            deselectLabel="Нажмите enter для удаления"
+            selectedLabel="Выбрано"
+            :multiple="true"
+            class="multiselect-input"
+            label="name"
+            track-by="name"
+            placeholder="Выберите тэг"
           >
-          </b-form-select>
+          </multiselect>
         </div>
       </div>
     </div>
@@ -86,14 +91,18 @@
       <div class="container__appeal">
         <div class="form__appeal-group">
           <label class="form__apeal-label">Признак целевого</label>
-          <b-form-select
-            style="display: block; text-align: center"
-            class="form__appeal-input"
-            v-model="selected.manager"
-            :options="options_manager"
-            :state="selected.manager === null ? false : true"
+          <multiselect
+            v-model="selected.manager_check"
+            :options="options_manager_check"
+            selectLabel="Нажмите enter для выбора"
+            deselectLabel="Нажмите enter для удаления"
+            selectedLabel="Выбрано"
+            class="multiselect-input"
+            label="text"
+            track-by="text"
+            placeholder="Выберите целевое"
           >
-          </b-form-select>
+          </multiselect>
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Комментарий</label>
@@ -102,7 +111,7 @@
             placeholder="Комментарий"
             rows="5"
             no-resize
-            v-model="selected.commentManager"
+            v-model="selected.manager_comment"
           />
         </div>
       </div>
@@ -112,14 +121,18 @@
       <div class="container__appeal">
         <div class="form__appeal-group">
           <label class="form__apeal-label">Признак целевого</label>
-          <b-form-select
-            style="display: block; text-align: center"
-            class="form__appeal-input"
-            v-model="selected.client"
-            :options="options_client"
-            :state="selected.client === null ? false : true"
+          <multiselect
+            v-model="selected.client_check"
+            :options="options_client_check"
+            selectLabel="Нажмите enter для выбора"
+            deselectLabel="Нажмите enter для удаления"
+            selectedLabel="Выбрано"
+            class="multiselect-input"
+            label="text"
+            track-by="text"
+            placeholder="Выберите целевое"
           >
-          </b-form-select>
+          </multiselect>
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Комментарий</label>
@@ -128,7 +141,7 @@
             placeholder="Комментарий"
             rows="5"
             no-resize
-            v-model="selected.commentClient"
+            v-model="selected.client_comment"
           />
         </div>
       </div>
@@ -193,82 +206,77 @@ export default {
   },
   data() {
     return {
-      dateAppeal: null,
+      datetime: "",
       value_spinbutton: "",
+      tags: [],
       selected: {
-        tag: null,
-        rangeAppeal: 0,
-        source: null,
-        manager: null,
-        client: null,
+        duration: 0,
+        source_id: [],
+        manager_check: null,
+        client_check: null,
         redirected: "",
-        commentManager: "",
-        commentClient: "",
+        manager_comment: "",
+        client_comment: "",
       },
+      temp_manager_comment: [],
+      temp_client_comment: [],
       enter: false,
       flatpicr: false,
-      options_tag: [
-        { value: null, text: "—" },
-        { value: "балкон", text: "балкон" },
-        { value: "окна", text: "окна" },
-      ],
-      options_source: [
+      options_tags: [{ value: "балкон" }, { value: "окна" }],
+      options_source_id: [
         {
           value: null,
           text: "—",
         },
         {
-          value: "Задарма: Adwords на nw61.ru + Я.Объявления",
-          text: "Задарма: Adwords на nw61.ru + Я.Объявления",
+          value: 1,
+          text: 1,
         },
-        { value: "Задарма: Оконский Директ", text: "Задарма: Оконский Директ" },
+        { value: 2, text: 2 },
       ],
-      options_manager: [
-        { value: null, text: "—" },
-        { value: "целевой", text: "целевой" },
-        { value: "не целевой", text: "не целевой" },
-        { value: "не установленный", text: "не установленный" },
+      options_manager_check: [
+        { value: "targeted", text: "целевой" },
+        { value: "untargeted", text: "не целевой" },
+        { value: "unidentified", text: "не установленный" },
       ],
-      options_client: [
-        { value: null, text: "—" },
-        { value: "целевой", text: "целевой" },
-        { value: "не целевой", text: "не целевой" },
-        { value: "не проверенный", text: "не проверенный" },
+      options_client_check: [
+        { value: "targeted", text: "целевой" },
+        { value: "untargeted", text: "не целевой" },
+        { value: "unchecked", text: "не проверенный" },
       ],
       selectedCheckBox: false,
-      form: {
-        phone: null,
-      },
+      phone: null,
       dateNtim: null,
     };
   },
   methods: {
     async addAppeal() {
+      console.log("manager_check = " + this.selected.manager_check.value);
+      console.log("client_check = " + this.selected.client_check.value);
+
+      let tempTagsId = [];
+      this.tags.filter((item) => {
+        tempTagsId.push(item.id);
+      });
       try {
-        if (
-          this.dateAppeal &&
-          this.selected.rangeAppeal &&
-          this.selected.source &&
-          this.form.phone &&
-          this.selected.tag &&
-          this.selected.client &&
-          this.selected.manager &&
-          this.form.phone.length === 18
-        ) {
-          this.enter = true;
-          await axios.post("/api/data", {
-            id: Date.now(),
-            date: this.dateAppeal,
-            call: this.selected.rangeAppeal,
-            source: this.selected.source,
-            user: this.form.phone,
-            tag: this.selected.tag,
-            client: this.selected.client,
-            manager: this.selected.manager,
-            commentManager: this.selected.commentManager,
-            commentClient: this.selected.commentClient,
-          });
-          this.$router.push("/Home");
+        if (this.selected.duration) {
+          await axios
+            .post("api/projects/" + this.getProject.id + "/claims", {
+              duration: this.selected.duration,
+              datetime: this.datetime,
+              source_id: this.selected.source_id.id,
+              phone: this.phone,
+              manager_check: this.selected.manager_check.value,
+              client_check: this.selected.client_check.value,
+              manager_comment: this.selected.manager_comment,
+              client_comment: this.selected.client_comment,
+              tags: tempTagsId,
+            })
+            .then(() => {
+              this.$store.dispatch("getDataTable");
+              this.enter = true;
+              this.$router.push("/Home");
+            });
         } else {
           this.$bvToast.toast("Пожалуйтса заполните все поля", {
             title: `Ошибка`,
@@ -279,41 +287,54 @@ export default {
             autoHideDelay: 2000,
           });
         }
-      } catch (error) {}
+      } catch (error) {
+        const vNodesMsg = [`${error.response.data.error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
+      }
     },
     async CreateAndAddAppeal() {
       try {
         if (
-          this.dateAppeal &&
-          this.selected.rangeAppeal &&
-          this.selected.source &&
-          this.form.phone &&
-          this.selected.tag &&
-          this.selected.client &&
-          this.selected.manager &&
-          this.form.phone.length === 18
+          this.datetime &&
+          this.selected.duration &&
+          this.selected.source_id &&
+          this.phone &&
+          this.tags &&
+          this.selected.client_check &&
+          this.selected.manager_check &&
+          this.phone.length === 18
         ) {
-          await axios.post("/api/data", {
-            id: Date.now(),
-            date: this.dateAppeal,
-            call: this.selected.rangeAppeal,
-            source: this.selected.source,
-            user: this.form.phone,
-            tag: this.selected.tag,
-            client: this.selected.client,
-            manager: this.selected.manager,
-            commentManager: this.selected.commentManager,
-            commentClient: this.selected.commentClient,
-          });
-          this.dateAppeal = null;
-          this.selected.rangeAppeal = 0;
-          this.selected.source = null;
-          this.form.phone = null;
-          this.selected.tag = null;
-          this.selected.manager = null;
-          this.selected.client = null;
-          this.selected.commentManager = null;
-          this.selected.commentClient = null;
+          await axios
+            .post(" api/projects/{project}/claims", {
+              datetime: this.datetime,
+              duration: this.selected.duration,
+              source_id: this.selected.source_id,
+              phone: this.phone,
+              tags: this.tags,
+              client_check: this.selected.client_check,
+              manager_check: this.selected.manager_check,
+              manager_comment: this.selected.manager_comment,
+              client_comment: this.selected.client_comment,
+            })
+            .then(() => {
+              this.$store.dispatch("getDataTable");
+            });
+          this.datetime = null;
+          this.selected.duration = 0;
+          this.selected.source_id = null;
+          this.phone = null;
+          this.tags = null;
+          this.selected.manager_check = null;
+          this.selected.client_check = null;
+          this.selected.manager_comment = null;
+          this.selected.client_comment = null;
         } else {
           this.$bvToast.toast("Пожалуйтса заполните все поля", {
             title: `Ошибка`,
@@ -324,13 +345,37 @@ export default {
             autoHideDelay: 2000,
           });
         }
-      } catch (error) {}
+      } catch (error) {
+        const vNodesMsg = [`${error.response.data.error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
+      }
     },
-    inputSpinButton(call) {
-      this.selected.rangeAppeal = call + " секунд";
+    // inputSpinButton(duration) {
+    //   this.selected.duration = duration + " секунд";
+    // },
+  },
+  computed: {
+    getProject() {
+      return this.$store.getters.project;
+    },
+    getTagsTable() {
+      return this.$store.getters.getTags;
+    },
+    getSourceTable() {
+      return this.$store.getters.getSources;
     },
   },
   mounted() {
+    if (!this.$store.getters.project) {
+      this.$router.push("/Home");
+    }
     this.$store.commit("SET_ENTERED", true);
   },
 };
@@ -338,10 +383,10 @@ export default {
 
 <style scoped>
 .nonActiveDatePicr {
-  border:1px solid #ea5455;
+  border: 1px solid #ea5455;
 }
 .activeDatePicr {
-  border:1px solid #28c76f;
+  border: 1px solid #28c76f;
   background: #fff;
 }
 .text-manager {

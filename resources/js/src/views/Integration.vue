@@ -148,6 +148,8 @@
       size="lg"
       ref="modal__window"
       hide-footer
+      no-close-on-esc
+      no-close-on-backdrop
     >
       <swiper
         class="swiper-navigations"
@@ -179,7 +181,7 @@
                     placeholder="Код"
                   />
                 </div>
-                <div class="form__group-options" v-if="data.config.length">
+                <div class="form__group-options" v-if="data.config">
                   <div>
                     <label class="row__lables-label">Настройки </label>
                     <b-form

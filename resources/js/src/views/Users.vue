@@ -151,6 +151,8 @@
       size="lg"
       ref="modal__window"
       hide-footer
+      no-close-on-esc
+      no-close-on-backdrop
     >
       <swiper
         class="swiper-navigations"

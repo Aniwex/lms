@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center" v-if="!getSources || !user">
+    <div class="text-center" v-if="!getDataSources || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -8,14 +8,14 @@
     </div>
     <!-- search input -->
     <search
-      :rows="rowsSource"
+      :rows="getDataSources"
       :searchTerm="searchTerm"
-      v-if="getSources && user"
-      :role_id="user.role_id"
+      v-if="getDataSources && user"
+      :role_id="user.role.id"
       @arraySearch="pushArraySearch"
     />
     <div
-      v-if="rowSelection.length && user.role_id === 1"
+      v-if="rowSelection.length && user.role.id === 1"
       class="d-flex justify-content-end"
     >
       <b-dropdown class="drop__down-delete" variant="primary" right no-caret>
@@ -39,7 +39,7 @@
     <vue-good-table
       :columns="columns"
       :rows="sorted"
-      v-if="getSources && user"
+      v-if="getDataSources && user"
       :search-options="{
         enabled: true,
       }"
@@ -65,7 +65,7 @@
           v-if="props.column.field === 'integration'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.integration }}</span>
+          <span class="text-nowrap">{{ props.row.integration.title }}</span>
         </span>
         <!-- Column: Name -->
         <span
@@ -105,7 +105,7 @@
               <b-dropdown-item v-b-modal.modal__seeIntegration>
                 <span>Посмотреть</span>
               </b-dropdown-item>
-              <b-dropdown-item v-if="user.role_id === 1" @click="deleteModal">
+              <b-dropdown-item v-if="user.role.id === 1" @click="deleteModal">
                 <span>Удалить</span>
               </b-dropdown-item>
             </b-dropdown>
@@ -161,6 +161,8 @@
       size="lg"
       ref="modal__window"
       hide-footer
+      no-close-on-esc
+      no-close-on-backdrop
     >
       <swiper
         class="swiper-navigations"
@@ -174,11 +176,11 @@
             <h3 class="see-project__read">Данные для редактирования</h3>
             <div class="container__see-project">
               <div class="row__lables">
-                <div class="row__date-lables">
+                <div class="row__date-lables" v-if="data.integration">
                   <label class="row__lables-label">Интеграция</label>
                   <b-form-input
                     class="row__user-input"
-                    v-model="data.integration"
+                    v-model="data.integration.title"
                     type="text"
                     placeholder="Интеграция"
                   />
@@ -341,6 +343,7 @@ export default {
       },
       getSources: false,
       arraySearch: "",
+      project: [],
     };
   },
   methods: {
@@ -355,32 +358,15 @@ export default {
       this.modalCounter--;
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
-    async getSource() {
-      await axios
-        .get("/api/sources")
-        .then((response) => {
-          this.rowsSource = response.data;
-          this.getSources = true;
-        })
-        .catch((error) => {
-          const vNodesMsg = [`${error.response.data.error}`];
-          this.$bvToast.toast([vNodesMsg], {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
-          });
-        });
-    },
     async getDataUser() {
-      await axios.get("/sanctum/csrf-cookie").then((response) => {
-        axios
-          .get("api/user ")
-          .then((response) => {
+      if (!this.$store.getters.project) {
+        this.$router.push("/Home");
+      } else {
+        await axios.get("/sanctum/csrf-cookie").then((response) => {
+          axios.get("api/user ").then((response) => {
             this.user = response.data;
-            if (this.user.role_id === 1) {
+            this.getProject;
+            if (this.user.role.id === 1) {
               const obj = {
                 label: "Действие",
                 field: "action",
@@ -389,19 +375,9 @@ export default {
               };
               this.columns.push(obj);
             }
-          })
-          .catch((error) => {
-            const vNodesMsg = [`${error.response.data.error}`];
-            this.$bvToast.toast([vNodesMsg], {
-              title: `Ошибка`,
-              variant: "danger",
-              solid: true,
-              appendToast: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 3000,
-            });
           });
-      });
+        });
+      }
     },
     onCellClick(row) {
       if (row.column.label === "Действие") {
@@ -413,7 +389,7 @@ export default {
         let temp = row;
         this.modalArray = [];
         let i = 0;
-        this.rowsSource.filter((item) => {
+        this.getDataSources.filter((item) => {
           if (temp.id === item.id) {
             i++;
           }
@@ -427,35 +403,39 @@ export default {
       }
     },
     hideModal() {
+      this.modalArray = this.getDataSources;
+      console.log(this.modalArray);
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
       try {
         await axios
-          .put("/api/sources/" + this.modalArray[this.modalCounter].id, {
-            id: this.modalArray[this.modalCounter].id,
-            integration: this.modalArray[this.modalCounter].integration,
-            name: this.modalArray[this.modalCounter].name,
-            code: this.modalArray[this.modalCounter].code,
-            source_data: this.modalArray[this.modalCounter].source_data,
-          })
+          .put(
+            " api/projects/" +
+              this.project.id +
+              "/sources/" +
+              this.modalArray[this.modalCounter].id,
+            {
+              integration_id: this.modalArray[this.modalCounter].integration.id,
+              name: this.modalArray[this.modalCounter].name,
+              code: this.modalArray[this.modalCounter].code,
+              data: this.modalArray[this.modalCounter].data,
+            }
+          )
           .then(() => {
             this.$refs["modal__window"].hide();
-          })
-          .catch((error) => {
-            const vNodesMsg = [`${error.response.data.error}`];
-            this.$bvToast.toast([vNodesMsg], {
-              title: `Ошибка`,
-              variant: "danger",
-              solid: true,
-              appendToast: true,
-              toaster: "b-toaster-top-center",
-              autoHideDelay: 3000,
-            });
           });
-
-        await this.getSource();
-      } catch (error) {}
+      } catch (error) {
+        const vNodesMsg = [`${error.response.data.error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
+      }
     },
     async deleteModal() {
       try {
@@ -472,13 +452,18 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.rowsSource.length) {
-            this.rowsSource.filter((index, i) => {
+          if (this.getDataSources.length) {
+            this.getDataSources.filter((index, i) => {
               if (index.id === this.modalArray.id) {
                 axios
-                  .delete("/api/sources/" + this.modalArray.id)
+                  .delete(
+                    "api/projects/" +
+                      this.project.id +
+                      "/sources/" +
+                      this.modalArray.id
+                  )
                   .then(() => {
-                    this.rowsSource.splice(i, 1);
+                    this.getDataSources.splice(i, 1);
                     if (result.value) {
                       this.$swal({
                         icon: "success",
@@ -525,15 +510,14 @@ export default {
       }
     },
     deleteSelected() {
-      if (this.rowsSource.length) {
+      if (this.getDataSources.length) {
         this.rowSelection.filter((item) => {
-          this.rowsSource.map((index, i) => {
+          this.getDataSources.map((index, i) => {
             if (item.id === index.id) {
               axios
-                .delete("/api/sources/" + item.id)
-                .then(() => {
-                  this.rowsSource.splice(i, 1);
-                })
+                .delete(
+                  "api/projects/" + this.project.id + "/sources/" + +item.id
+                )
                 .catch((error) => {
                   const vNodesMsg = [`${error.response.data.error}`];
                   this.$bvToast.toast([vNodesMsg], {
@@ -545,6 +529,7 @@ export default {
                     autoHideDelay: 3000,
                   });
                 });
+              this.getDataSources.splice(i, 1);
             }
           });
         });
@@ -556,13 +541,19 @@ export default {
       if (this.arraySearch.length) {
         return this.arraySearch;
       } else {
-        return this.rowsSource;
+        return this.getDataSources;
       }
+    },
+    getDataSources() {
+      return this.$store.getters.getSources;
+    },
+    getProject() {
+      this.project = this.$store.getters.project;
+      return this.$store.getters.project;
     },
   },
   created() {
     this.getDataUser();
-    this.getSource();
   },
 };
 </script>

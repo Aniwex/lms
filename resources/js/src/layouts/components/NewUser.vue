@@ -24,13 +24,18 @@
         </div>
         <div class="form__group">
           <label class="form__label">Роли </label>
-          <b-form-select
-            class="form__appeal-input"
+          <multiselect
             v-model="role"
             :options="options_roles"
-            :state="role !== null"
+            selectLabel="Нажмите enter для выбора"
+            deselectLabel="Нажмите enter для удаления"
+            selectedLabel="Выбрано"
+            class="multiselect-input"
+            label="id"
+            track-by="id"
+            placeholder="Выберите роль"
           >
-          </b-form-select>
+          </multiselect>
         </div>
         <div class="form__group">
           <label class="form__label">Проекты </label>
@@ -130,7 +135,6 @@ export default {
       await axios
         .get("api/projects")
         .then((response) => {
-          console.log(response.data);
           this.option_project = response.data.projects;
         })
         .catch((error) => {
@@ -150,10 +154,6 @@ export default {
         .get("api/roles")
         .then((response) => {
           this.options_roles = response.data.roles;
-          this.options_roles.filter((item, i) => {
-            item["value"] = item["text"] = i + 1;
-          });
-          this.options_roles.unshift({ value: null, text: "—" });
         })
         .catch((error) => {
           const vNodesMsg = [`${error.response.data.error}`];
@@ -175,7 +175,7 @@ export default {
             .post("/api/users", {
               login: this.login,
               password: this.password,
-              role_id: this.role,
+              role_id: this.role.id,
             })
             .then(() => {
               this.$router.push("/Users");
@@ -290,13 +290,6 @@ input {
 }
 .btn {
   margin-left: 12px;
-}
-.multiselect-input {
-  width: 416px;
-  height: 36px !important;
-  border-radius: 0.5rem;
-  border-width: 1px;
-  background-color: #fff;
 }
 
 [dir] .multiselect__tag {
