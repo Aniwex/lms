@@ -107,9 +107,7 @@ class UserController extends Controller
             $user->password = Hash::make($request->input('password'));
         }
 
-        if ($request->filled('projects')) {
-            $user->projects()->sync($request->input('projects', []));
-        }
+        $user->projects()->sync($request->input('projects', []));
 
         $user->save();
 

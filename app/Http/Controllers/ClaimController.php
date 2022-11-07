@@ -96,9 +96,7 @@ class ClaimController extends Controller
         $claim->fill($request->onlyFilled()->validated());
         $claim->save();
 
-        if ($request->filled('tags')) {
-            $claim->tags()->sync($request->input('tags', []));
-        }
+        $claim->tags()->sync($request->input('tags', []));
 
         $claim->load(['tags', 'source']);
 
