@@ -35,7 +35,7 @@ class ClaimPolicy
      */
     public function viewAny(User $user)
     {
-        return $this->userHasAccessToProject($user);
+        return $this->userHasAccessToProject($user) || $user->isClient();
     }
 
     /**
@@ -47,7 +47,7 @@ class ClaimPolicy
      */
     public function view(User $user, Claim $claim)
     {
-        return $this->userHasAccessToProject($user) && $this->claimBelongsToProject($claim);
+        return ($this->userHasAccessToProject($user) && $this->claimBelongsToProject($claim)) || $user->isClient();
     }
 
     /**
@@ -70,7 +70,7 @@ class ClaimPolicy
      */
     public function update(User $user, Claim $claim)
     {
-        return $this->userHasAccessToProject($user) && $this->claimBelongsToProject($claim);
+        return ($this->userHasAccessToProject($user) && $this->claimBelongsToProject($claim)) || $user->isClient();
     }
 
     /**
