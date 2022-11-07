@@ -40,6 +40,22 @@ class SourceController extends Controller
     }
 
     /**
+     * Список полей для источника, в зависимости от интеграции.
+     * 
+     * @throws \App\Exceptions\BaseAppException
+     *
+     * @param  \App\Models\Project  $project
+     * @param  \App\Models\Source   $source
+     * @return \App\Http\Response
+     */
+    public function fields(Project $project, Source $source)
+    {
+        return Response::success()->data([
+            'fields' => $source->getIntegrationClass()->fields()
+        ]);
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  StoreSourceRequest  $request

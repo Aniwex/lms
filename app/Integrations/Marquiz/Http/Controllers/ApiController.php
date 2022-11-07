@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Response;
 use App\Integrations\Marquiz\Http\Requests\NewQuizRequest;
 use App\Models\Claim;
+use App\Models\Integration;
 use App\Models\Source;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Log;
@@ -27,11 +28,17 @@ class ApiController extends Controller
     protected array $request;
 
     /**
+     * @var int ID интеграции
+     */
+    protected int $integration;
+
+    /**
      * Инициализация контроллера. Определяем канал логирования.
      */
     public function __construct()
     {
         $this->logger = Log::channel('marquiz');
+        $this->integration = Integration::whereSlug('marquiz')->firstOrFail()?->id;
     }
 
     /**
@@ -49,7 +56,9 @@ class ApiController extends Controller
             $this->logger->debug(print_r($this->request, true));
 
             // находим источник в нашей системе
-            $source = Source::whereJsonContains('data->quiz_id', $this->request['quiz']['id'])->firstOrFail();
+            $source = Source::whereIntegrationId($this->integration)
+                ->whereJsonContains('data->quiz_id', $this->request['quiz']['id'])
+                ->firstOrFail();
 
             // создаем обращение
             $claim = new Claim();

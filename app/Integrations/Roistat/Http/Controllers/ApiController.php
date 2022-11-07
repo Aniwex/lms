@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Response;
 use App\Integrations\Roistat\Http\Requests\NewRoistatRequest;
 use App\Models\Claim;
+use App\Models\Integration;
 use App\Models\Source;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Log;
@@ -27,16 +28,23 @@ class ApiController extends Controller
     protected $request;
 
     /**
+     * @var int ID интеграции
+     */
+    protected int $integration;
+
+    /**
      * Инициализация контроллера. Определяем канал логирования.
      */
     public function __construct()
     {
         $this->logger = Log::channel('roistat');
+        $this->integration = Integration::whereSlug('roistat')->firstOrFail()?->id;
     }
 
     /**
      * Обработка хука из системы Roistat. Оповещает о новом лиде.
      * @param NewRoistatRequest $request Запрос, полученный из Roistat.
+     * @param mixed $roistat_id
      *
      * @return \Illuminate\Http\Response
      */
@@ -48,7 +56,9 @@ class ApiController extends Controller
             $this->logger->debug(print_r($this->request, true));
 
             // находим источник в нашей системе
-            $source = Source::whereJsonContains('data->roistat_id', $roistat_id)->firstOrFail();
+            $source = Source::whereIntegrationId($this->integration)
+                ->whereJsonContains('data->roistat_id', $roistat_id)
+                ->firstOrFail();
 
             // создаем обращение
             $claim = new Claim();

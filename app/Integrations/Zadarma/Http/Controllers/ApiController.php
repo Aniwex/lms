@@ -9,6 +9,7 @@ use App\Integrations\Zadarma\Exceptions\BadApiConnection;
 use App\Integrations\Zadarma\Http\Requests\NotifyRequest;
 use App\Integrations\Zadarma\Jobs\GetCallRecognition;
 use App\Models\Claim;
+use App\Models\Integration;
 use App\Models\Source;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Log;
@@ -35,11 +36,17 @@ class ApiController extends Controller
     protected LoggerInterface $logger;
 
     /**
+     * @var int ID интеграции
+     */
+    protected int $integration;
+
+    /**
      * Инициализация контроллера. Определяем канал логирования.
      */
     public function __construct()
     {
         $this->logger = Log::channel('zadarma');
+        $this->integration = Integration::whereSlug('zadarma')->firstOrFail()?->id;
     }
 
 	/**
@@ -84,7 +91,7 @@ class ApiController extends Controller
         $this->logger->debug(print_r($data, true));
 
         // находим источник в нашей системе
-        $source = Source::whereJsonContains('data->phone', $data['called_did'])->firstOrFail();
+        $source = Source::whereIntegrationId($this->integration)->whereJsonContains('data->phone', $data['called_did'])->firstOrFail();
 
         // создаем обращение
         $claim = new Claim();

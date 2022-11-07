@@ -1,0 +1,41 @@
+<?php
+
+namespace App\Integrations\{{ Integration }};
+
+use App\Integrations\BaseIntegration;
+
+/**
+ * Интеграция {{ Integration }}
+ */
+class {{ Integration }} extends BaseIntegration
+{
+    /**
+     * @return array Поля для источника, связанные с интеграцией
+     */
+    public function fields() : array 
+    {
+        return [
+            [
+                'type'        => 'text',
+                'key'         => '',
+                'value'       => '',
+                'description' => '',
+            ],
+            [
+                'type'        => 'select',
+                'key'         => '',
+                'value'       => '',
+                'description' => '',
+                'options'     => [
+                    'text1' => 'value1',
+                    'text2' => 'value2'
+                ]
+            ],
+            [
+                'type'        => 'hint',
+                'message'     => ''
+            ]
+            // ...
+        ];
+    }
+}

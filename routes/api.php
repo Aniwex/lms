@@ -40,9 +40,6 @@ Route::middleware('auth:sanctum')->group(function() {
         'projects'     => ProjectController::class
     ]);
 
-    // список ролей
-    Route::get('roles', [UserController::class, 'roles']);
-
     /**
      * Проекто-зависимые REST-api роуты.
      */
@@ -52,6 +49,12 @@ Route::middleware('auth:sanctum')->group(function() {
             'tags'    => TagController::class,
             'claims'  => ClaimController::class
         ]);
+
+        // список полей для источника, в зависимости от интеграции
+        Route::get('sources/{source}/integration-fields', [SourceController::class, 'fields']);
     });
+
+    // список ролей
+    Route::get('roles', [UserController::class, 'roles']);
 });
 
