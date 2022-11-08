@@ -14,15 +14,6 @@
         <b-button
           v-ripple.400="'rgba(255, 255, 255, 0.15)'"
           variant="primary"
-          to="NewAppeal"
-          v-b-tooltip.hover.top="'Добавить обращение'"
-          v-if="this.$route.path === '/Home'"
-        >
-          Добавить обращение
-        </b-button>
-        <b-button
-          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-          variant="primary"
           to="NewIntegration"
           v-b-tooltip.hover.top="'Добавить интеграцию'"
           v-if="this.$route.path === '/Integration'"
@@ -97,20 +88,13 @@ export default {
       let key = Object.keys(this.rows[0]);
       if (this.rows.length) {
         this.rows.filter((item) => {
-          // for (let k in key) {
-          //   console.log(item.phone.formatted);
-          //   if (
-          //     item[key[k]] !== null &&
-          //     item[key[k]].toString().includes(this.searchTerm)
-          //   ) {
-          //     this.arraySearch.push(item);
-          //   }
-          // }
-          if (
-            item.phone.formatted !== null &&
-            item.phone.formatted.toString().includes(this.searchTerm)
-          ) {
-            this.arraySearch.push(item);
+          for (let k in key) {
+            if (
+              item[key[k]] !== null &&
+              item[key[k]].toString().includes(this.searchTerm)
+            ) {
+              this.arraySearch.push(item);
+            }
           }
         });
       }

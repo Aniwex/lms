@@ -7,23 +7,43 @@
       </b-button>
     </div>
     <!-- search input -->
-    <search
-      @arraySearch="pushArraySearch"
-      :rows="getDataTable"
-      v-if="getDataTable && user"
-      :role_id="user.role.id"
-    />
+    <div class="custom-search" v-if="getDataTable && user">
+      <div class="container__search-from">
+        <div class="search__form align-items-center">
+          <b-form-input
+            v-model="searchTerm"
+            placeholder="Поиск"
+            type="text"
+            class="search__input"
+            @input="handleSearch"
+          />
+        </div>
+        <div class="create__appeal" v-if="user.role.id === 1">
+          <b-button
+            v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+            variant="primary"
+            to="NewAppeal"
+            v-b-tooltip.hover.top="'Добавить обращение'"
+            v-if="this.$route.path === '/Home'"
+          >
+            Добавить обращение
+          </b-button>
+        </div>
+      </div>
+    </div>
     <!-- filers -->
     <filters
-      @sortedFilter="pushSortedFilter"
       @arrayCheckboxUser="pushChangeCheckBox"
       @selected="pushSelected"
       :rowSelection="rowSelection"
-      :rows="getDataTable"
+      :getDataTable="getDataTable"
       :role_id="user.role.id"
       :project="getProject"
-      :options_source="options_source"
-      v-if="getDataTable && user"
+      :options_source="getSourceTable"
+      :options_tags="getTagsTable"
+      :options_manager="options_manager_check"
+      :options_client="options_client_check"
+      v-if="getDataTable && getTagsTable && getSourceTable && user"
     />
 
     <!-- table -->
@@ -284,7 +304,7 @@
     </vue-good-table>
     <!-- modal see project -->
     <ModalSeeProject
-      v-if="modalArray.length"
+      v-if="create_window"
       id="modal__seeProject"
       :user="user"
       :modalArray="modalArray"
@@ -293,8 +313,6 @@
       :options_manager="options_manager_check"
       :options_client="options_client_check"
       :project="getProject"
-      :chooseManager="chooseManager"
-      :chooseClient="chooseClient"
     ></ModalSeeProject>
   </div>
   <div v-else>
@@ -503,7 +521,6 @@ export default {
       ],
       rows: [],
       searchTerm: "",
-      sortedFilter: [],
       arr: [],
       rowSelection: [],
       arraySearch: [],
@@ -530,8 +547,6 @@ export default {
       user: "",
       tempProject: null,
       historyArray: [],
-      chooseManager: null,
-      chooseClient: null,
     };
   },
   methods: {
@@ -540,6 +555,30 @@ export default {
       await this.$store.dispatch("getDataTable");
       await this.$store.dispatch("getSourceTable");
       await this.$store.dispatch("getTagsTable");
+    },
+    handleSearch() {
+      this.arraySearch = [];
+      //let key = Object.keys(this.getDataTable[0]);
+      if (this.getDataTable.length) {
+        this.getDataTable.filter((item) => {
+          // for (let k in key) {
+          //   console.log(item.phone.formatted);
+          //   if (
+          //     item[key[k]] !== null &&
+          //     item[key[k]].toString().includes(this.searchTerm)
+          //   ) {
+          //     this.arraySearch.push(item);
+          //   }
+          // }
+          if (
+            item.phone.formatted !== null &&
+            item.phone.formatted.toString().includes(this.searchTerm)
+          ) {
+            this.arraySearch.push(item);
+          }
+        });
+      }
+      this.arraySearch = [...new Set(this.arraySearch)];
     },
     async saveProjectModal() {
       await this.$store.commit("SET_PROJECT", this.project);
@@ -565,12 +604,6 @@ export default {
     },
     pushChangeCheckBox(user) {
       this.checkboxUser = user;
-    },
-    pushSortedFilter(SortedFilter) {
-      this.sortedFilter = SortedFilter;
-    },
-    pushArraySearch(search) {
-      this.arraySearch = search;
     },
     pushSelected(select) {
       this.selected = select;
@@ -618,7 +651,6 @@ export default {
       }
     },
     historyUser(row) {
-      console.log(row);
       this.searchTerm = row.phone.formatted;
       this.arraySearch = [];
       this.getDataTable.filter((item) => {
@@ -645,9 +677,8 @@ export default {
             this.modalArray.push(item);
           }
         });
-        this.chooseManager = this.modalArray[this.modalCounter].manager.check;
-        this.chooseClient = this.modalArray[this.modalCounter].client.check;
         this.arrayChat = await this.modalArray[this.modalCounter].dialog;
+        await this.$store.commit("SET_CREATE_MODAL_WINDOW", true);
         this.$bvModal.show("modal__seeProject");
       }
       if (item === "Удалить") {
@@ -669,44 +700,44 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.getDataTable.length) {
-            this.getDataTable.filter((index, i) => {
-              if (index.id === this.modalArray.id) {
-                axios
-                  .delete(
-                    "api/projects/" +
-                      this.getProject.id +
-                      "/claims/" +
-                      this.modalArray.id
-                  )
-                  .then(() => {
-                    this.getDataTable.splice(i, 1);
-                    if (result.value) {
-                      this.$swal({
-                        icon: "success",
-                        title: "Удалено!",
-                        text: "Обращение было удалено.",
-                        customClass: {
-                          confirmButton: "btn btn-success",
-                        },
-                      });
-                    }
-                  })
-                  .catch((error) => {
-                    const vNodesMsg = [
-                      `${Object.values(error.response.data.errors)}`,
-                    ];
-                    this.$bvToast.toast([vNodesMsg], {
-                      title: `Ошибка`,
-                      variant: "danger",
-                      solid: true,
-                      appendToast: true,
-                      toaster: "b-toaster-top-center",
-                      autoHideDelay: 3000,
-                    });
-                  });
-              }
+          if (result.value) {
+            this.$swal({
+              icon: "success",
+              title: "Удалено!",
+              text: "Обращение было удалено.",
+              customClass: {
+                confirmButton: "btn btn-success",
+              },
             });
+            if (this.getDataTable.length) {
+              this.getDataTable.filter((index, i) => {
+                if (index.id === this.modalArray.id) {
+                  axios
+                    .delete(
+                      "api/projects/" +
+                        this.getProject.id +
+                        "/claims/" +
+                        this.modalArray.id
+                    )
+                    .then(() => {
+                      this.getDataTable.splice(i, 1);
+                    })
+                    .catch((error) => {
+                      const vNodesMsg = [
+                        `${Object.values(error.response.data.errors)}`,
+                      ];
+                      this.$bvToast.toast([vNodesMsg], {
+                        title: `Ошибка`,
+                        variant: "danger",
+                        solid: true,
+                        appendToast: true,
+                        toaster: "b-toaster-top-center",
+                        autoHideDelay: 3000,
+                      });
+                    });
+                }
+              });
+            }
           } else if (result.dismiss === "cancel") {
             this.$swal({
               title: "Отмена",
@@ -834,22 +865,18 @@ export default {
       if (this.checkboxUser.length) {
         return this.checkboxUser;
       }
-      if (this.sortedFilter.length) {
-        const filteredRows = this.sortedFilter.filter((row) => {
-          let flag = true;
-          for (const [key, value] of Object.entries(this.selected)) {
-            if (!!value && !row[key].includes(value)) {
-              // если value фильтра истинно (то есть не равно ни null, ни 0) и если то же поле в строке (с тем же ключом что и в фильтре) не содержит значение фильтра...
-              flag = false; // ... то флаг = false...
-              break; // ... и цикл прерывается
-            }
-          }
-          return flag; // возвращаем флаг, если флаг == false - строка не проходит фильтрацию
-        });
-        return filteredRows;
-      } else {
-        return this.$store.getters.getClaims;
-      }
+      // const filteredRows = this.getDataTable.filter((row) => {
+      //   let flag = true;
+      //   for (const [key, value] of Object.entries(this.selected)) {
+      //     if (!!value && !row[key].includes(value)) {
+      //       // если value фильтра истинно (то есть не равно ни null, ни 0) и если то же поле в строке (с тем же ключом что и в фильтре) не содержит значение фильтра...
+      //       flag = false; // ... то флаг = false...
+      //       break; // ... и цикл прерывается
+      //     }
+      //   }
+      //   return flag; // возвращаем флаг, если флаг == false - строка не проходит фильтрацию
+      // });
+      return this.getDataTable;
     },
     getProject() {
       return this.$store.getters.project;
@@ -865,6 +892,9 @@ export default {
     },
     options_client_check() {
       return this.$store.getters.options_client_check;
+    },
+    create_window() {
+      return this.$store.getters.get_create_modal_window;
     },
   },
   created() {

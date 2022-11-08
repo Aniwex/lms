@@ -20,24 +20,32 @@
               <!-- <b-dropdown-item class="dropitem__close" @click="closeMe()"
                 >X</b-dropdown-item
               > -->
-              <b-form-select
-                class="db__tc"
+              <multiselect
                 v-model="selected.tag"
                 :options="options_tags"
-                @change="sortTag(selected.tag)"
-                :state="selected.tag === null ? false : true"
+                selectedLabel="Выбрано"
+                :multiple="true"
+                class="multiselect-input multiselect-width"
+                label="name"
+                track-by="name"
+                placeholder="Выберите тэг"
+                :showLabels="false"
               >
-              </b-form-select>
+              </multiselect>
               <b-dropdown-divider />
               <p>Источник</p>
-              <b-form-select
-                class="db__tc"
+              <multiselect
                 v-model="selected.source"
                 :options="options_source"
-                :state="selected.source === null ? false : true"
-                @change="sortSource(selected.source)"
+                selectedLabel="Выбрано"
+                class="multiselect-input multiselect-width"
+                label="name"
+                track-by="name"
+                placeholder="Выберите источник"
+                :showLabels="false"
               >
-              </b-form-select>
+              </multiselect>
+
               <b-dropdown-divider />
               <p>Дата и время</p>
               <flat-pickr
@@ -45,23 +53,39 @@
                 class="form-control row__date-pickr db__tc"
                 placeholder="Выберите дату и время"
                 :config="{ dateFormat: 'd.m.Y' }"
-                @input="datePicker(selected.date)"
-                :class="{
-                  nonActiveDatePicr: !selected.date,
-                  activeDatePicr: selected.date,
-                }"
               />
               <b-dropdown-divider />
               <p>Продолжительность Звонка</p>
-              <b-form-spinbutton
-                class="form__spinbutton"
-                v-model="selected.value_range"
-                min="0"
-                max="1000"
-                step="10"
-                :state="selected.value_range === 0 ? false : true"
-                @change="valueRange(selected.value_range)"
-              />
+              <div class="modal__input">
+                <b-button
+                  @click="quantity_minus()"
+                  type="button"
+                  size="sm"
+                  v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                  variant="primary"
+                >
+                  <minus-icon
+                    size="1x"
+                    class="plus-icon align-middle mr-25"
+                  ></minus-icon>
+                </b-button>
+                <b-form-input
+                  class="input__number form-control multiselect-width"
+                  v-model="selected.duration"
+                />
+                <b-button
+                  v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                  variant="primary"
+                  type="button"
+                  size="sm"
+                  @click="quantity_plus()"
+                >
+                  <plus-icon
+                    size="1x"
+                    class="plus-icon align-middle mr-25"
+                  ></plus-icon>
+                </b-button>
+              </div>
               <div class="mt-2">Значение: {{ selected.value_range }}</div>
               <b-dropdown-divider />
               <p>Пользователь</p>
@@ -70,31 +94,33 @@
                 placeholder="+7 (999) 999-99-99"
                 v-model="selected.user"
                 v-mask="'+7 (###) ###-##-##'"
-                @input="sortedUser(selected.user)"
-                :state="
-                  selected.user === '' || selected.user === null ? false : true
-                "
               />
               <b-dropdown-divider />
               <p>Целевой по мнению менеджера</p>
-              <b-form-select
-                class="db__tc"
+              <multiselect
                 v-model="selected.manager"
                 :options="options_manager"
-                @change="sortManager(selected.manager)"
-                :state="selected.manager === null ? false : true"
+                selectedLabel="Выбрано"
+                class="multiselect-input multiselect-width"
+                label="text"
+                track-by="text"
+                placeholder="Выберите источник"
+                :showLabels="false"
               >
-              </b-form-select>
+              </multiselect>
               <b-dropdown-divider />
               <p>Целевой по мнению клиента</p>
-              <b-form-select
-                class="db__tc"
+              <multiselect
                 v-model="selected.client"
                 :options="options_client"
-                @change="sortClient(selected.client)"
-                :state="selected.client === null ? false : true"
+                selectedLabel="Выбрано"
+                class="multiselect-input multiselect-width"
+                label="text"
+                track-by="text"
+                placeholder="Выберите источник"
+                :showLabels="false"
               >
-              </b-form-select>
+              </multiselect>
               <b-dropdown-divider />
               <p>Группировка по пользователю</p>
               <b-form-checkbox
@@ -149,12 +175,14 @@ import {
   BButton,
   BFormSpinbutton,
 } from "bootstrap-vue";
-import { FilterIcon, Trash2Icon } from "vue-feather-icons";
+import { FilterIcon, Trash2Icon, PlusIcon, MinusIcon } from "vue-feather-icons";
 import flatPickr from "vue-flatpickr-component";
 import Ripple from "vue-ripple-directive";
 import axios from "axios";
 export default {
   components: {
+    PlusIcon,
+    MinusIcon,
     Trash2Icon,
     BFormSpinbutton,
     BFormGroup,
@@ -174,41 +202,40 @@ export default {
     Ripple,
     // "b-tooltip": VBTooltip,
   },
-  props: ["options_source", "rows", "rowSelection", "role_id", "project"],
+  props: [
+    "options_source",
+    "options_tags",
+    "options_manager",
+    "options_client",
+    "getDataTable",
+    "rowSelection",
+    "role_id",
+    "project",
+  ],
   data() {
     return {
       selected: {
-        tag: null,
+        tag: [],
         source: null,
         date: null,
         user: null,
         manager: null,
         client: null,
-        value_range: 0,
+        duration: 0,
       },
-      options_tags: [
-        { value: null, text: "—" },
-        { value: "балкон", text: "балкон" },
-        { value: "окна", text: "окна" },
-      ],
-      options_manager: [
-        { value: null, text: "—" },
-        { value: "целевой", text: "целевой" },
-        { value: "не целевой", text: "не целевой" },
-        { value: "не установленный", text: "не установленный" },
-      ],
-      options_client: [
-        { value: null, text: "—" },
-        { value: "целевой", text: "целевой" },
-        { value: "не целевой", text: "не целевой" },
-        { value: "не проверенный", text: "не проверенный" },
-      ],
-      sortedFilter: [],
       checkboxUser: false,
       arrayCheckboxUser: [],
     };
   },
   methods: {
+    quantity_minus() {
+      if (this.selected.duration >= 1) {
+        this.selected.duration--;
+      }
+    },
+    quantity_plus() {
+      this.selected.duration++;
+    },
     resetFilters() {
       this.selected.tag = null;
       this.selected.source = null;
@@ -221,82 +248,12 @@ export default {
       this.arrayCheckboxUser = [];
       this.checkboxUser = false;
       this.$emit("arrayCheckboxUser", this.arrayCheckboxUser);
-      this.$emit("sortedFilter", this.sortedFilter);
       this.$emit("selected", this.selected);
     },
-    sortTag(tag) {
-      this.sortedFilter = [];
-      this.rows.filter((item) => {
-        if (item.tag === tag) {
-          this.sortedFilter.push(item);
-        }
-      });
-      this.$emit("sortedFilter", this.sortedFilter);
-    },
-    sortSource(source) {
-      this.sortedFilter = [];
-      this.rows.map((item) => {
-        if (item.source === source) {
-          this.sortedFilter.push(item);
-        }
-      });
-      this.$emit("sortedFilter", this.sortedFilter);
-    },
-    datePicker(date) {
-      let d;
-      this.sortedFilter = [];
-      this.rows.map((item) => {
-        d = item.date.substr(0, 10);
-        if (d === date) {
-          this.sortedFilter.push(item);
-        }
-      });
-      this.$emit("sortedFilter", this.sortedFilter);
-    },
-    valueRange(value) {
-      this.sortedFilter = [];
-      this.rows.map((item, call) => {
-        call = item.call.toString().replace(/[^0-9]/g, "");
-        call = Number(call);
-
-        if (call === value) {
-          this.sortedFilter.push(item);
-        }
-      });
-
-      this.$emit("sortedFilter", this.sortedFilter);
-    },
-    sortManager(manager) {
-      this.sortedFilter = [];
-      this.rows.filter((item) => {
-        if (item.manager === manager) {
-          this.sortedFilter.push(item);
-        }
-      });
-      this.$emit("sortedFilter", this.sortedFilter);
-    },
-    sortClient(client) {
-      this.sortedFilter = [];
-      this.rows.filter((item) => {
-        if (item.client === client) {
-          this.sortedFilter.push(item);
-        }
-      });
-      this.$emit("sortedFilter", this.sortedFilter);
-    },
-    sortedUser(user) {
-      this.sortedFilter = [];
-      this.rows.filter((item) => {
-        if (item.user.includes(user)) {
-          this.sortedFilter.push(item);
-        }
-      });
-      this.$emit("sortedFilter", this.sortedFilter);
-    },
     deleteSelected() {
-      if (this.rows.length) {
-        this.rowSelection.filter((item) => {
-          return this.rows.map((index, i) => {
+      if (this.getDataTable.length) {
+        this.getDataTableelection.filter((item) => {
+          return this.getDataTable.map((index, i) => {
             if (item.id === index.id) {
               axios
                 .delete(
@@ -305,7 +262,7 @@ export default {
                 .catch((error) => {
                   console.log(error.response.data);
                 });
-              this.rows.splice(i, 1);
+              this.getDataTable.splice(i, 1);
             }
           });
         });
@@ -315,20 +272,20 @@ export default {
       if (chek) {
         let arr = [];
         this.arrayCheckboxUser = [];
-        this.rows.filter((item) => {
-          arr.push(item.user);
+        this.getDataTable.filter((item) => {
+          arr.push(item.phone.formatted);
         });
         arr = [...new Set(arr)];
         let j = 0;
-        for (let i in this.rows) {
-          if (this.rows[i].user.includes(arr[j])) {
-            this.arrayCheckboxUser.push(this.rows[i]);
+        for (let i in this.getDataTable) {
+          if (this.getDataTable[i].phone.formatted.includes(arr[j])) {
+            this.arrayCheckboxUser.push(this.getDataTable[i]);
             j++;
           }
         }
         this.$emit("arrayCheckboxUser", this.arrayCheckboxUser);
       } else {
-        this.$emit("arrayCheckboxUser", this.rows);
+        this.$emit("arrayCheckboxUser", this.getDataTable);
       }
     },
   },
@@ -336,6 +293,7 @@ export default {
   updated() {
     this.$emit("selected", this.selected);
   },
+  created() {},
 };
 </script>
 

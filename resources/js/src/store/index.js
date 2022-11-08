@@ -21,8 +21,6 @@ export default new Vuex.Store({
         claims: [],
         sources: [],
         tags: [],
-        manager_object: {},
-        client_object: {},
         options_manager_check: [
             { value: "targeted", text: "целевой" },
             { value: "untargeted", text: "нецелевой" },
@@ -33,11 +31,15 @@ export default new Vuex.Store({
             { value: "untargeted", text: "нецелевой" },
             { value: "unchecked", text: "не проверенный" },
         ],
+        create_modal_window: false,
     },
 
     mutations: {
         SET_ENTERED: (state, response) => {
             state.entered = response;
+        },
+        SET_CREATE_MODAL_WINDOW: (state, response) => {
+            state.create_modal_window = response;
         },
         SET_CLAIMS: (state, response) => {
             state.claims = response;
@@ -65,12 +67,6 @@ export default new Vuex.Store({
         },
         SET_PROJECT: (state, payload) => {
             state.project = payload;
-        },
-        SET_MANAGER_OBJECT: (state, payload) => {
-            state.manager_object = payload;
-        },
-        SET_CLIENT_OBJECT: (state, payload) => {
-            state.client_object = payload;
         },
     },
     actions: {
@@ -201,14 +197,11 @@ export default new Vuex.Store({
         getTags: (state) => {
             return state.tags;
         },
-        getManagerObject: (state) => {
-            return state.manager_object;
-        },
-        getClientObject: (state) => {
-            return state.client_object;
-        },
         manager: (state) => {
             return state.manager;
+        },
+        get_create_modal_window: (state) => {
+            return state.create_modal_window;
         },
         client: (state) => {
             return state.client;

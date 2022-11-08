@@ -204,13 +204,14 @@
                   />
                 </div>
                 <div class="row__source-lables">
-                  <label class="row__lables-label">Данные по источнику</label>
+                  <label class="row__lables-label">Настройки</label>
                   <b-form-input
                     class="row__user-input"
                     v-model="data.source_data"
                     type="text"
                     placeholder="Данные по источнику"
                   />
+                  <label for=""></label>
                 </div>
                 <div class="modal__form-buttons">
                   <b-button
@@ -397,6 +398,14 @@ export default {
             this.modalArray.push(item);
           }
         });
+        await axios
+          .get()
+          .then((response) => {
+            console.log(response);
+          })
+          .catch((error) => {
+            console.log(error.response.data.error);
+          });
       }
       if (item === "Удалить") {
         this.modalArray = row;

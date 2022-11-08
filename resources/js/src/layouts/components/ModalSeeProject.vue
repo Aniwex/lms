@@ -11,6 +11,7 @@
       hide-footer
       no-close-on-esc
       no-close-on-backdrop
+      @close="closeWindow"
     >
       <swiper
         class="swiper-navigations"
@@ -321,7 +322,6 @@ export default {
     "client_check",
     "manager_check",
     "project",
-    "chooseMutationManager",
   ],
   directives: {
     Ripple,
@@ -351,22 +351,16 @@ export default {
     };
   },
   methods: {
+    closeWindow() {
+      this.$store.commit("SET_CREATE_MODAL_WINDOW", false);
+    },
     quantity_minus(duration) {
-      // let temp = duration.toString().replace(/[^0-9]/g, "");
-      // duration = Number(temp);
       if (duration.original >= 1) {
         duration.original--;
-        // this.modalArray[this.modalCounter].duration = "";
-        // this.modalArray[this.modalCounter].duration += duration + " секунд";
       }
     },
     quantity_plus(duration) {
-      // duration = duration.toString().replace(/[^0-9]/g, "");
-      // duration = Number(duration);
       duration.original++;
-
-      // this.modalArray[this.modalCounter].duration = "";
-      // this.modalArray[this.modalCounter].duration += duration + " секунд";
     },
     changeSlideNext() {
       this.modalCounter++;
@@ -390,8 +384,21 @@ export default {
     },
     hideModal() {
       this.$refs["modal__window"].hide();
+      this.$store.commit("SET_CREATE_MODAL_WINDOW", false);
     },
     async saveModal() {
+      if (this.chooseManager === null) {
+        this.chooseManager = {
+          value: "unidentified",
+          text: "не установленный",
+        };
+      }
+      if (this.chooseClient === null) {
+        this.chooseClient = {
+          value: "unchecked",
+          text: "не проверенный",
+        };
+      }
       try {
         this.modalArray[this.modalCounter].phone.original = this.modalArray[
           this.modalCounter
@@ -400,8 +407,7 @@ export default {
         this.modalArray[this.modalCounter].tags.filter((item) => {
           tempTagsId.push(item.id);
         });
-        console.log(this.chooseManager);
-        console.log(this.modalArray[this.modalCounter]);
+
         await axios
           .put(
             " api/projects/" +
@@ -455,6 +461,7 @@ export default {
               (this.modalArray[this.modalCounter].duration.original % 60) +
               " сек";
             this.$refs["modal__window"].hide();
+            this.$store.commit("SET_CREATE_MODAL_WINDOW", false);
           })
           .catch((error) => {
             const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
@@ -467,7 +474,17 @@ export default {
               autoHideDelay: 3000,
             });
           });
-      } catch (error) {}
+      } catch (error) {
+        const vNodesMsg = [`${error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
+      }
     },
     // nextAppeal() {
     //   try {
