@@ -21,19 +21,18 @@ export default new Vuex.Store({
         claims: [],
         sources: [],
         tags: [],
-        manager: [
-            { value: "целевой", icon: "CheckCircleIcon" },
-            { value: "не целевой", icon: "XCircleIcon" },
-            { value: "не установленный", icon: "XSquareIcon" },
-        ],
-        client: [
-            { value: "целевой", icon: "CheckCircleIcon" },
-            { value: "не целевой", icon: "XCircleIcon" },
-            { value: "не проверенный", icon: "XSquareIcon" },
-        ],
-        historyArray: [],
         manager_object: {},
         client_object: {},
+        options_manager_check: [
+            { value: "targeted", text: "целевой" },
+            { value: "untargeted", text: "нецелевой" },
+            { value: "unidentified", text: "не установленный" },
+        ],
+        options_client_check: [
+            { value: "targeted", text: "целевой" },
+            { value: "untargeted", text: "нецелевой" },
+            { value: "unchecked", text: "не проверенный" },
+        ],
     },
 
     mutations: {
@@ -66,9 +65,6 @@ export default new Vuex.Store({
         },
         SET_PROJECT: (state, payload) => {
             state.project = payload;
-        },
-        SET_HISTORY_ARRAY: (state, payload) => {
-            state.historyArray = payload;
         },
         SET_MANAGER_OBJECT: (state, payload) => {
             state.manager_object = payload;
@@ -116,24 +112,6 @@ export default new Vuex.Store({
                 .then((response) => {
                     let claims = response.data.claims;
                     ctx.commit("SET_CLAIMS", claims);
-                    claims.filter((row, index, k) => {
-                        k = 0;
-                        for (let i = 0; i < index; i++) {
-                            if (row.phone === claims[i].phone) {
-                                k++;
-                                if (k < 2) {
-                                    // historyArray.push(this.rows[i].id);
-                                    ctx.commit(
-                                        "SET_HISTORY_ARRAY",
-                                        this.rows[i].id
-                                    );
-                                }
-                            }
-                        }
-                    });
-                    ctx.commit("SET_HISTORY_ARRAY", [
-                        ...new Set(ctx.getters.historyArray),
-                    ]);
                 });
         },
         SET_USER: async (ctx) => {
@@ -155,7 +133,9 @@ export default new Vuex.Store({
                                 this.$store.commit("SET_ENTERED", false);
                             });
                         } else {
-                            const vNodesMsg = [`${error.response.data.error}`];
+                            const vNodesMsg = [
+                                `${Object.values(error.response.data.errors)}`,
+                            ];
                             this.$bvToast.toast([vNodesMsg], {
                                 title: `Ошибка`,
                                 variant: "danger",
@@ -176,7 +156,9 @@ export default new Vuex.Store({
                     ctx.commit("SET_USERS", users);
                 })
                 .catch((error) => {
-                    const vNodesMsg = [`${error.response.data.error}`];
+                    const vNodesMsg = [
+                        `${Object.values(error.response.data.errors)}`,
+                    ];
                     this.$bvToast.toast([vNodesMsg], {
                         title: `Ошибка`,
                         variant: "danger",
@@ -231,8 +213,11 @@ export default new Vuex.Store({
         client: (state) => {
             return state.client;
         },
-        historyArray: (state) => {
-            return state.historyArray;
+        options_manager_check: (state) => {
+            return state.options_manager_check;
+        },
+        options_client_check: (state) => {
+            return state.options_client_check;
         },
     },
     modules: {

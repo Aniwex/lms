@@ -18,18 +18,38 @@
         <div class="form__appeal-group">
           <label class="form__apeal-label">Продолжительность звонка </label>
           <div>
-            <b-form-spinbutton
-              class="form__spinbutton"
-              v-model="selected.duration"
-              min="0"
-              max="1000"
-              step="10"
-              :state="
-                selected.duration === '0 секунд' || selected.duration === 0
-                  ? false
-                  : true
-              "
-            />
+            <div class="modal__input">
+              <b-button
+                @click="quantity_minus()"
+                type="button"
+                size="sm"
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="primary"
+              >
+                <minus-icon
+                  size="1x"
+                  class="plus-icon align-middle mr-25"
+                ></minus-icon>
+              </b-button>
+              <b-form-input
+                class="input__number form-control"
+                v-model="selected.duration"
+                type="number"
+              />
+              <b-button
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="primary"
+                type="button"
+                size="sm"
+                style="margin: 0 !important"
+                @click="quantity_plus()"
+              >
+                <plus-icon
+                  size="1x"
+                  class="plus-icon align-middle mr-25"
+                ></plus-icon>
+              </b-button>
+            </div>
             <label class="form__apeal-label-seconds">Значение в секундах</label>
           </div>
         </div>
@@ -185,12 +205,15 @@ import {
   BButton,
   BSpinner,
 } from "bootstrap-vue";
+import { PlusIcon, MinusIcon } from "vue-feather-icons";
 import flatPickr from "vue-flatpickr-component";
 import "@core/scss/vue/libs/vue-flatpicker.scss";
 import Ripple from "vue-ripple-directive";
 import axios from "axios";
 export default {
   components: {
+    PlusIcon,
+    MinusIcon,
     BSpinner,
     BFormInput,
     flatPickr,
@@ -212,8 +235,8 @@ export default {
       selected: {
         duration: 0,
         source_id: [],
-        manager_check: null,
-        client_check: null,
+        manager_check: "",
+        client_check: "",
         redirected: "",
         manager_comment: "",
         client_comment: "",
@@ -234,26 +257,22 @@ export default {
         },
         { value: 2, text: 2 },
       ],
-      options_manager_check: [
-        { value: "targeted", text: "целевой" },
-        { value: "untargeted", text: "не целевой" },
-        { value: "unidentified", text: "не установленный" },
-      ],
-      options_client_check: [
-        { value: "targeted", text: "целевой" },
-        { value: "untargeted", text: "не целевой" },
-        { value: "unchecked", text: "не проверенный" },
-      ],
+
       selectedCheckBox: false,
       phone: null,
       dateNtim: null,
     };
   },
   methods: {
+    quantity_minus() {
+      if (this.selected.duration >= 1) {
+        this.selected.duration--;
+      }
+    },
+    quantity_plus() {
+      this.selected.duration++;
+    },
     async addAppeal() {
-      console.log("manager_check = " + this.selected.manager_check.value);
-      console.log("client_check = " + this.selected.client_check.value);
-
       let tempTagsId = [];
       this.tags.filter((item) => {
         tempTagsId.push(item.id);
@@ -288,7 +307,7 @@ export default {
           });
         }
       } catch (error) {
-        const vNodesMsg = [`${error.response.data.error}`];
+        const vNodesMsg = [`${Object.values(error)}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",
@@ -346,7 +365,7 @@ export default {
           });
         }
       } catch (error) {
-        const vNodesMsg = [`${error.response.data.error}`];
+        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",
@@ -370,6 +389,12 @@ export default {
     },
     getSourceTable() {
       return this.$store.getters.getSources;
+    },
+    options_manager_check() {
+      return this.$store.getters.options_manager_check;
+    },
+    options_client_check() {
+      return this.$store.getters.options_client_check;
     },
   },
   mounted() {

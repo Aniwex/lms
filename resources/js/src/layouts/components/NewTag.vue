@@ -148,20 +148,32 @@ export default {
   },
   methods: {
     async addAppeal() {
-      this.temp_client_plus_words.push(
-        this.client_plus_words.split(/(?=\/)|\s/)
-      );
-      this.temp_client_minus_words.push(
-        this.client_minus_words.split(/(?=\/)|\s/)
-      );
-      this.temp_operator_plus_words.push(
-        this.operator_plus_words.split(/(?=\/)|\s/)
-      );
-      this.temp_operator_minus_words.push(
-        this.operator_minus_words.split(/(?=\/)|\s/)
-      );
       try {
         if (this.name) {
+          this.temp_client_plus_words = [];
+          this.temp_client_minus_words = [];
+          this.temp_operator_plus_words = [];
+          this.temp_operator_minus_words = [];
+          this.temp_client_plus_words.push(
+            this.client_plus_words.split(/(?=\/)|\s/).filter((item) => {
+              return item !== "";
+            })
+          );
+          this.temp_client_minus_words.push(
+            this.client_minus_words.split(/(?=\/)|\s/).filter((item) => {
+              return item !== "";
+            })
+          );
+          this.temp_operator_plus_words.push(
+            this.operator_plus_words.split(/(?=\/)|\s/).filter((item) => {
+              return item !== "";
+            })
+          );
+          this.temp_operator_minus_words.push(
+            this.operator_minus_words.split(/(?=\/)|\s/).filter((item) => {
+              return item !== "";
+            })
+          );
           await axios
             .post("api/projects/" + this.project.id + "/tags", {
               name: this.name,
@@ -187,7 +199,7 @@ export default {
           });
         }
       } catch (error) {
-        const vNodesMsg = [`${error.response.data.error}`];
+        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",
@@ -199,20 +211,24 @@ export default {
       }
     },
     async CreateAndAddAppeal() {
-      this.temp_client_plus_words.push(
-        this.client_plus_words.split(/(?=\/)|\s/)
-      );
-      this.temp_client_minus_words.push(
-        this.client_minus_words.split(/(?=\/)|\s/)
-      );
-      this.temp_operator_plus_words.push(
-        this.operator_plus_words.split(/(?=\/)|\s/)
-      );
-      this.temp_operator_minus_words.push(
-        this.operator_minus_words.split(/(?=\/)|\s/)
-      );
       try {
         if (this.name) {
+          this.temp_client_plus_words = [];
+          this.temp_client_minus_words = [];
+          this.temp_operator_plus_words = [];
+          this.temp_operator_minus_words = [];
+          this.temp_client_plus_words.push(
+            this.client_plus_words.split(/(?=\/)|\s/)
+          );
+          this.temp_client_minus_words.push(
+            this.client_minus_words.split(/(?=\/)|\s/)
+          );
+          this.temp_operator_plus_words.push(
+            this.operator_plus_words.split(/(?=\/)|\s/)
+          );
+          this.temp_operator_minus_words.push(
+            this.operator_minus_words.split(/(?=\/)|\s/)
+          );
           await axios
             .post("api/projects/" + this.project.id + "/tags", {
               name: this.name,
@@ -242,7 +258,7 @@ export default {
           });
         }
       } catch (error) {
-        const vNodesMsg = [`${error.response.data.error}`];
+        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",

@@ -404,7 +404,6 @@ export default {
     },
     hideModal() {
       this.modalArray = this.getDataSources;
-      console.log(this.modalArray);
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
@@ -426,7 +425,7 @@ export default {
             this.$refs["modal__window"].hide();
           });
       } catch (error) {
-        const vNodesMsg = [`${error.response.data.error}`];
+        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",
@@ -464,19 +463,17 @@ export default {
                   )
                   .then(() => {
                     this.getDataSources.splice(i, 1);
-                    if (result.value) {
-                      this.$swal({
-                        icon: "success",
-                        title: "Удалено!",
-                        text: "Ваше обращение было удалено.",
-                        customClass: {
-                          confirmButton: "btn btn-success",
-                        },
-                      });
-                    }
+                    this.$swal({
+                      icon: "success",
+                      title: "Удалено!",
+                      text: "Обращение было удалено.",
+                      customClass: {
+                        confirmButton: "btn btn-success",
+                      },
+                    });
                   })
                   .catch((error) => {
-                    const vNodesMsg = [`${error.response.data.error}`];
+                    const vNodesMsg = [`${Object.values(error.response.data)}`];
                     this.$bvToast.toast([vNodesMsg], {
                       title: `Ошибка`,
                       variant: "danger",
@@ -519,7 +516,9 @@ export default {
                   "api/projects/" + this.project.id + "/sources/" + +item.id
                 )
                 .catch((error) => {
-                  const vNodesMsg = [`${error.response.data.error}`];
+                  const vNodesMsg = [
+                    `${Object.values(error.response.data.errors)}`,
+                  ];
                   this.$bvToast.toast([vNodesMsg], {
                     title: `Ошибка`,
                     variant: "danger",

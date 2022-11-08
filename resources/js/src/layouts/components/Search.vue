@@ -74,7 +74,7 @@
 import { BFormInput, BButton, VBTooltip } from "bootstrap-vue";
 import Ripple from "vue-ripple-directive";
 export default {
-  props: ["rows", "role_id"],
+  props: ["rows", "role_id", "searchHistory"],
   components: {
     BFormInput,
     BButton,
@@ -97,13 +97,20 @@ export default {
       let key = Object.keys(this.rows[0]);
       if (this.rows.length) {
         this.rows.filter((item) => {
-          for (let k in key) {
-            if (
-              item[key[k]] !== null &&
-              item[key[k]].toString().includes(this.searchTerm)
-            ) {
-              this.arraySearch.push(item);
-            }
+          // for (let k in key) {
+          //   console.log(item.phone.formatted);
+          //   if (
+          //     item[key[k]] !== null &&
+          //     item[key[k]].toString().includes(this.searchTerm)
+          //   ) {
+          //     this.arraySearch.push(item);
+          //   }
+          // }
+          if (
+            item.phone.formatted !== null &&
+            item.phone.formatted.toString().includes(this.searchTerm)
+          ) {
+            this.arraySearch.push(item);
           }
         });
       }

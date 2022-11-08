@@ -298,9 +298,13 @@ export default {
         this.rowSelection.filter((item) => {
           return this.rows.map((index, i) => {
             if (item.id === index.id) {
-              axios.delete(
-                "api/projects/" + this.project + "/claims/" + item.id
-              );
+              axios
+                .delete(
+                  "api/projects/" + this.project.id + "/claims/" + item.id
+                )
+                .catch((error) => {
+                  console.log(error.response.data);
+                });
               this.rows.splice(i, 1);
             }
           });

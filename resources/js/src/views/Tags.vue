@@ -458,7 +458,9 @@ export default {
               }
             })
             .catch((error) => {
-              const vNodesMsg = [`${error.response.data.error}`];
+              const vNodesMsg = [
+                `${Object.values(error.response.data.errors)}`,
+              ];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
                 variant: "danger",
@@ -538,7 +540,7 @@ export default {
             this.$refs["modal__window"].hide();
           })
           .catch((error) => {
-            const vNodesMsg = [`${error.response.data.error}`];
+            const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
               variant: "danger",
@@ -566,41 +568,43 @@ export default {
           buttonsStyling: false,
         }).then((result) => {
           if (this.getDataTags.length) {
-            this.getDataTags.filter((index, i) => {
-              if (index.id === this.modalArray.id) {
-                axios
-                  .delete(
-                    "api/projects/" +
-                      this.getProject.id +
-                      "/tags/" +
-                      this.modalArray.id
-                  )
-                  .then(() => {
-                    this.getDataTags.splice(i, 1);
-                    if (result.value) {
-                      this.$swal({
-                        icon: "success",
-                        title: "Удалено!",
-                        text: "Ваше обращение было удалено.",
-                        customClass: {
-                          confirmButton: "btn btn-success",
-                        },
+            if (result.value) {
+              this.getDataTags.filter((index, i) => {
+                if (index.id === this.modalArray.id) {
+                  axios
+                    .delete(
+                      "api/projects/" +
+                        this.getProject.id +
+                        "/tags/" +
+                        this.modalArray.id
+                    )
+                    .then(() => {
+                      this.getDataTags.splice(i, 1);
+                    })
+                    .catch((error) => {
+                      const vNodesMsg = [
+                        `${Object.values(error.response.data.errors)}`,
+                      ];
+                      this.$bvToast.toast([vNodesMsg], {
+                        title: `Ошибка`,
+                        variant: "danger",
+                        solid: true,
+                        appendToast: true,
+                        toaster: "b-toaster-top-center",
+                        autoHideDelay: 3000,
                       });
-                    }
-                  })
-                  .catch((error) => {
-                    const vNodesMsg = [`${error.response.data.error}`];
-                    this.$bvToast.toast([vNodesMsg], {
-                      title: `Ошибка`,
-                      variant: "danger",
-                      solid: true,
-                      appendToast: true,
-                      toaster: "b-toaster-top-center",
-                      autoHideDelay: 3000,
                     });
-                  });
-              }
-            });
+                }
+              });
+              this.$swal({
+                icon: "success",
+                title: "Удалено!",
+                text: "Обращение было удалено.",
+                customClass: {
+                  confirmButton: "btn btn-success",
+                },
+              });
+            }
           } else if (result.dismiss === "cancel") {
             this.$swal({
               title: "Отмена",
@@ -632,7 +636,9 @@ export default {
                   "api/projects/" + this.getProject.id + "/tags/" + item.id
                 )
                 .catch((error) => {
-                  const vNodesMsg = [`${error.response.data.error}`];
+                  const vNodesMsg = [
+                    `${Object.values(error.response.data.errors)}`,
+                  ];
                   this.$bvToast.toast([vNodesMsg], {
                     title: `Ошибка`,
                     variant: "danger",

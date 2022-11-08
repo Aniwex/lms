@@ -202,7 +202,7 @@ export default {
           });
         })
         .catch((error) => {
-          const vNodesMsg = [`${error.response.data.error}`];
+          const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
           this.$bvToast.toast([vNodesMsg], {
             title: `Ошибка`,
             variant: "danger",
@@ -237,7 +237,7 @@ export default {
         await this.$store.dispatch("SET_USER");
       } catch (error) {
         this.enter = false;
-        const vNodesMsg = [`${error.response.data.error}`];
+        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
         this.$bvToast.toast([vNodesMsg], {
           name: `Ошибка`,
           variant: "danger",
@@ -277,7 +277,7 @@ export default {
         this.enterAndAdd = false;
       } catch (error) {
         this.enterAndAdd = false;
-        const vNodesMsg = [`${error.response.data.error}`];
+        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
         this.$bvToast.toast([vNodesMsg], {
           name: `Ошибка`,
           variant: "danger",

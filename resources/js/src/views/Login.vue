@@ -67,11 +67,11 @@
         </b-form-group>
 
         <!-- checkbox -->
-        <b-form-group>
+        <!-- <b-form-group>
           <b-form-checkbox id="remember-me" v-model="status" name="checkbox-1">
             Запомнить меня
           </b-form-checkbox>
-        </b-form-group>
+        </b-form-group> -->
 
         <!-- submit buttons -->
         <b-button type="submit" variant="primary" block>

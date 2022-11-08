@@ -11,7 +11,6 @@
       hide-footer
       no-close-on-esc
       no-close-on-backdrop
-      @close="close_Function"
     >
       <swiper
         class="swiper-navigations"
@@ -48,7 +47,7 @@
             <h3>Данные для редактирования</h3>
             <div class="container__see-project">
               <div class="row__lables">
-                <div v-if="user.role.id === 1" class="row__datetime-lables">
+                <div v-if="user.role.id === 1" class="row__tag-lables">
                   <label class="row__lables-label">Дата и время</label>
                   <flat-pickr
                     placeholder="Выберите дату и время"
@@ -61,7 +60,7 @@
                     }"
                   />
                 </div>
-                <div v-if="user.role.id === 1" class="row__duration-lables">
+                <div v-if="user.role.id === 1" class="row__tag-lables">
                   <label class="row__lables-label"
                     >Продолжительность звонка</label
                   >
@@ -78,11 +77,10 @@
                         class="plus-icon align-middle mr-25"
                       ></minus-icon>
                     </b-button>
-                    <!-- <b-form-input
+                    <b-form-input
                       class="input__number form-control"
-                      v-model="data.duration"
-                      readonly="readonly"
-                    /> -->
+                      v-model="data.duration.original"
+                    />
                     <b-button
                       v-ripple.400="'rgba(255, 255, 255, 0.15)'"
                       variant="primary"
@@ -100,11 +98,11 @@
                 <div v-if="user.role.id === 1" class="row__tag-lables">
                   <label class="row__lables-label">Источник</label>
                   <multiselect
-                    v-model="data.source_id"
+                    v-model="data.source"
                     onclick="this.querySelector('input').focus();"
-                    :options="options_source_id"
+                    :options="options_source"
                     selectedLabel="Выбрано"
-                    class="multiselect-input"
+                    class="multiselect-input mutiselect-margin"
                     label="name"
                     track-by="name"
                     placeholder="Выберите источник"
@@ -114,14 +112,14 @@
                 </div>
                 <div v-if="user.role.id === 1" class="row__user-lables">
                   <label class="row__lables-label">Пользователь</label>
-                  <!-- <b-form-input
+                  <b-form-input
                     class="row__user-input"
                     type="text"
                     placeholder="+7 (999) 999-99-99"
-                    v-model="data.phone"
+                    v-model="data.phone.formatted"
                     v-mask="'+7 (###) ###-##-##'"
                     maxlength="18"
-                  /> -->
+                  />
                 </div>
                 <div
                   v-if="user.role.id === 1 || user.role.id === 2"
@@ -134,7 +132,7 @@
                     :options="options_tags"
                     selectedLabel="Выбрано"
                     :multiple="true"
-                    class="multiselect-input"
+                    class="multiselect-input mutiselect-margin"
                     label="name"
                     track-by="name"
                     placeholder="Выберите тэг"
@@ -147,12 +145,18 @@
                   class="row__tag-lables"
                 >
                   <label class="row__lables-label">Проверка менеджера</label>
-                  <b-form-select
-                    class="form__select"
-                    v-model="data.manager_check"
+                  <multiselect
+                    v-model="chooseManager"
+                    onclick="this.querySelector('input').focus();"
                     :options="options_manager"
+                    selectedLabel="Выбрано"
+                    class="multiselect-input mutiselect-margin"
+                    label="text"
+                    track-by="text"
+                    placeholder="Выберите источник"
+                    :showLabels="false"
                   >
-                  </b-form-select>
+                  </multiselect>
                 </div>
                 <div
                   v-if="user.role.id === 1 || user.role.id === 2"
@@ -164,18 +168,23 @@
                     placeholder="Комментарий менеджера"
                     rows="5"
                     no-resize
-                    v-model="data.manager_comment"
-                    :value="data.manager_comment"
+                    v-model="chooseManagerComment"
                   />
                 </div>
                 <div v-if="user.role.id === 1" class="row__tag-lables">
                   <label class="row__lables-label">Проверка клиента</label>
-                  <b-form-select
-                    class="form__select"
-                    v-model="data.client_check"
+                  <multiselect
+                    v-model="chooseClient"
+                    onclick="this.querySelector('input').focus();"
                     :options="options_client"
+                    selectedLabel="Выбрано"
+                    class="multiselect-input mutiselect-margin"
+                    label="text"
+                    track-by="text"
+                    placeholder="Выберите источник"
+                    :showLabels="false"
                   >
-                  </b-form-select>
+                  </multiselect>
                 </div>
                 <div class="row__comment-client-lables">
                   <label class="row__lables-label">Комментарий клиента</label>
@@ -184,8 +193,7 @@
                     placeholder="Комментарий клиента"
                     rows="5"
                     no-resize
-                    v-model="data.client_comment"
-                    :value="data.client_comment"
+                    v-model="chooseClientComment"
                   />
                 </div>
                 <div class="modal__form-buttons">
@@ -306,12 +314,14 @@ export default {
   props: [
     "user",
     "modalArray",
-    "options_source_id",
+    "options_source",
     "options_tags",
     "options_manager",
     "options_client",
     "client_check",
     "manager_check",
+    "project",
+    "chooseMutationManager",
   ],
   directives: {
     Ripple,
@@ -320,6 +330,10 @@ export default {
   },
   data() {
     return {
+      chooseManager: null,
+      chooseClient: null,
+      chooseManagerComment: null,
+      chooseClientComment: null,
       modalArrayNext: [],
       modalArrayPrev: [],
       modalCounter: 0,
@@ -337,69 +351,113 @@ export default {
     };
   },
   methods: {
-    close_Function() {
-    
-    },
     quantity_minus(duration) {
-      let temp = duration.toString().replace(/[^0-9]/g, "");
-      duration = Number(temp);
-      if (duration >= 10) {
-        duration -= 10;
-        this.modalArray[this.modalCounter].duration = "";
-        this.modalArray[this.modalCounter].duration += duration + " секунд";
+      // let temp = duration.toString().replace(/[^0-9]/g, "");
+      // duration = Number(temp);
+      if (duration.original >= 1) {
+        duration.original--;
+        // this.modalArray[this.modalCounter].duration = "";
+        // this.modalArray[this.modalCounter].duration += duration + " секунд";
       }
     },
     quantity_plus(duration) {
-      duration = duration.toString().replace(/[^0-9]/g, "");
-      duration = Number(duration);
-      duration += 10;
+      // duration = duration.toString().replace(/[^0-9]/g, "");
+      // duration = Number(duration);
+      duration.original++;
 
-      this.modalArray[this.modalCounter].duration = "";
-      this.modalArray[this.modalCounter].duration += duration + " секунд";
+      // this.modalArray[this.modalCounter].duration = "";
+      // this.modalArray[this.modalCounter].duration += duration + " секунд";
     },
     changeSlideNext() {
       this.modalCounter++;
+      this.chooseManager = this.modalArray[this.modalCounter].manager.check;
+      this.chooseClient = this.modalArray[this.modalCounter].client.check;
+      this.chooseManagerComment =
+        this.modalArray[this.modalCounter].manager.comment;
+      this.chooseClientComment =
+        this.modalArray[this.modalCounter].client.comment;
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     changeSlidePrev() {
       this.modalCounter--;
+      this.chooseManager = this.modalArray[this.modalCounter].manager.check;
+      this.chooseClient = this.modalArray[this.modalCounter].client.check;
+      this.chooseManagerComment =
+        this.modalArray[this.modalCounter].manager.comment;
+      this.chooseClientComment =
+        this.modalArray[this.modalCounter].client.comment;
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
-    },
-    resetFilters() {
-      this.selected.tags = null;
-      this.selected.source_id = null;
-      this.selected.datetime = null;
-      this.selected.manager_check = null;
-      this.selected.client_check = null;
-      this.selected.deleted = null;
-      this.selected.value_range = 0;
-      this.phone = "";
-      this.sortedFilter = [];
     },
     hideModal() {
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
       try {
+        this.modalArray[this.modalCounter].phone.original = this.modalArray[
+          this.modalCounter
+        ].phone.formatted.replace(/[^0-9]/g, "");
+        let tempTagsId = [];
+        this.modalArray[this.modalCounter].tags.filter((item) => {
+          tempTagsId.push(item.id);
+        });
+        console.log(this.chooseManager);
+        console.log(this.modalArray[this.modalCounter]);
         await axios
-          .put("/api/data/" + this.modalArray[this.modalCounter].id, {
-            id: this.modalArray[this.modalCounter].id,
-            datetime: this.modalArray[this.modalCounter].datetime,
-            duration: this.modalArray[this.modalCounter].duration,
-            manager_comment: this.modalArray[this.modalCounter].manager_comment,
-            source_id: this.modalArray[this.modalCounter].source_id,
-            phone: this.modalArray[this.modalCounter].phone,
-            tags: this.modalArray[this.modalCounter].tags,
-            client_comment: this.modalArray[this.modalCounter].client_comment,
-            manager_check: this.modalArray[this.modalCounter].manager_check,
-            client_check: this.modalArray[this.modalCounter].client_check,
-            dialog: this.modalArray[this.modalCounter].dialog,
-          })
+          .put(
+            " api/projects/" +
+              this.project.id +
+              "/claims/" +
+              this.modalArray[this.modalCounter].id,
+            {
+              id: this.modalArray[this.modalCounter].id,
+              datetime: this.modalArray[this.modalCounter].datetime,
+              duration: this.modalArray[this.modalCounter].duration.original,
+              manager_comment:
+                this.modalArray[this.modalCounter].manager_comment,
+              source_id: this.modalArray[this.modalCounter].source.id,
+              phone: this.modalArray[this.modalCounter].phone.original,
+              tags: tempTagsId,
+              client_comment: this.modalArray[this.modalCounter].client_comment,
+              manager_check: this.chooseManager.value,
+              client_check: this.chooseClient.value,
+              dialog: this.modalArray[this.modalCounter].dialog,
+              manager_comment: this.chooseManagerComment,
+              client_comment: this.chooseClientComment,
+            }
+          )
           .then(() => {
+            this.modalArray[this.modalCounter].manager.check.value =
+              this.chooseManager.value;
+            this.modalArray[this.modalCounter].manager.check.text =
+              this.chooseManager.text;
+
+            this.modalArray[this.modalCounter].client.check.value =
+              this.chooseClient.value;
+            this.modalArray[this.modalCounter].client.check.text =
+              this.chooseClient.text;
+
+            this.modalArray[this.modalCounter].manager.comment =
+              this.chooseManagerComment;
+
+            this.modalArray[this.modalCounter].client.comment =
+              this.chooseClientComment;
+
+            this.modalArray[this.modalCounter].duration.formatted =
+              Math.floor(
+                this.modalArray[this.modalCounter].duration.original / 60
+              ) -
+              Math.floor(
+                this.modalArray[this.modalCounter].duration.original / 60 / 60
+              ) *
+                60 +
+              " мин" +
+              " " +
+              (this.modalArray[this.modalCounter].duration.original % 60) +
+              " сек";
             this.$refs["modal__window"].hide();
           })
           .catch((error) => {
-            const vNodesMsg = [`${error.response.data.error}`];
+            const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
               variant: "danger",
@@ -445,7 +503,14 @@ export default {
     },
   },
   computed: {},
-  created() {},
+  created() {
+    this.chooseManager = this.modalArray[this.modalCounter].manager.check;
+    this.chooseClient = this.modalArray[this.modalCounter].client.check;
+    this.chooseManagerComment =
+      this.modalArray[this.modalCounter].manager.comment;
+    this.chooseClientComment =
+      this.modalArray[this.modalCounter].client.comment;
+  },
   mounted() {},
 };
 </script>

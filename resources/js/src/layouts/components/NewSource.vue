@@ -119,7 +119,7 @@ export default {
           this.options_integration_id = response.data.integrations;
         })
         .catch((error) => {
-          const vNodesMsg = [`${error.response.data.error}`];
+          const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
           this.$bvToast.toast([vNodesMsg], {
             title: `Ошибка`,
             variant: "danger",
@@ -147,7 +147,7 @@ export default {
             })
             .catch((error) => {
               this.enter = false;
-              const vNodesMsg = [`${error.response.data.error}`];
+              const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
               this.$bvToast.toast([vNodesMsg], {
                 name: `Ошибка`,
                 variant: "danger",

@@ -70,10 +70,7 @@
           v-else-if="props.column.field === 'role'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap"
-            >ID: {{ props.row.role.id }} <br />
-            Роль: {{ props.row.role.title }}</span
-          >
+          <span class="text-nowrap"> Роль: {{ props.row.role.title }}</span>
         </span>
         <span v-else-if="props.column.field === 'action'">
           <span class="db__tc">
@@ -167,6 +164,21 @@
             <div class="container__see-project">
               <div class="row__lables">
                 <div class="row__source-lables">
+                  <label class="row__lables-label">Роль</label>
+                  <multiselect
+                    v-model="role"
+                    :options="options_roles"
+                    selectedLabel="Выбрано"
+                    class="multiselect-input"
+                    label="title"
+                    track-by="title"
+                    onclick="this.querySelector('input').focus();"
+                    placeholder="Выберите роль"
+                    :showLabels="false"
+                  >
+                  </multiselect>
+                </div>
+                <div class="row__date-lables">
                   <label class="row__lables-label">Логин</label>
                   <b-form-input
                     class="row__user-input"
@@ -176,24 +188,42 @@
                   />
                 </div>
                 <div class="row__date-lables">
-                  <label class="row__lables-label">Роль</label>
-                  <b-form-select
-                    style="display: block; text-align: center"
-                    class="form__appeal-input"
-                    v-model="role"
-                    :options="options_roles"
+                  <label class="row__lables-label">Пароль</label>
+                  <validation-provider
+                    #default="{ errors }"
+                    name="Password"
+                    rules="required"
                   >
-                  </b-form-select>
+                    <b-input-group
+                      class="input-group-merge"
+                      :class="errors.length > 0 ? 'is-invalid' : null"
+                      style="width: 300px !important"
+                    >
+                      <b-form-input
+                        v-model="password"
+                        :state="errors.length > 0 ? false : null"
+                        class="row__user-input"
+                        :type="passwordFieldType"
+                        placeholder="············"
+                      />
+                    </b-input-group>
+                    <small class="text-danger">{{ errors[0] }}</small>
+                  </validation-provider>
                 </div>
                 <div class="row__date-lables">
-                  <label class="row__lables-label">Пароль</label>
-                  <b-form-input
-                    class="row__user-input"
-                    v-model="password"
-                    type="text"
-                    placeholder="Пароль"
-                    :state="password !== ''"
-                  />
+                  <label class="row__lables-label">Проекты</label>
+                  <multiselect
+                    v-model="project"
+                    :options="option_project"
+                    selectedLabel="Выбрано"
+                    class="multiselect-input"
+                    label="name"
+                    track-by="name"
+                    onclick="this.querySelector('input').focus();"
+                    placeholder="Выберите проект"
+                    :showLabels="false"
+                  >
+                  </multiselect>
                 </div>
                 <div class="modal__form-buttons">
                   <b-button
@@ -248,7 +278,12 @@ import {
   BButton,
   BFormTextarea,
   BSpinner,
+  BInputGroup,
+  BInputGroupAppend,
 } from "bootstrap-vue";
+import { ValidationProvider, ValidationObserver } from "vee-validate";
+import { required } from "@validations";
+import { togglePasswordVisibility } from "@core/mixins/ui/forms";
 import Search from "../layouts/components/Search.vue";
 import Filters from "../layouts/components/Filters.vue";
 import { Swiper, SwiperSlide } from "vue-awesome-swiper";
@@ -257,6 +292,10 @@ import Ripple from "vue-ripple-directive";
 import "swiper/css/swiper.css";
 export default {
   components: {
+    BInputGroupAppend,
+    BInputGroup,
+    ValidationProvider,
+    ValidationObserver,
     BForm,
     Trash2Icon,
     MoreVerticalIcon,
@@ -286,6 +325,7 @@ export default {
     Ripple,
     "b-modal": VBModal,
   },
+  mixins: [togglePasswordVisibility],
   data() {
     return {
       rowsUsers: [],
@@ -296,6 +336,7 @@ export default {
       user: "",
       modalCounter: 0,
       searchTerm: "",
+      required,
       pageLength: 5,
       columns: [
         {
@@ -325,6 +366,8 @@ export default {
       tempHeightPlus: null,
       tempHeightMinus: null,
       options_roles: [],
+      project: [],
+      option_project: [],
       role: null,
     };
   },
@@ -342,6 +385,7 @@ export default {
     },
     changeSlideNext() {
       this.modalCounter++;
+      this.role = this.modalArray[this.modalCounter].role;
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     pushArraySearch(search) {
@@ -349,6 +393,7 @@ export default {
     },
     changeSlidePrev() {
       this.modalCounter--;
+      this.role = this.modalArray[this.modalCounter].role;
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     async getTableUsers() {
@@ -357,10 +402,6 @@ export default {
         .get("api/roles")
         .then((response) => {
           this.options_roles = response.data.roles;
-          this.options_roles.filter((item, i) => {
-            item["value"] = item["text"] = i + 1;
-          });
-          this.options_roles.unshift({ value: null, text: "—" });
           this.getUsers = true;
         })
         .catch((error) => {
@@ -433,6 +474,7 @@ export default {
             this.modalArray.push(item);
           }
         });
+        this.role = this.modalArray[this.modalCounter].role;
       }
       if (item === "Удалить") {
         this.modalArray = row;
@@ -447,21 +489,11 @@ export default {
         await axios.put("/api/users/" + this.modalArray[this.modalCounter].id, {
           login: this.modalArray[this.modalCounter].login,
           password: this.password,
-          role_id: this.role,
+          role_id: this.role.id,
         });
         this.$refs["modal__window"].hide();
         await this.getTableUsers();
-      } catch (error) {
-        const vNodesMsg = [`${error.response.data.error}`];
-        this.$bvToast.toast([vNodesMsg], {
-          title: `Ошибка`,
-          variant: "danger",
-          solid: true,
-          appendToast: true,
-          toaster: "b-toaster-top-center",
-          autoHideDelay: 3000,
-        });
-      }
+      } catch (error) {}
     },
     async deleteModal() {
       try {
@@ -489,7 +521,7 @@ export default {
                       this.$swal({
                         icon: "success",
                         role: "Удалено!",
-                        text: "Ваш пользователь был удален.",
+                        text: "Пользователь был удален.",
                         customClass: {
                           confirmButton: "btn btn-success",
                         },
@@ -541,6 +573,24 @@ export default {
         });
       }
     },
+    async getProjects() {
+      await axios
+        .get("api/projects")
+        .then((response) => {
+          this.option_project = response.data.projects;
+        })
+        .catch((error) => {
+          const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
+          this.$bvToast.toast([vNodesMsg], {
+            title: `Ошибка`,
+            variant: "danger",
+            solid: true,
+            appendToast: true,
+            toaster: "b-toaster-top-center",
+            autoHideDelay: 3000,
+          });
+        });
+    },
   },
   computed: {
     sorted() {
@@ -554,6 +604,7 @@ export default {
   created() {
     this.getDataUser();
     this.getTableUsers();
+    this.getProjects();
   },
 };
 </script>

@@ -186,16 +186,27 @@ export default {
     async addIntegration() {
       try {
         this.enter = true;
+        let tempConfig = [];
+        this.config.filter((item) => {
+          if (item.key !== null && item.value !== null) {
+            tempConfig.push(item);
+          }
+        });
+        tempConfig.filter((item, i) => {
+          if (item.key === null && item.value === null) {
+            item.splice(i, 1);
+          }
+        });
         await axios
           .post("/api/integrations", {
             title: this.title,
             slug: this.slug,
-            config: this.config,
+            config: tempConfig,
           })
           .then(() => this.$router.push("/Integration"));
       } catch (error) {
         this.enter = false;
-        const vNodesMsg = [`${error.response.data.error}`];
+        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",
@@ -226,7 +237,7 @@ export default {
         this.enterAndAdd = false;
       } catch (error) {
         this.enterAndAdd = false;
-        const vNodesMsg = [`${error.response.data.error}`];
+        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",

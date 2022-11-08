@@ -436,7 +436,7 @@ export default {
           this.getProjects = true;
         })
         .catch((error) => {
-          const vNodesMsg = [`${error.response.data.error}`];
+          const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
           this.$bvToast.toast([vNodesMsg], {
             title: `Ошибка`,
             variant: "danger",
@@ -475,7 +475,9 @@ export default {
                 this.$store.commit("SET_ENTERED", false);
               });
             } else {
-              const vNodesMsg = [`${error.response.data.error}`];
+              const vNodesMsg = [
+                `${Object.values(error.response.data.errors)}`,
+              ];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
                 variant: "danger",
@@ -535,7 +537,7 @@ export default {
         await this.getTableProjects();
         await this.$store.dispatch("SET_USER");
       } catch (error) {
-        const vNodesMsg = [`${error.response.data.error}`];
+        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",
@@ -549,7 +551,7 @@ export default {
     async deleteModal() {
       try {
         this.$swal({
-          role: "Вы согласны удалить пользователя?",
+          role: "Вы согласны удалить проект?",
           text: "Это действие необратимо!",
           icon: "warning",
           showCancelButton: true,
@@ -575,7 +577,7 @@ export default {
                       this.$swal({
                         icon: "success",
                         role: "Удалено!",
-                        text: "Ваш пользователь был удален.",
+                        text: "Ваш проект был удален.",
                         customClass: {
                           confirmButton: "btn btn-success",
                         },
@@ -583,7 +585,7 @@ export default {
                     } else if (result.dismiss === "cancel") {
                       this.$swal({
                         role: "Отмена",
-                        text: "Удаление пользователя было отменено",
+                        text: "Удаление проекта было отменено",
                         icon: "error",
                         customClass: {
                           confirmButton: "btn btn-success",
@@ -592,13 +594,14 @@ export default {
                     }
                   })
                   .catch(() => {
-                    this.$bvToast.toast("Удалять супер админа запрещено", {
+                    const vNodesMsg = [`${error.response.data.error}`];
+                    this.$bvToast.toast([vNodesMsg], {
                       title: `Ошибка`,
                       variant: "danger",
                       solid: true,
                       appendToast: true,
                       toaster: "b-toaster-top-center",
-                      autoHideDelay: 2000,
+                      autoHideDelay: 3000,
                     });
                   });
               }

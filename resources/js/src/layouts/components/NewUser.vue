@@ -17,7 +17,7 @@
           <b-form-input
             class="row__user-input"
             v-model="password"
-            type="text"
+            type="password"
             placeholder="Пароль"
             :state="password !== ''"
           />
@@ -138,7 +138,7 @@ export default {
           this.option_project = response.data.projects;
         })
         .catch((error) => {
-          const vNodesMsg = [`${error.response.data.error}`];
+          const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
           this.$bvToast.toast([vNodesMsg], {
             title: `Ошибка`,
             variant: "danger",
@@ -156,7 +156,7 @@ export default {
           this.options_roles = response.data.roles;
         })
         .catch((error) => {
-          const vNodesMsg = [`${error.response.data.error}`];
+          const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
           this.$bvToast.toast([vNodesMsg], {
             title: `Ошибка`,
             variant: "danger",
@@ -182,7 +182,9 @@ export default {
             })
             .catch((error) => {
               this.enter = false;
-              const vNodesMsg = [`${error.response.data.error}`];
+              const vNodesMsg = [
+                `${Object.values(error.response.data.errors)}`,
+              ];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
                 variant: "danger",
@@ -216,7 +218,9 @@ export default {
             })
             .catch((error) => {
               this.enter = false;
-              const vNodesMsg = [`${error.response.data.error}`];
+              const vNodesMsg = [
+                `${Object.values(error.response.data.errors)}`,
+              ];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
                 variant: "danger",

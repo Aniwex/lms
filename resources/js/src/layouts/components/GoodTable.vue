@@ -1,5 +1,5 @@
 <template>
-  <div v-if="getProject !== ''">
+  <div v-if="getProject">
     <div class="text-center" v-if="!getDataTable || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
@@ -28,7 +28,7 @@
 
     <!-- table -->
     <vue-good-table
-      v-if="getDataTable"
+      v-if="getDataTable && user.role"
       :columns="columns"
       :rows="sorted"
       :search-options="{
@@ -67,7 +67,7 @@
           <span class="text-nowrap">{{ props.row.duration.formatted }}</span>
         </span>
         <!-- Column: source  -->
-        <span v-else-if="props.column.field === 'source '">
+        <span class="db__tc" v-else-if="props.column.field === 'source '">
           <span>{{ props.row.source.name }}</span>
         </span>
         <!-- Column: phone  -->
@@ -98,8 +98,8 @@
               aria-expanded="false"
             >
               <feather-icon
-                v-if="getManagerObject[props.row.id]"
-                :icon="getManagerObject[props.row.id].icon"
+                v-if="managerObject[props.row.id]"
+                :icon="managerObject[props.row.id].icon"
                 size="16"
                 class="align-middle mr-25"
               />
@@ -118,7 +118,7 @@
               v-if="user.role.id === 1"
             >
               <button
-                v-for="(m, index) in getManager"
+                v-for="(m, index) in managerIcons"
                 :key="index"
                 class="dropdown-item"
                 @click="changeIconManager(props.row.id, m)"
@@ -145,8 +145,8 @@
               aria-expanded="false"
             >
               <feather-icon
-                v-if="getClientObject[props.row.id]"
-                :icon="getClientObject[props.row.id].icon"
+                v-if="clientObject[props.row.id]"
+                :icon="clientObject[props.row.id].icon"
                 size="16"
                 class="align-middle mr-25"
               />
@@ -165,7 +165,7 @@
               v-if="user.role.id === 1"
             >
               <button
-                v-for="(c, index) in getClient"
+                v-for="(c, index) in clientIcons"
                 :key="index"
                 class="dropdown-item"
                 @click="changeIconClient(props.row.id, c)"
@@ -197,14 +197,14 @@
           style="word-break: break-all"
           v-else-if="props.column.field === 'manager_comment'"
         >
-          <span>{{ props.row.manager_comment }}</span>
+          <span>{{ props.row.manager.comment }}</span>
         </span>
         <!-- Column: client_comment -->
         <span
           style="word-break: break-all"
           v-else-if="props.column.field === 'client_comment'"
         >
-          <span>{{ props.row.client_comment }}</span>
+          <span>{{ props.row.client.comment }}</span>
         </span>
         <!-- Column: Status -->
         <span v-else-if="props.column.field === 'status'">
@@ -228,10 +228,11 @@
                   class="text-body align-middle mr-25"
                 />
               </template>
-              <b-dropdown-item v-b-modal.modal__seeProject>
+              <b-dropdown-item>
                 <eye-icon size="1x" class="mr-50"></eye-icon>
                 <span>Посмотреть</span>
               </b-dropdown-item>
+
               <b-dropdown-item v-if="user.role.id === 1" @click="deleteModal">
                 <feather-icon icon="TrashIcon" class="mr-50" />
                 <span>Удалить</span>
@@ -283,13 +284,17 @@
     </vue-good-table>
     <!-- modal see project -->
     <ModalSeeProject
+      v-if="modalArray.length"
       id="modal__seeProject"
       :user="user"
       :modalArray="modalArray"
       :options_source="getSourceTable"
       :options_tags="getTagsTable"
-      :options_manager="options_manager"
-      :options_client="options_client"
+      :options_manager="options_manager_check"
+      :options_client="options_client_check"
+      :project="getProject"
+      :chooseManager="chooseManager"
+      :chooseClient="chooseClient"
     ></ModalSeeProject>
   </div>
   <div v-else>
@@ -365,7 +370,6 @@ import Ripple from "vue-ripple-directive";
 import "@core/scss/vue/libs/vue-select.scss";
 import axios from "axios";
 import {
-  SlashIcon,
   CheckIcon,
   XCircleIcon,
   AlertCircleIcon,
@@ -487,17 +491,15 @@ export default {
       selected: {},
       options_tags: [],
       options_source: [],
-      options_manager: [
-        { value: null, text: "—" },
-        { value: "целевой", text: "целевой" },
-        { value: "не целевой", text: "не целевой" },
-        { value: "не установленный", text: "не установленный" },
+      managerIcons: [
+        { value: "целевой", icon: "CheckCircleIcon" },
+        { value: "нецелевой", icon: "XCircleIcon" },
+        { value: "не установленный", icon: "XSquareIcon" },
       ],
-      options_client: [
-        { value: null, text: "—" },
-        { value: "целевой", text: "целевой" },
-        { value: "не целевой", text: "не целевой" },
-        { value: "не проверенный", text: "не проверенный" },
+      clientIcons: [
+        { value: "целевой", icon: "CheckCircleIcon" },
+        { value: "нецелевой", icon: "XCircleIcon" },
+        { value: "не проверенный", icon: "XSquareIcon" },
       ],
       rows: [],
       searchTerm: "",
@@ -511,7 +513,6 @@ export default {
       modalArrayNext: [],
       modalArrayPrev: [],
       modalCounter: 0,
-      historyArray: [],
       swiperOptions: {
         navigation: {
           nextEl: ".swiper-button-next",
@@ -527,6 +528,10 @@ export default {
       project: [],
       option_project: [],
       user: "",
+      tempProject: null,
+      historyArray: [],
+      chooseManager: null,
+      chooseClient: null,
     };
   },
   methods: {
@@ -536,28 +541,8 @@ export default {
       await this.$store.dispatch("getSourceTable");
       await this.$store.dispatch("getTagsTable");
     },
-    showProjectModal() {
-      this.$refs["project__modal"].show();
-    },
     async saveProjectModal() {
       await this.$store.commit("SET_PROJECT", this.project);
-    },
-    quantity_minus(duration) {
-      let temp = duration.toString().replace(/[^0-9]/g, "");
-      duration = Number(temp);
-      if (duration >= 10) {
-        duration -= 10;
-        this.modalArray[this.modalCounter].duration = "";
-        this.modalArray[this.modalCounter].duration += duration + " секунд";
-      }
-    },
-    quantity_plus(duration) {
-      duration = duration.toString().replace(/[^0-9]/g, "");
-      duration = Number(duration);
-      duration += 10;
-
-      this.modalArray[this.modalCounter].duration = "";
-      this.modalArray[this.modalCounter].duration += duration + " секунд";
     },
     changeSlideNext() {
       this.modalCounter++;
@@ -578,9 +563,6 @@ export default {
       this.isCloseable = true;
       this.$refs.dropdown.hide();
     },
-    stopPropagation() {
-      console.log("stopPropagation");
-    },
     pushChangeCheckBox(user) {
       this.checkboxUser = user;
     },
@@ -592,17 +574,6 @@ export default {
     },
     pushSelected(select) {
       this.selected = select;
-    },
-    resetFilters() {
-      this.selected.tags = null;
-      this.selected.source = null;
-      this.selected.datetime = null;
-      this.selected.manager = null;
-      this.selected.client = null;
-      this.selected.deleted = null;
-      this.selected.value_range = 0;
-      this.phone = "";
-      this.sortedFilter = [];
     },
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
@@ -623,7 +594,9 @@ export default {
                 this.$store.commit("SET_ENTERED", false);
               });
             } else {
-              const vNodesMsg = [`${error.response.data.error}`];
+              const vNodesMsg = [
+                `${Object.values(error.response.data.errors)}`,
+              ];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
                 variant: "danger",
@@ -645,10 +618,11 @@ export default {
       }
     },
     historyUser(row) {
-      this.searchTerm = row.phone;
+      console.log(row);
+      this.searchTerm = row.phone.formatted;
       this.arraySearch = [];
       this.getDataTable.filter((item) => {
-        if (item.phone === this.searchTerm) {
+        if (item.phone.formatted === this.searchTerm) {
           this.arraySearch.push(item);
         }
       });
@@ -671,7 +645,10 @@ export default {
             this.modalArray.push(item);
           }
         });
+        this.chooseManager = this.modalArray[this.modalCounter].manager.check;
+        this.chooseClient = this.modalArray[this.modalCounter].client.check;
         this.arrayChat = await this.modalArray[this.modalCounter].dialog;
+        this.$bvModal.show("modal__seeProject");
       }
       if (item === "Удалить") {
         this.modalArray = row;
@@ -703,11 +680,12 @@ export default {
                       this.modalArray.id
                   )
                   .then(() => {
+                    this.getDataTable.splice(i, 1);
                     if (result.value) {
                       this.$swal({
                         icon: "success",
                         title: "Удалено!",
-                        text: "Ваше обращение было удалено.",
+                        text: "Обращение было удалено.",
                         customClass: {
                           confirmButton: "btn btn-success",
                         },
@@ -715,7 +693,9 @@ export default {
                     }
                   })
                   .catch((error) => {
-                    const vNodesMsg = [`${error.response.data.error}`];
+                    const vNodesMsg = [
+                      `${Object.values(error.response.data.errors)}`,
+                    ];
                     this.$bvToast.toast([vNodesMsg], {
                       title: `Ошибка`,
                       variant: "danger",
@@ -725,7 +705,6 @@ export default {
                       autoHideDelay: 3000,
                     });
                   });
-                this.getDataTable.splice(i, 1);
               }
             });
           } else if (result.dismiss === "cancel") {
@@ -751,76 +730,62 @@ export default {
     async changeIconManager(id, manager) {
       this.getDataTable.map((row) => {
         if (row.id === id) {
-          row.manager.check.text = manager.value;
-          let tempTagsId = [];
-          row.tags.filter((item) => {
-            tempTagsId.push(item.id);
+          this.options_manager_check.filter((item) => {
+            if (item.text === manager.value) {
+              axios
+                .put(" api/projects/" + this.getProject.id + "/claims/" + id, {
+                  manager_check: item.value,
+                })
+                .then(() => {
+                  this.$set(this.managerObject, id, manager);
+                })
+                .catch((error) => {
+                  const vNodesMsg = [
+                    `${Object.values(error.response.data.errors)}`,
+                  ];
+                  this.$bvToast.toast([vNodesMsg], {
+                    title: `Ошибка`,
+                    variant: "danger",
+                    solid: true,
+                    appendToast: true,
+                    toaster: "b-toaster-top-center",
+                    autoHideDelay: 3000,
+                  });
+                });
+            }
           });
-          console.log("client_check = " + row.client.check.value);
-          axios
-            .put(" api/projects/" + this.getProject.id + "/claims/" + id, {
-              datetime: row.datetime,
-              duration: row.duration.original,
-              manager_comment: row.manager_comment,
-              client_comment: row.client_comment,
-              source_id: row.source.id,
-              phone: row.phone.original,
-              tags: tempTagsId,
-              manager_check: row.manager.check.value,
-              client_check: row.client.check.value,
-            })
-            .then(() => {
-              let manager_object = {};
-              this.$set(manager_object, id, manager);
-              this.$store.commit("SET_MANAGER_OBJECT", manager_object);
-            })
-            .catch((error) => {
-              const vNodesMsg = [`${error.response.data.error}`];
-              this.$bvToast.toast([vNodesMsg], {
-                title: `Ошибка`,
-                variant: "danger",
-                solid: true,
-                appendToast: true,
-                toaster: "b-toaster-top-center",
-                autoHideDelay: 3000,
-              });
-            });
+        }
+        if (id) {
         }
       });
     },
     changeIconClient(id, client) {
       this.getDataTable.map((row) => {
         if (row.id === id) {
-          row.client = client.value;
-          axios
-            .put("/api/data/" + id, {
-              id: id,
-              datetime: row.datetime,
-              duration: row.duration,
-              manager_comment: row.manager_comment,
-              source: row.source,
-              phone: row.phone,
-              tags: row.tags,
-              client_comment: row.client_comment,
-              manager: row.manager,
-              client: client.value,
-            })
-            .then(() => {
-              let client_object = {};
-              this.$set(client_object, id, client);
-              this.$store.commit("SET_CLIENT_OBJECT", client_object);
-            })
-            .catch((error) => {
-              const vNodesMsg = [`${error.response.data.error}`];
-              this.$bvToast.toast([vNodesMsg], {
-                title: `Ошибка`,
-                variant: "danger",
-                solid: true,
-                appendToast: true,
-                toaster: "b-toaster-top-center",
-                autoHideDelay: 3000,
-              });
-            });
+          this.options_client_check.filter((item) => {
+            if (item.text === client.value) {
+              axios
+                .put("api/projects/" + this.getProject.id + "/claims/" + id, {
+                  client_check: item.value,
+                })
+                .then(() => {
+                  this.$set(this.clientObject, id, client);
+                })
+                .catch((error) => {
+                  const vNodesMsg = [
+                    `${Object.values(error.response.data.errors)}`,
+                  ];
+                  this.$bvToast.toast([vNodesMsg], {
+                    title: `Ошибка`,
+                    variant: "danger",
+                    solid: true,
+                    appendToast: true,
+                    toaster: "b-toaster-top-center",
+                    autoHideDelay: 3000,
+                  });
+                });
+            }
+          });
         }
       });
     },
@@ -830,22 +795,30 @@ export default {
   },
   computed: {
     getDataTable() {
-      let managerObject = {};
-      let clientObject = {};
-      this.$store.getters.getClaims.forEach((row) => {
+      this.historyArray = [];
+      this.$store.getters.getClaims.forEach((row, index, k) => {
+        k = 0;
         const activeManager =
-          this.$store.getters.manager.find(
-            (m) => m.value == row.manager.check.text
-          ) || null;
-        this.$set(managerObject, row.id, activeManager);
-        this.$store.commit("SET_MANAGER_OBJECT", managerObject);
+          this.managerIcons.find((m) => m.value === row.manager.check.text) ||
+          null;
+        this.$set(this.managerObject, row.id, activeManager);
         const activeClient =
-          this.$store.getters.client.find(
-            (c) => c.value == row.client.check.text
-          ) || null;
-        this.$set(clientObject, row.id, activeClient);
-        this.$store.commit("SET_CLIENT_OBJECT", clientObject);
+          this.clientIcons.find((c) => c.value == row.client.check.text) ||
+          null;
+        this.$set(this.clientObject, row.id, activeClient);
+        for (let i = 0; i < index; i++) {
+          if (
+            row.phone.original ===
+            this.$store.getters.getClaims[i].phone.original
+          ) {
+            k++;
+            if (k < 2) {
+              this.historyArray.push(this.$store.getters.getClaims[i].id);
+            }
+          }
+        }
       });
+      this.historyArray = [...new Set(this.historyArray)];
       return this.$store.getters.getClaims;
     },
     getTagsTable() {
@@ -875,7 +848,7 @@ export default {
         });
         return filteredRows;
       } else {
-        return this.getDataTable;
+        return this.$store.getters.getClaims;
       }
     },
     getProject() {
@@ -887,11 +860,11 @@ export default {
     getClient() {
       return this.$store.getters.client;
     },
-    getManagerObject() {
-      return this.$store.getters.getManagerObject;
+    options_manager_check() {
+      return this.$store.getters.options_manager_check;
     },
-    getClientObject() {
-      return this.$store.getters.getClientObject;
+    options_client_check() {
+      return this.$store.getters.options_client_check;
     },
   },
   created() {

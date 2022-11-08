@@ -165,12 +165,18 @@
               <div class="row__lables" :style="{ height: trHeight + 'px' }">
                 <div class="row__date-lables">
                   <label class="row__lables-label">Название</label>
-                  <b-form-input
-                    class="row__user-input"
-                    v-model="data.title"
-                    type="text"
-                    placeholder="Название"
-                  />
+                  <multiselect
+                    v-model="integration"
+                    onclick="this.querySelector('input').focus();"
+                    :options="options_integrations"
+                    selectedLabel="Выбрано"
+                    class="multiselect-input"
+                    label="title"
+                    track-by="title"
+                    placeholder="Выберите интеграцию"
+                    :showLabels="false"
+                  >
+                  </multiselect>
                 </div>
                 <div class="row__source-lables">
                   <label class="row__lables-label">Код</label>
@@ -181,7 +187,10 @@
                     placeholder="Код"
                   />
                 </div>
-                <div class="form__group-options" v-if="data.config">
+                <div
+                  class="form__group-options"
+                  v-if="data.config.length !== 0"
+                >
                   <div>
                     <label class="row__lables-label">Настройки </label>
                     <b-form
@@ -383,6 +392,8 @@ export default {
       trMargin: 20,
       tempHeightPlus: null,
       tempHeightMinus: null,
+      options_integrations: [],
+      integration: [],
     };
   },
   methods: {
@@ -403,6 +414,7 @@ export default {
     },
     changeSlideNext() {
       this.modalCounter++;
+      this.integration = this.modalArray[this.modalCounter];
       if (this.modalArray[this.modalCounter].config.length >= 2) {
         this.trHeight =
           297 +
@@ -418,6 +430,7 @@ export default {
     },
     changeSlidePrev() {
       this.modalCounter--;
+      this.integration = this.modalArray[this.modalCounter];
       if (this.modalArray[this.modalCounter].config.length >= 2) {
         this.trHeight =
           297 +
@@ -433,10 +446,11 @@ export default {
         .get("api/integrations")
         .then((response) => {
           this.rowsIntegration = response.data.integrations;
+          this.options_integrations = this.rowsIntegration;
           this.getInt = true;
         })
         .catch((error) => {
-          const vNodesMsg = [`${error.response.data.error}`];
+          const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
           this.$bvToast.toast([vNodesMsg], {
             title: `Ошибка`,
             variant: "danger",
@@ -474,7 +488,9 @@ export default {
                 this.$store.commit("SET_ENTERED", false);
               });
             } else {
-              const vNodesMsg = [`${error.response.data.error}`];
+              const vNodesMsg = [
+                `${Object.values(error.response.data.errors)}`,
+              ];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
                 variant: "danger",
@@ -504,6 +520,7 @@ export default {
           if (i === 1) {
             this.modalArray.push(item);
           }
+          this.integration = this.modalArray[this.modalCounter];
         });
         if (this.modalArray[this.modalCounter].config.length === 0) {
           this.trHeight = 350;
@@ -527,7 +544,7 @@ export default {
         await axios
           .put("/api/integrations/" + this.modalArray[this.modalCounter].id, {
             id: this.modalArray[this.modalCounter].id,
-            title: this.modalArray[this.modalCounter].title,
+            title: this.integration.title,
             slug: this.modalArray[this.modalCounter].slug,
             config: this.modalArray[this.modalCounter].config,
           })
@@ -535,7 +552,7 @@ export default {
             this.$refs["modal__window"].hide();
           })
           .catch((error) => {
-            const vNodesMsg = [`${error.response.data.error}`];
+            const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
               variant: "danger",
@@ -581,7 +598,9 @@ export default {
                       });
                     })
                     .catch((error) => {
-                      const vNodesMsg = [`${error.response.data.error}`];
+                      const vNodesMsg = [
+                        `${Object.values(error.response.data.errors)}`,
+                      ];
                       this.$bvToast.toast([vNodesMsg], {
                         title: `Ошибка`,
                         variant: "danger",

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Claim;
 
+use App\Models\Claim;
 use Illuminate\Validation\Rule;
 
 /**
@@ -22,8 +23,8 @@ class UpdateClaimRequest extends StoreClaimRequest
             'source_id' => ['integer', 'nullable', Rule::exists('sources', 'id')],
             'phone' => ['nullable', 'regex:/^((8|\+374|\+994|\+995|\+375|\+7|\+380|\+38|\+996|\+998|\+993)[\- ]?)?\(?\d{3,5}\)?[\- ]?\d{1}[\- ]?\d{1}[\- ]?\d{1}[\- ]?\d{1}[\- ]?\d{1}(([\- ]?\d{1})?[\- ]?\d{1})?$/'],
             'redirected_to' => ['string', 'nullable', 'max:255'],
-            'manager_check' => ['nullable', Rule::in(['targeted', 'untargeted', 'unidentified'])],
-            'client_check' => ['nullable', Rule::in(['targeted', 'untargeted', 'unidentified'])],
+            'manager_check' => ['nullable', Rule::in(array_keys(Claim::managerCheckValues()))],
+            'client_check' => ['nullable', Rule::in(array_keys(Claim::clientCheckValues()))],
             'manager_comment' => ['nullable', 'string'],
             'client_comment' => ['nullable', 'string'],
             'data' => ['array', 'nullable'],
