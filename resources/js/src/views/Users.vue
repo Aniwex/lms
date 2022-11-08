@@ -562,16 +562,37 @@ export default {
       }
     },
     deleteSelected() {
-      if (this.$store.getters.getUsers.length) {
-        this.rowSelection.filter((item) => {
-          this.$store.getters.getUsers.map((index, i) => {
-            if (item.id === index.id) {
-              axios.delete("/api/users/" + item.id);
-              this.$store.getters.getUsers.splice(i, 1);
-            }
+      try {
+        let k = 0;
+        let arr = [];
+        if (this.$store.getters.getUsers.length) {
+          this.rowSelection.filter((item) => {
+            this.$store.getters.getUsers.map((index, i) => {
+              if (item.id === index.id) {
+                k++;
+                arr.push(i);
+                axios
+                  .delete("/api/users/" + item.id)
+                  .then(() => {})
+                  .catch((error) => {
+                    const vNodesMsg = [
+                      `${Object.values(error.response.data.error)}`,
+                    ];
+                    this.$bvToast.toast([vNodesMsg], {
+                      title: `Ошибка`,
+                      variant: "danger",
+                      solid: true,
+                      appendToast: true,
+                      toaster: "b-toaster-top-center",
+                      autoHideDelay: 3000,
+                    });
+                  });
+              }
+            });
           });
-        });
-      }
+        }
+        this.$store.getters.getUsers.splice(arr[0], k);
+      } catch (error) {}
     },
     async getProjects() {
       await axios

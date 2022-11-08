@@ -627,32 +627,39 @@ export default {
       }
     },
     deleteSelected() {
-      if (this.getDataTags.length) {
-        this.rowSelection.filter((item) => {
-          this.getDataTags.map((index, i) => {
-            if (item.id === index.id) {
-              axios
-                .delete(
-                  "api/projects/" + this.getProject.id + "/tags/" + item.id
-                )
-                .catch((error) => {
-                  const vNodesMsg = [
-                    `${Object.values(error.response.data.errors)}`,
-                  ];
-                  this.$bvToast.toast([vNodesMsg], {
-                    title: `Ошибка`,
-                    variant: "danger",
-                    solid: true,
-                    appendToast: true,
-                    toaster: "b-toaster-top-center",
-                    autoHideDelay: 3000,
+      try {
+        let k = 0;
+        let arr = [];
+        if (this.getDataTags.length) {
+          this.rowSelection.filter((item) => {
+            this.getDataTags.map((index, i) => {
+              if (item.id === index.id) {
+                k++;
+                arr.push(i);
+                axios
+                  .delete(
+                    "api/projects/" + this.getProject.id + "/tags/" + item.id
+                  )
+                  .then(() => {})
+                  .catch((error) => {
+                    const vNodesMsg = [
+                      `${Object.values(error.response.data.errors)}`,
+                    ];
+                    this.$bvToast.toast([vNodesMsg], {
+                      title: `Ошибка`,
+                      variant: "danger",
+                      solid: true,
+                      appendToast: true,
+                      toaster: "b-toaster-top-center",
+                      autoHideDelay: 3000,
+                    });
                   });
-                });
-              this.getDataTags.splice(i, 1);
-            }
+              }
+            });
           });
-        });
-      }
+        }
+        this.getDataTags.splice(arr[0], k);
+      } catch (error) {}
     },
     pushArraySearch(search) {
       this.arraySearch = search;

@@ -399,7 +399,13 @@ export default {
           }
         });
         await axios
-          .get()
+          .get(
+            "api/projects/" +
+              this.project.id +
+              "/sources/" +
+              this.modalArray[this.modalCounter].id +
+              "/integration-fields"
+          )
           .then((response) => {
             console.log(response);
           })
@@ -516,32 +522,37 @@ export default {
       }
     },
     deleteSelected() {
-      if (this.getDataSources.length) {
-        this.rowSelection.filter((item) => {
-          this.getDataSources.map((index, i) => {
-            if (item.id === index.id) {
-              axios
-                .delete(
-                  "api/projects/" + this.project.id + "/sources/" + +item.id
-                )
-                .catch((error) => {
-                  const vNodesMsg = [
-                    `${Object.values(error.response.data.errors)}`,
-                  ];
-                  this.$bvToast.toast([vNodesMsg], {
-                    title: `Ошибка`,
-                    variant: "danger",
-                    solid: true,
-                    appendToast: true,
-                    toaster: "b-toaster-top-center",
-                    autoHideDelay: 3000,
+      try {
+        let k = 0;
+        let arr = [];
+        if (this.getDataSources.length) {
+          this.rowSelection.filter((item) => {
+            this.getDataSources.map((index, i) => {
+              if (item.id === index.id) {
+                k++;
+                arr.push(i);
+                axios
+                  .delete(
+                    "api/projects/" + this.project.id + "/sources/" + +item.id
+                  )
+                  .then(() => {})
+                  .catch((error) => {
+                    const vNodesMsg = [`${Object.values(error.response.data)}`];
+                    this.$bvToast.toast([vNodesMsg], {
+                      title: `Ошибка`,
+                      variant: "danger",
+                      solid: true,
+                      appendToast: true,
+                      toaster: "b-toaster-top-center",
+                      autoHideDelay: 3000,
+                    });
                   });
-                });
-              this.getDataSources.splice(i, 1);
-            }
+              }
+            });
           });
-        });
-      }
+        }
+        this.getDataSources.splice(arr[0], k);
+      } catch (error) {}
     },
   },
   computed: {

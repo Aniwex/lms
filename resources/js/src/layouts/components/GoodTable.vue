@@ -35,7 +35,6 @@
     <filters
       @arrayCheckboxUser="pushChangeCheckBox"
       @selected="pushSelected"
-      :rowSelection="rowSelection"
       :getDataTable="getDataTable"
       :role_id="user.role.id"
       :project="getProject"
@@ -45,7 +44,27 @@
       :options_client="options_client_check"
       v-if="getDataTable && getTagsTable && getSourceTable && user"
     />
-
+    <div
+      v-if="rowSelection.length && user.role.id === 1"
+      class="d-flex justify-content-end"
+    >
+      <b-dropdown class="drop__down-delete" variant="primary" right no-caret>
+        <template #button-content>
+          <trash-2-icon size="1x" class="custom-class"></trash-2-icon
+        ></template>
+        <b-dropdown-form
+          ><div class="form__group-delete">
+            <b-button
+              v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+              variant="primary"
+              @click="deleteSelected()"
+            >
+              Удалить выбранное ({{ rowSelection.length }})
+            </b-button>
+          </div>
+        </b-dropdown-form>
+      </b-dropdown>
+    </div>
     <!-- table -->
     <vue-good-table
       v-if="getDataTable && user.role"
@@ -388,6 +407,7 @@ import Ripple from "vue-ripple-directive";
 import "@core/scss/vue/libs/vue-select.scss";
 import axios from "axios";
 import {
+  Trash2Icon,
   CheckIcon,
   XCircleIcon,
   AlertCircleIcon,
@@ -400,6 +420,7 @@ import {
 } from "vue-feather-icons";
 export default {
   components: {
+    Trash2Icon,
     ModalSeeProject,
     BSpinner,
     Filters,
@@ -555,6 +576,31 @@ export default {
       await this.$store.dispatch("getDataTable");
       await this.$store.dispatch("getSourceTable");
       await this.$store.dispatch("getTagsTable");
+    },
+    deleteSelected() {
+      try {
+        let k = 0;
+        let arr = [];
+        if (this.getDataTable.length) {
+          this.getDataTable.filter((item) => {
+            this.getDataTable.map((index, i) => {
+              if (item.id === index.id) {
+                k++;
+                arr.push(i);
+                axios
+                  .delete(
+                    "api/projects/" + this.getProject.id + "/claims/" + item.id
+                  )
+                  .then(() => {})
+                  .catch((error) => {
+                    console.log(error.response.data);
+                  });
+              }
+            });
+          });
+        }
+        this.getDataTable.splice(arr[0], k);
+      } catch (error) {}
     },
     handleSearch() {
       this.arraySearch = [];

@@ -635,16 +635,22 @@ export default {
       }
     },
     deleteSelected() {
-      if (this.rowsIntegration.length) {
-        this.rowSelection.filter((item) => {
-          this.rowsIntegration.filter((index, i) => {
-            if (item.id === index.id) {
-              axios.delete("/api/integrations/" + item.id);
-              this.rowsIntegration.splice(i, 1);
-            }
+      try {
+        let k = 0;
+        let arr = [];
+        if (this.rowsIntegration.length) {
+          this.rowSelection.filter((item) => {
+            this.rowsIntegration.filter((index, i) => {
+              if (item.id === index.id) {
+                k++;
+                arr.push(i);
+                axios.delete("/api/integrations/" + item.id).then(() => {});
+              }
+            });
           });
-        });
-      }
+        }
+        this.rowsIntegration.splice(arr[0], k);
+      } catch (error) {}
     },
   },
   computed: {

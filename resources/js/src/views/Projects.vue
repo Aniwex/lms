@@ -619,16 +619,22 @@ export default {
       }
     },
     deleteSelected() {
-      if (this.rowsProjects.length) {
-        this.rowSelection.filter((item) => {
-          this.rowsProjects.map((index, i) => {
-            if (item.id === index.id) {
-              axios.delete("/api/projects/" + item.id);
-              this.rowsProjects.splice(i, 1);
-            }
+      try {
+        let k = 0;
+        let arr = [];
+        if (this.rowsProjects.length) {
+          this.rowSelection.filter((item) => {
+            this.rowsProjects.map((index, i) => {
+              if (item.id === index.id) {
+                k++;
+                arr.push(i);
+                axios.delete("/api/projects/" + item.id).then(() => {});
+              }
+            });
           });
-        });
-      }
+        }
+        this.rowsProjects.splice(arr[0], k);
+      } catch (error) {}
     },
   },
   computed: {

@@ -147,7 +147,9 @@ export default {
             })
             .catch((error) => {
               this.enter = false;
-              const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
+              const vNodesMsg = [
+                `${Object.values(error.response.data.errors)}`,
+              ];
               this.$bvToast.toast([vNodesMsg], {
                 name: `Ошибка`,
                 variant: "danger",
@@ -172,7 +174,6 @@ export default {
     async CreateAndAddSource() {
       try {
         if (this.name && this.code) {
-          this.enterAndAdd = true;
           await axios
             .post("api/projects/" + this.project.id + "/sources", {
               integration_id: this.integration_id.id,
@@ -182,12 +183,13 @@ export default {
             })
             .then(() => {
               this.$store.dispatch("getSourceTable");
+              this.enterAndAdd = true;
+              this.integration_id = [];
+              this.name = "";
+              this.code = "";
+              this.dataSource = [];
+              this.enterAndAdd = false;
             });
-          this.integration_id = [];
-          this.name = "";
-          this.code = "";
-          this.dataSource = [];
-          this.enterAndAdd = false;
         } else {
           this.$bvToast.toast("Пожалуйтса заполните все поля", {
             title: `Ошибка`,

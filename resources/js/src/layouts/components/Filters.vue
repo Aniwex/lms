@@ -137,27 +137,6 @@
       </b-dropdown>
     </b-form-group>
 
-    <div
-      v-if="rowSelection.length && role_id === 1"
-      class="d-flex justify-content-end"
-    >
-      <b-dropdown class="drop__down-delete" variant="primary" right no-caret>
-        <template #button-content>
-          <trash-2-icon size="1x" class="custom-class"></trash-2-icon
-        ></template>
-        <b-dropdown-form
-          ><div class="form__group-delete">
-            <b-button
-              v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-              variant="primary"
-              @click="deleteSelected()"
-            >
-              Удалить выбранное ({{ rowSelection.length }})
-            </b-button>
-          </div>
-        </b-dropdown-form>
-      </b-dropdown>
-    </div>
   </div>
 </template>
 
@@ -250,24 +229,7 @@ export default {
       this.$emit("arrayCheckboxUser", this.arrayCheckboxUser);
       this.$emit("selected", this.selected);
     },
-    deleteSelected() {
-      if (this.getDataTable.length) {
-        this.getDataTableelection.filter((item) => {
-          return this.getDataTable.map((index, i) => {
-            if (item.id === index.id) {
-              axios
-                .delete(
-                  "api/projects/" + this.project.id + "/claims/" + item.id
-                )
-                .catch((error) => {
-                  console.log(error.response.data);
-                });
-              this.getDataTable.splice(i, 1);
-            }
-          });
-        });
-      }
-    },
+    
     changeCheckBox(chek) {
       if (chek) {
         let arr = [];
