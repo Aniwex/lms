@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Source;
 
 use App\Http\Requests\Request;
+use App\Rules\Slug;
 use Illuminate\Validation\Rule;
 
 class UpdateSourceRequest extends Request
@@ -15,9 +16,9 @@ class UpdateSourceRequest extends Request
     public function rules()
     {
         return [
-            'name' => ['string', 'required', 'max:255'],
-            'integration_id' => ['integer', 'exists:integrations,id'],
-            'code' => ['string', 'required', 'max:255', Rule::unique('sources')->where('project_id', $this->project_id)->ignore($this->source)],
+            'name' => ['string', 'nullable', 'max:255'],
+            'integration_id' => ['integer', 'nullable', 'exists:integrations,id'],
+            'code' => ['string', 'nullable', 'max:255', Rule::unique('sources')->where('project_id', $this->project->id)->ignore($this->source), new Slug],
             'data' => ['array', 'nullable']
         ];
     }

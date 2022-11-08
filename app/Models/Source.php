@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Exceptions\BaseAppException;
+use App\Integrations\BaseIntegration;
 use App\Models\Traits\HasProject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -67,5 +69,23 @@ class Source extends Model
     public function claims()
     {
         return $this->hasMany(Claim::class);
+    }
+
+    /**
+     * Получить объект класса интеграции источника.
+     * 
+     * @throws \App\Exceptions\BaseAppException
+     * @return \App\Integrations\BaseIntegration объект класса интеграции источника
+     */
+    public function getIntegrationClass() : BaseIntegration
+    {
+        $name = ucfirst(strtolower(trim($this->integration->slug ?? '')));
+        $class = '\App\Integrations\\' . $name . '\\' . $name;
+
+        if (!class_exists($class) || $class instanceof BaseIntegration) {
+            throw new BaseAppException('Класса интеграции не существует в системе');
+        }
+
+        return new $class($this);
     }
 }

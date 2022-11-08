@@ -44,7 +44,7 @@ class IntegrationPolicy
      */
     public function create(User $user)
     {
-        return $user->isAdmin();
+        return false;
     }
 
     /**

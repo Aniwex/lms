@@ -83,9 +83,7 @@ class ProjectController extends Controller
     {
         $project->fill($request->onlyFilled()->except('users'));
 
-        if ($request->filled('users')) {
-            $project->users()->sync($request->input('users', []));
-        }
+        $project->users()->sync($request->input('users', []));
 
         $project->save();
 

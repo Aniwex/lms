@@ -22,8 +22,8 @@ services:
             - '.:/var/www/html'
         networks:
             - sail
-        depends_on:
-            - mysql
+        # depends_on:
+        #     - mysql
     mysql:
         container_name: lms_db
         image: 'mysql/mysql-server:8.0'

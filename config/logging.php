@@ -55,6 +55,42 @@ return [
             'days' => 14,
         ],
 
+        // логирование интеграции с задармой
+        'zadarma' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/zadarma.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+            'permission' => 0666,
+        ],
+
+        // логирование интеграции с марквизом
+        'marquiz' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/marquiz.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+            'permission' => 0666,
+        ],
+
+        // логирование интеграции с формами обратной связи
+        'forms_integration' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/forms_integration.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+            'permission' => 0666,
+        ],
+
+        // логирование интеграции с ройстатом
+        'roistat' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/roistat.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+            'permission' => 0666,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
