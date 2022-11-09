@@ -91,8 +91,10 @@
             :key="index"
             class="text-nowrap"
           >
-            <span v-if="data.key === 'roistat_id'">{{ data.value }}</span>
-            <span v-if="data.key === 'quiz_id'">{{ data.name }}</span>
+            <span v-if="data.key !== 'quiz_id'"
+              >{{ data.key }}: {{ data.value }}</span
+            >
+            <span v-else>{{ data.key }}: {{ data.name }}</span>
           </div>
         </span>
         <span v-else-if="props.column.field === 'action'">
@@ -210,51 +212,67 @@
                     placeholder="Код"
                   />
                 </div>
-                <div class="row__source-lables">
-                  <label class="row__lables-label">Данные по источнику</label>
+                <div class="data__source">
+                  <label class="db__tc data__source-label"
+                    >Данные по источнику</label
+                  >
                   <div v-for="(fields, index) in tempFields" :key="index">
                     <div v-for="(f, index) in fields" :key="index">
                       <div v-if="f.type === 'text'">
-                        <b-form-input
-                          v-if="f.key === 'roistat_id'"
-                          class="row__user-input"
-                          style="width: 300px"
-                          v-model="f.value"
-                          type="text"
-                          placeholder="Данные по источнику"
-                        />
-                        <b-form-input
-                          v-if="f.key === 'quiz_id'"
-                          class="row__user-input"
-                          style="width: 300px"
-                          v-model="f.name"
-                          type="text"
-                          placeholder="Данные по источнику"
-                        />
+                        <b-form-group
+                          label-cols="4"
+                          label-cols-lg="2"
+                          :label="f.key"
+                          label-for="input-lg"
+                          style="width: 400px"
+                        >
+                          <b-form-input
+                            v-if="f.key !== 'quiz_id'"
+                            class="row__user-input"
+                            style="margin-left: 10px"
+                            v-model="f.value"
+                            type="text"
+                            placeholder="Данные по источнику"
+                          />
+                          <b-form-input
+                            v-else
+                            class="row__user-input"
+                            style="margin-left: 10px"
+                            v-model="f.name"
+                            type="text"
+                            placeholder="Данные по источнику"
+                          />
+                        </b-form-group>
                       </div>
                       <div v-else-if="f.type === 'select'">
-                        <multiselect
-                          v-model="f.value"
-                          onclick="this.querySelector('input').focus();"
-                          :options="f.options"
-                          selectedLabel="Выбрано"
-                          class="multiselect-input mutiselect-margin"
-                          label="name"
-                          track-by="name"
-                          placeholder="Выберите источник"
-                          :showLabels="false"
+                        <b-form-group
+                          label-cols="4"
+                          label-cols-lg="2"
+                          :label="f.key"
+                          label-for="input-lg"
+                          style="width: 400px"
                         >
-                        </multiselect>
+                          <multiselect
+                            v-model="f.value"
+                            onclick="this.querySelector('input').focus();"
+                            :options="f.options"
+                            selectedLabel="Выбрано"
+                            style="margin-top: 10px"
+                            label="value"
+                            track-by="value"
+                            placeholder="Выберите источник"
+                            :showLabels="false"
+                          >
+                          </multiselect>
+                        </b-form-group>
                       </div>
                       <div v-else-if="f.type === 'hint'">
-                        <p class="fields__hint">
+                        <p class="fields__hint db__tc">
                           {{ f.message }}
                         </p>
                       </div>
                     </div>
                   </div>
-
-                  <label for=""></label>
                 </div>
                 <div class="modal__form-buttons">
                   <b-button
@@ -500,8 +518,8 @@ export default {
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
+      console.log(this.tempFields[0]);
       try {
-        console.log(this.tempFields[0]);
         await axios
           .put(
             " api/projects/" +
@@ -651,7 +669,7 @@ export default {
       }
     },
     getDataSources() {
-      //console.log(this.$store.getters.getSources);
+      console.log(this.$store.getters.getSources);
       return this.$store.getters.getSources;
     },
     getProject() {
@@ -666,4 +684,12 @@ export default {
 </script>
 
 <style>
+.data__source {
+  width: 400px;
+  display: block;
+  margin: 0 auto;
+}
+.col-form-label {
+  margin-top: 2.5%;
+}
 </style>
