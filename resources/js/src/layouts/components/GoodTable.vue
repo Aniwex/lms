@@ -1,5 +1,5 @@
 <template>
-  <div v-if="getProject">
+  <div v-if="LocalStorageProject !== null || getProject">
     <div class="text-center" v-if="!getDataTable || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
@@ -572,6 +572,7 @@ export default {
   },
   methods: {
     async selectProject(project) {
+      await localStorage.setItem("project", JSON.stringify(project));
       await this.$store.commit("SET_PROJECT", project);
       await this.$store.dispatch("getDataTable");
       await this.$store.dispatch("getSourceTable");
@@ -669,6 +670,7 @@ export default {
                   "x_xsrf_token",
                   resp.config.headers["X-XSRF-TOKEN"]
                 );
+                localStorage.removeItem("project");
                 this.$router.push("/");
                 this.$store.commit("SET_ENTERED", false);
               });
@@ -869,6 +871,14 @@ export default {
     inputSpinButton(duration) {
       this.modalArray[this.modalCounter].duration = duration + " секунд";
     },
+    async verifyLocalStorage() {
+      if (this.LocalStorageProject !== null) {
+        await this.$store.commit("SET_PROJECT", this.LocalStorageProject);
+        await this.$store.dispatch("getDataTable");
+        await this.$store.dispatch("getSourceTable");
+        await this.$store.dispatch("getTagsTable");
+      }
+    },
   },
   computed: {
     getDataTable() {
@@ -942,11 +952,15 @@ export default {
     create_window() {
       return this.$store.getters.get_create_modal_window;
     },
+    LocalStorageProject() {
+      return JSON.parse(localStorage.getItem("project"));
+    },
   },
   created() {
     this.getDataUser();
   },
   mounted() {
+    this.verifyLocalStorage();
     this.$bvModal.show("Project__modal");
   },
 };

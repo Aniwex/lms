@@ -79,6 +79,7 @@ export default new Vuex.Store({
         getSourceTable: async (ctx) => {
             await axios
                 .get(" api/projects/" + ctx.getters.project.id + "/sources")
+
                 .then((response) => {
                     let sources = response.data.sources;
                     ctx.commit("SET_SOURCES", sources);

@@ -86,7 +86,14 @@
           v-else-if="props.column.field === 'source_data'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.source_data }}</span>
+          <div
+            v-for="(data, index) in props.row.data"
+            :key="index"
+            class="text-nowrap"
+          >
+            <span v-if="data.key === 'roistat_id'">{{ data.value }}</span>
+            <span v-if="data.key === 'quiz_id'">{{ data.name }}</span>
+          </div>
         </span>
         <span v-else-if="props.column.field === 'action'">
           <span class="db__tc">
@@ -204,13 +211,49 @@
                   />
                 </div>
                 <div class="row__source-lables">
-                  <label class="row__lables-label">Настройки</label>
-                  <b-form-input
-                    class="row__user-input"
-                    v-model="data.source_data"
-                    type="text"
-                    placeholder="Данные по источнику"
-                  />
+                  <label class="row__lables-label">Данные по источнику</label>
+                  <div v-for="(fields, index) in tempFields" :key="index">
+                    <div v-for="(f, index) in fields" :key="index">
+                      <div v-if="f.type === 'text'">
+                        <b-form-input
+                          v-if="f.key === 'roistat_id'"
+                          class="row__user-input"
+                          style="width: 300px"
+                          v-model="f.value"
+                          type="text"
+                          placeholder="Данные по источнику"
+                        />
+                        <b-form-input
+                          v-if="f.key === 'quiz_id'"
+                          class="row__user-input"
+                          style="width: 300px"
+                          v-model="f.name"
+                          type="text"
+                          placeholder="Данные по источнику"
+                        />
+                      </div>
+                      <div v-else-if="f.type === 'select'">
+                        <multiselect
+                          v-model="f.value"
+                          onclick="this.querySelector('input').focus();"
+                          :options="f.options"
+                          selectedLabel="Выбрано"
+                          class="multiselect-input mutiselect-margin"
+                          label="name"
+                          track-by="name"
+                          placeholder="Выберите источник"
+                          :showLabels="false"
+                        >
+                        </multiselect>
+                      </div>
+                      <div v-else-if="f.type === 'hint'">
+                        <p class="fields__hint">
+                          {{ f.message }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <label for=""></label>
                 </div>
                 <div class="modal__form-buttons">
@@ -345,6 +388,7 @@ export default {
       getSources: false,
       arraySearch: "",
       project: [],
+      tempFields: [],
     };
   },
   methods: {
@@ -353,10 +397,41 @@ export default {
     },
     changeSlideNext() {
       this.modalCounter++;
+      this.tempFields = [];
+      axios
+        .get(
+          "api/projects/" +
+            this.project.id +
+            "/sources/" +
+            this.modalArray[this.modalCounter].id +
+            "/integration-fields"
+        )
+        .then((response) => {
+          this.tempFields.push(response.data.fields);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     changeSlidePrev() {
       this.modalCounter--;
+      this.tempFields = [];
+      axios
+        .get(
+          "api/projects/" +
+            this.project.id +
+            "/sources/" +
+            this.modalArray[this.modalCounter].id +
+            "/integration-fields"
+        )
+        .then((response) => {
+          this.tempFields.push(response.data.fields);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
       this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     async getDataUser() {
@@ -389,6 +464,7 @@ export default {
       if (item === "Посмотреть") {
         let temp = row;
         this.modalArray = [];
+        this.tempFields = [];
         let i = 0;
         this.getDataSources.filter((item) => {
           if (temp.id === item.id) {
@@ -407,11 +483,13 @@ export default {
               "/integration-fields"
           )
           .then((response) => {
-            console.log(response);
+            this.tempFields.push(response.data.fields);
           })
           .catch((error) => {
-            console.log(error.response.data.error);
+            console.log(error);
           });
+        //this.tempFields.filter((field) => console.log(field));
+        // console.log(this.tempFields[0]);
       }
       if (item === "Удалить") {
         this.modalArray = row;
@@ -423,6 +501,7 @@ export default {
     },
     async saveModal() {
       try {
+        console.log(this.tempFields[0]);
         await axios
           .put(
             " api/projects/" +
@@ -433,11 +512,19 @@ export default {
               integration_id: this.modalArray[this.modalCounter].integration.id,
               name: this.modalArray[this.modalCounter].name,
               code: this.modalArray[this.modalCounter].code,
-              data: this.modalArray[this.modalCounter].data,
+              data: this.tempFields[0],
             }
           )
           .then(() => {
+            this.getDataSources.filter((item) => {
+              if (item.id == this.modalArray[this.modalCounter].id) {
+                item.data = this.tempFields[0];
+              }
+            });
             this.$refs["modal__window"].hide();
+          })
+          .catch((error) => {
+            console.log(error.response.data);
           });
       } catch (error) {
         const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
@@ -564,6 +651,7 @@ export default {
       }
     },
     getDataSources() {
+      //console.log(this.$store.getters.getSources);
       return this.$store.getters.getSources;
     },
     getProject() {

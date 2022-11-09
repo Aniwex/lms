@@ -471,6 +471,7 @@ export default {
                   "x_xsrf_token",
                   resp.config.headers["X-XSRF-TOKEN"]
                 );
+                localStorage.removeItem("project");
                 this.$router.push("/");
                 this.$store.commit("SET_ENTERED", false);
               });
