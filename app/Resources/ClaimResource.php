@@ -18,7 +18,7 @@ class ClaimResource extends AbstractResource
         return new \League\Fractal\Resource\Item($model, function(Claim $claim) {
             $data = [
                 'id' => $claim->id,
-                'datetime' => $claim->datetime->format('Y-m-d H:i:s'),
+                'datetime' => $claim->datetime?->format('Y-m-d H:i:s'),
                 'code' => $claim->code,
                 'duration' => [
                     'original' => $claim->duration ?? 0,

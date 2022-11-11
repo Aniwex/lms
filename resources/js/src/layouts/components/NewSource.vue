@@ -19,23 +19,37 @@
         </div>
         <div class="form__group">
           <label class="form__label">Название </label>
-          <b-form-input
-            class="row__user-input"
-            v-model="name"
-            type="text"
-            placeholder="Название"
-            :state="name !== ''"
-          />
+          <div>
+            <b-form-input
+              class="row__user-input"
+              v-model="name"
+              type="text"
+              :placeholder="errors.name ? errors.name[1] : 'Название'"
+              :state="name !== ''"
+            />
+            <span style="color: red" class="db__tc" v-if="errors.name">
+              <span v-for="(err, index) in errors.name" :key="index"
+                >{{ err }}<br
+              /></span>
+            </span>
+          </div>
         </div>
         <div class="form__group">
           <label class="form__label">Код </label>
-          <b-form-input
-            class="row__user-input"
-            v-model="code"
-            type="text"
-            placeholder="Код"
-            :state="code !== ''"
-          />
+          <div>
+            <b-form-input
+              class="row__user-input"
+              v-model="code"
+              type="text"
+              :placeholder="errors.code ? errors.code[1] : 'Код'"
+              :state="code !== ''"
+            />
+            <span style="color: red" class="db__tc" v-if="errors.code">
+              <span v-for="(err, index) in errors.code" :key="index"
+                >{{ err }}<br
+              /></span>
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -109,6 +123,7 @@ export default {
       enterAndAdd: false,
       options_integration_id: [],
       project: [],
+      errors: {},
     };
   },
   methods: {
@@ -132,7 +147,7 @@ export default {
     },
     async addSource() {
       try {
-        if (this.name && this.code) {
+        if (this.integration_id) {
           await axios
             .post("api/projects/" + this.project.id + "/sources", {
               integration_id: this.integration_id.id,
@@ -147,9 +162,9 @@ export default {
             })
             .catch((error) => {
               this.enter = false;
-              const vNodesMsg = [
-                `${Object.values(error.response.data.errors)}`,
-              ];
+              this.errors = error.response.data.errors;
+              console.log(this.errors);
+              const vNodesMsg = [`${error.response.data.error}`];
               this.$bvToast.toast([vNodesMsg], {
                 name: `Ошибка`,
                 variant: "danger",
@@ -160,7 +175,7 @@ export default {
               });
             });
         } else {
-          this.$bvToast.toast("Пожалуйтса заполните все поля", {
+          this.$bvToast.toast("Пожалуйста выберите интеграцию", {
             title: `Ошибка`,
             variant: "danger",
             solid: true,
@@ -173,7 +188,7 @@ export default {
     },
     async CreateAndAddSource() {
       try {
-        if (this.name && this.code) {
+        if (this.integration_id) {
           await axios
             .post("api/projects/" + this.project.id + "/sources", {
               integration_id: this.integration_id.id,
@@ -191,7 +206,7 @@ export default {
               this.enterAndAdd = false;
             });
         } else {
-          this.$bvToast.toast("Пожалуйтса заполните все поля", {
+          this.$bvToast.toast("Пожалуйста выберите интеграцию", {
             title: `Ошибка`,
             variant: "danger",
             solid: true,

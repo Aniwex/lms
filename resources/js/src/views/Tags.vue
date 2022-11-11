@@ -60,6 +60,10 @@
       @on-selected-rows-change="selectionChanged"
     >
       <template slot="table-row" slot-scope="props">
+        <!-- Column: id -->
+        <span v-if="props.column.field === 'ID'" class="text-nowrap db__tc">
+          <span class="text-nowrap">{{ props.row.id }}</span>
+        </span>
         <!-- Column: Name -->
         <span v-if="props.column.field === 'name'" class="text-nowrap db__tc">
           <span class="text-nowrap">{{ props.row.name }}</span>
@@ -240,47 +244,95 @@
                 </div>
                 <div class="row__source-lables">
                   <label class="row__lables-label">Плюс слова клиента</label>
-                  <b-form-textarea
-                    class="row__user-input"
-                    style="text-align: left"
-                    placeholder="Плюс слова клиента"
-                    rows="5"
-                    no-resize
-                    v-model="data.client_plus_words"
-                  />
+                  <div>
+                    <b-form-textarea
+                      style="text-align: left; width: 300px"
+                      :placeholder="
+                        errors['client_plus_words.' + 0]
+                          ? errors['client_plus_words.' + 0][0]
+                          : 'Плюс слова клиента'
+                      "
+                      class="row__user-input"
+                      rows="5"
+                      no-resize
+                      v-model="data.client_plus_words"
+                      :state="data.client_plus_words !== ''"
+                    />
+                    <span
+                      class="db__tc"
+                      v-if="errors['client_plus_words.' + 0]"
+                      >{{ errors["client_plus_words." + 0][0] }}</span
+                    >
+                  </div>
                 </div>
                 <div class="row__source-lables">
                   <label class="row__lables-label">Минус слова клиента</label>
-                  <b-form-textarea
-                    class="row__user-input"
-                    style="text-align: left"
-                    placeholder="Плюс слова клиента"
-                    rows="5"
-                    no-resize
-                    v-model="data.client_minus_words"
-                  />
+                  <div>
+                    <b-form-textarea
+                      class="row__user-input"
+                      style="text-align: left; width: 300px"
+                      :placeholder="
+                        errors['client_minus_words.' + 0]
+                          ? errors['client_minus_words.' + 0][0]
+                          : 'Плюс слова клиента'
+                      "
+                      rows="5"
+                      no-resize
+                      v-model="data.client_minus_words"
+                      :state="data.client_minus_words !== ''"
+                    />
+                    <span
+                      class="db__tc"
+                      v-if="errors['client_minus_words.' + 0]"
+                      >{{ errors["client_minus_words." + 0][0] }}</span
+                    >
+                  </div>
                 </div>
                 <div class="row__source-lables">
                   <label class="row__lables-label">Плюс слова оператора</label>
-                  <b-form-textarea
-                    class="row__user-input"
-                    style="text-align: left"
-                    placeholder="Плюс слова клиента"
-                    rows="5"
-                    no-resize
-                    v-model="data.operator_plus_words"
-                  />
+                  <div>
+                    <b-form-textarea
+                      class="row__user-input"
+                      style="text-align: left; width: 300px"
+                      :placeholder="
+                        errors['operator_plus_words.' + 0]
+                          ? errors['operator_plus_words.' + 0][0]
+                          : 'Плюс слова клиента'
+                      "
+                      rows="5"
+                      no-resize
+                      v-model="data.operator_plus_words"
+                      :state="data.operator_plus_words !== ''"
+                    />
+                    <span
+                      class="db__tc"
+                      v-if="errors['operator_plus_words.' + 0]"
+                      >{{ errors["operator_plus_words." + 0][0] }}</span
+                    >
+                  </div>
                 </div>
                 <div class="row__source-lables">
                   <label class="row__lables-label">Минус слова оператора</label>
-                  <b-form-textarea
-                    class="row__user-input"
-                    style="text-align: left"
-                    placeholder="Плюс слова клиента"
-                    rows="5"
-                    no-resize
-                    v-model="data.operator_minus_words"
-                  />
+                  <div>
+                    <b-form-textarea
+                      class="row__user-input"
+                      style="text-align: left; width: 300px"
+                      :placeholder="
+                        errors['operator_minus_words.' + 0]
+                          ? errors['operator_minus_words.' + 0][0]
+                          : 'Плюс слова клиента'
+                      "
+                      rows="5"
+                      no-resize
+                      v-model="data.operator_minus_words"
+                      :state="data.operator_minus_words !== ''"
+                    />
+                    <span
+                      class="db__tc"
+                      v-if="errors['operator_minus_words.' + 0]"
+                      >{{ errors["operator_minus_words." + 0][0] }}</span
+                    >
+                  </div>
                 </div>
                 <div class="modal__form-buttons">
                   <b-button
@@ -379,11 +431,17 @@ export default {
       rowsTags: [],
       rowSelection: [],
       modalArray: [],
+      errors: {},
       modalCounter: 0,
       searchTerm: "",
       user: "",
       pageLength: 5,
       columns: [
+        {
+          label: "ID",
+          field: "ID",
+          thClass: "columnCenter",
+        },
         {
           label: "Название",
           field: "name",
@@ -540,6 +598,8 @@ export default {
             this.$refs["modal__window"].hide();
           })
           .catch((error) => {
+            this.errors = error.response.data.errors;
+            console.log(error.response.data.errors);
             const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
@@ -555,7 +615,7 @@ export default {
     async deleteModal() {
       try {
         this.$swal({
-          title: "Вы согласны удалить обращение?",
+          title: "Вы согласны удалить тэг?",
           text: "Это действие необратимо!",
           icon: "warning",
           showCancelButton: true,

@@ -9,19 +9,26 @@
             v-model="name"
             type="text"
             placeholder="Название"
-            :state="name !== ''"
           />
         </div>
         <div class="form__group">
           <label class="form__label">Главный домен</label>
-          <b-form-input
-            class="row__user-input"
-            v-model="domain"
-            type="text"
-            placeholder="Главный домен"
-            :state="domain !== ''"
-          />
+          <div>
+            <b-form-input
+              class="row__user-input"
+              v-model="domain"
+              type="text"
+              :state="domain !== ''"
+              :placeholder="errors.domain ? errors.domain[0] : 'Главный домен'"
+            />
+            <span style="color: red" class="db__tc" v-if="errors.domain">
+              <span v-for="(err, index) in errors.domain" :key="index">{{
+                err
+              }}</span>
+            </span>
+          </div>
         </div>
+
         <div class="form__group">
           <label class="form__label">Список зеркал </label>
           <div>
@@ -37,17 +44,29 @@
                 :id="index"
                 :key="index"
                 ref="row"
-                :style="{ margin: trMargin + 'px' }"
+                style="margin: 0 20px 20px 13px"
               >
                 <!-- Значение -->
 
                 <b-form-group label="Зеркало">
-                  <b-form-input
-                    type="text"
-                    placeholder="Зеркало"
-                    v-model="item.value"
-                    :state="item.value !== ''"
-                  />
+                  <div>
+                    <b-form-input
+                      type="text"
+                      v-model="item.value"
+                      :state="item.value !== ''"
+                      :placeholder="
+                        errors['mirrows.' + index]
+                          ? errors['mirrows.' + index][0]
+                          : 'Зеркало'
+                      "
+                    />
+                    <span
+                      style="color: red"
+                      class="db__tc"
+                      v-if="errors['mirrows.' + index]"
+                      >{{ errors["mirrows." + index][0] }}</span
+                    >
+                  </div>
                 </b-form-group>
                 <hr />
                 <!-- Добавить Button -->
@@ -177,6 +196,7 @@ export default {
           value: "",
         },
       ],
+      errors: {},
     };
   },
   methods: {
@@ -237,7 +257,8 @@ export default {
         await this.$store.dispatch("SET_USER");
       } catch (error) {
         this.enter = false;
-        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
+        this.errors = error.response.data.errors;
+        const vNodesMsg = [`${error.response.data.error}`];
         this.$bvToast.toast([vNodesMsg], {
           name: `Ошибка`,
           variant: "danger",
@@ -277,7 +298,8 @@ export default {
         this.enterAndAdd = false;
       } catch (error) {
         this.enterAndAdd = false;
-        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
+        this.errors = error.response.data.errors;
+        const vNodesMsg = [`${error.response.data.error}`];
         this.$bvToast.toast([vNodesMsg], {
           name: `Ошибка`,
           variant: "danger",

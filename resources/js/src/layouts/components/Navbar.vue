@@ -18,7 +18,7 @@
       <dark-Toggler class="d-none d-lg-block" />
 
       <b-button
-        v-if="user.role !== undefined && user.role.id === 1"
+        v-if="get_projects.role !== undefined && get_projects.role.id === 1"
         v-ripple.400="'rgba(255, 255, 255, 0.15)'"
         variant="primary"
         to="Projects"
@@ -26,7 +26,9 @@
       >
         Проекты
       </b-button>
-      <b-nav v-if="user.role !== undefined && user.role.id === 1">
+      <b-nav
+        v-if="get_projects.role !== undefined && get_projects.role.id === 1"
+      >
         <b-nav-item to="Users" class="navbar__button">
           <user-icon
             size="1.75x"
@@ -36,7 +38,7 @@
         <b-nav-item
           to="Integration"
           class="navbar__button"
-          v-if="user.role !== undefined && user.role.id === 1"
+          v-if="get_projects.role !== undefined && get_projects.role.id === 1"
         >
           <TrendingUpIcon
             size="1.75x"
@@ -44,10 +46,10 @@
           ></TrendingUpIcon>
         </b-nav-item>
       </b-nav>
-      <div v-if="get_projects && get_choose_project">
+      <div v-if="get_projects.projects && get_choose_project">
         <multiselect
           v-model="get_choose_project"
-          :options="get_projects"
+          :options="get_projects.projects"
           selectedLabel="Выбрано"
           class="choose__project"
           label="name"
@@ -58,14 +60,19 @@
         >
         </multiselect>
       </div>
-      <div v-if="!get_projects">
+      <div v-if="get_projects.projects">
+        <div v-if="get_projects.projects.length === 0">
+          Доступных проектов нет
+        </div>
+      </div>
+      <div v-if="!get_projects.projects">
         <b-button variant="primary" disabled class="mr-1">
           <b-spinner small />
           Загрузка...
         </b-button>
       </div>
     </div>
-    <div v-if="user.login === undefined">
+    <div v-if="get_projects.login === undefined">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -80,7 +87,7 @@
       >
         <template #button-content>
           <div class="d-sm-flex d-none user-nav">
-            <span class="user-status">{{ user.login }}</span>
+            <span class="user-status">{{ get_projects.login }}</span>
           </div>
           <b-avatar
             size="40"
@@ -205,8 +212,7 @@ export default {
       return this.$store.getters.project;
     },
     get_projects() {
-      this.user = this.$store.getters.getUser;
-      return this.$store.getters.getUser.projects;
+      return this.$store.getters.getUser;
     },
     get_choose_project() {
       return this.$store.getters.project;

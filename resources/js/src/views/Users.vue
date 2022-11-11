@@ -61,6 +61,10 @@
     >
       >
       <template slot="table-row" slot-scope="props">
+        <!-- Column: id -->
+        <span v-if="props.column.field === 'ID'" class="text-nowrap db__tc">
+          <span class="text-nowrap">{{ props.row.id }}</span>
+        </span>
         <!-- Column: login -->
         <span v-if="props.column.field === 'login'" class="text-nowrap db__tc">
           <span class="text-nowrap">{{ props.row.login }}</span>
@@ -70,7 +74,7 @@
           v-else-if="props.column.field === 'role'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap"> Роль: {{ props.row.role.title }}</span>
+          <span class="text-nowrap">{{ props.row.role.title }}</span>
         </span>
         <span v-else-if="props.column.field === 'action'">
           <span class="db__tc">
@@ -143,115 +147,100 @@
     <b-modal
       id="modal__seeIntegration"
       centered
-      role="Просмотр пользователя"
-      cancel-role="Отмена"
+      title="Просмотр пользователя"
       size="lg"
       ref="modal__window"
       hide-footer
       no-close-on-esc
       no-close-on-backdrop
     >
-      <swiper
-        class="swiper-navigations"
-        :options="swiperOptions"
-        :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-        @slideNextTransitionStart="changeSlideNext"
-        @slidePrevTransitionStart="changeSlidePrev"
-      >
-        <swiper-slide v-for="(data, index) in modalArray" :key="index"
-          ><div class="see-project__form">
-            <h3 class="see-project__read">Данные для редактирования</h3>
-            <div class="container__see-project">
-              <div class="row__lables">
-                <div class="row__source-lables">
-                  <label class="row__lables-label">Роль</label>
-                  <multiselect
-                    v-model="role"
-                    :options="options_roles"
-                    selectedLabel="Выбрано"
-                    class="multiselect-input"
-                    label="title"
-                    track-by="title"
-                    onclick="this.querySelector('input').focus();"
-                    placeholder="Выберите роль"
-                    :showLabels="false"
-                  >
-                  </multiselect>
-                </div>
-                <div class="row__date-lables">
-                  <label class="row__lables-label">Логин</label>
+      <div class="see-project__form">
+        <h3 class="see-project__read">Данные для редактирования</h3>
+        <div class="container__see-project">
+          <div class="row__lables">
+            <div class="row__source-lables">
+              <label class="row__lables-label">Роль</label>
+              <multiselect
+                v-model="role"
+                :options="options_roles"
+                selectedLabel="Выбрано"
+                class="multiselect-input"
+                label="title"
+                track-by="title"
+                onclick="this.querySelector('input').focus();"
+                placeholder="Выберите роль"
+                :showLabels="false"
+              >
+              </multiselect>
+            </div>
+            <div class="row__date-lables">
+              <label class="row__lables-label">Логин</label>
+              <b-form-input
+                class="row__user-input"
+                v-model="modalObject.login"
+                type="text"
+                placeholder="Логин"
+              />
+            </div>
+            <div class="row__date-lables">
+              <label class="row__lables-label">Пароль</label>
+              <validation-provider
+                #default="{ errors }"
+                name="Password"
+                rules="required"
+              >
+                <b-input-group
+                  class="input-group-merge"
+                  :class="errors.length > 0 ? 'is-invalid' : null"
+                  style="width: 300px !important"
+                >
                   <b-form-input
+                    v-model="password"
+                    :state="errors.length > 0 ? false : null"
                     class="row__user-input"
-                    v-model="data.login"
-                    type="text"
-                    placeholder="Логин"
+                    :type="passwordFieldType"
+                    placeholder="············"
                   />
-                </div>
-                <div class="row__date-lables">
-                  <label class="row__lables-label">Пароль</label>
-                  <validation-provider
-                    #default="{ errors }"
-                    name="Password"
-                    rules="required"
-                  >
-                    <b-input-group
-                      class="input-group-merge"
-                      :class="errors.length > 0 ? 'is-invalid' : null"
-                      style="width: 300px !important"
-                    >
-                      <b-form-input
-                        v-model="password"
-                        :state="errors.length > 0 ? false : null"
-                        class="row__user-input"
-                        :type="passwordFieldType"
-                        placeholder="············"
-                      />
-                    </b-input-group>
-                    <small class="text-danger">{{ errors[0] }}</small>
-                  </validation-provider>
-                </div>
-                <div class="row__date-lables">
-                  <label class="row__lables-label">Проекты</label>
-                  <multiselect
-                    v-model="project"
-                    :options="option_project"
-                    selectedLabel="Выбрано"
-                    class="multiselect-input"
-                    label="name"
-                    track-by="name"
-                    onclick="this.querySelector('input').focus();"
-                    placeholder="Выберите проект"
-                    :showLabels="false"
-                  >
-                  </multiselect>
-                </div>
-                <div class="modal__form-buttons">
-                  <b-button
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="secondary"
-                    @click="hideModal"
-                  >
-                    Отменить
-                  </b-button>
-                  <b-button
-                    @click="saveModal"
-                    class="form__button-margin"
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="primary"
-                  >
-                    Сохранить
-                  </b-button>
-                </div>
-              </div>
+                </b-input-group>
+                <small class="text-danger">{{ errors[0] }}</small>
+              </validation-provider>
+            </div>
+            <div class="row__date-lables">
+              <label class="row__lables-label">Проекты</label>
+              <multiselect
+                v-model="project"
+                :options="getProjects"
+                ref="multiselect"
+                selectedLabel="Выбрано"
+                label="name"
+                :multiple="true"
+                track-by="name"
+                placeholder="Выберите проект"
+                :showLabels="false"
+              >
+              </multiselect>
+            </div>
+
+            <div class="modal__form-buttons">
+              <b-button
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="secondary"
+                @click="hideModal"
+              >
+                Отменить
+              </b-button>
+              <b-button
+                @click="saveModal"
+                class="form__button-margin"
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="primary"
+              >
+                Сохранить
+              </b-button>
             </div>
           </div>
-        </swiper-slide>
-
-        <!-- Arrows -->
-        <div slot="button-next" class="swiper-button-next" />
-        <div slot="button-prev" class="swiper-button-prev" />
-        <div slot="pagination" class="swiper-pagination" />
-      </swiper>
+        </div>
+      </div>
     </b-modal>
   </div>
 </template>
@@ -330,8 +319,9 @@ export default {
     return {
       rowsUsers: [],
       password: "",
+      errors: {},
       rowSelection: [],
-      modalArray: [],
+      modalObject: [],
       arraySearch: "",
       user: "",
       modalCounter: 0,
@@ -339,6 +329,11 @@ export default {
       required,
       pageLength: 5,
       columns: [
+        {
+          label: "ID",
+          field: "ID",
+          thClass: "columnCenter",
+        },
         {
           label: "Логин",
           field: "login",
@@ -350,16 +345,6 @@ export default {
           thClass: "columnCenter",
         },
       ],
-      swiperOptions: {
-        navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev",
-        },
-        pagination: {
-          el: ".swiper-pagination",
-          type: "progressbar",
-        },
-      },
       getUsers: false,
       trHeight: 550,
       trMargin: 20,
@@ -367,37 +352,28 @@ export default {
       tempHeightMinus: null,
       options_roles: [],
       project: [],
-      option_project: [],
+      options_projects: [],
       role: null,
     };
   },
   methods: {
     repeateAgain() {
-      this.modalArray[this.modalCounter].config.push({
+      this.modalObject.config.push({
         key: null,
         value: null,
       });
       this.trHeight += 250;
     },
     removeItem(index) {
-      this.modalArray[this.modalCounter].config.splice(index, 1);
+      this.modalObject.config.splice(index, 1);
       this.trHeight -= 250;
-    },
-    changeSlideNext() {
-      this.modalCounter++;
-      this.role = this.modalArray[this.modalCounter].role;
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     pushArraySearch(search) {
       this.arraySearch = search;
     },
-    changeSlidePrev() {
-      this.modalCounter--;
-      this.role = this.modalArray[this.modalCounter].role;
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
-    },
     async getTableUsers() {
       await this.$store.dispatch("getDataUsers");
+      await this.$store.dispatch("SET_PROJECTS");
       await axios
         .get("api/roles")
         .then((response) => {
@@ -464,21 +440,16 @@ export default {
     },
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
-        let temp = row;
-        this.modalArray = [];
-        let i = 0;
-        this.$store.getters.getUsers.filter((item) => {
-          if (temp.id === item.id) {
-            i++;
-          }
-          if (i === 1) {
-            this.modalArray.push(item);
-          }
+        this.modalObject = row;
+        this.options_projects = [];
+
+        this.role = this.modalObject.role;
+        await axios.get("api/users/" + this.modalObject.id).then((response) => {
+          this.project = response.data.user.projects;
         });
-        this.role = this.modalArray[this.modalCounter].role;
       }
       if (item === "Удалить") {
-        this.modalArray = row;
+        this.modalObject = row;
       }
     },
     hideModal() {
@@ -487,11 +458,33 @@ export default {
     },
     async saveModal() {
       try {
-        await axios.put("/api/users/" + this.modalArray[this.modalCounter].id, {
-          login: this.modalArray[this.modalCounter].login,
-          password: this.password,
-          role_id: this.role.id,
+        let tempProjects = [];
+        this.project.filter((item) => {
+          tempProjects.push(item.id);
         });
+        await axios
+          .put("/api/users/" + this.modalObject.id, {
+            login: this.modalObject.login,
+            password: this.password,
+            role_id: this.role.id,
+            projects: tempProjects,
+          })
+          .then(() => {
+            if (tempProjects.length === 0) {
+              this.$store.dispatch("SET_USER");
+              this.$store.commit("SET_PROJECT", "");
+
+              localStorage.removeItem("project");
+            } else {
+              localStorage.setItem("project", JSON.stringify(this.project[0]));
+              this.$store.dispatch("SET_USER");
+              this.$store.commit("SET_PROJECT", this.project[0]);
+            }
+          })
+          .catch((error) => {
+            this.errors = error.response.data;
+            console.log(error.response.data);
+          });
         this.$refs["modal__window"].hide();
         await this.getTableUsers();
       } catch (error) {}
@@ -513,9 +506,9 @@ export default {
         }).then((result) => {
           if (this.$store.getters.getUsers.length) {
             this.$store.getters.getUsers.filter((index, i) => {
-              if (index.id === this.modalArray.id) {
+              if (index.id === this.modalObject.id) {
                 axios
-                  .delete("/api/users/" + this.modalArray.id)
+                  .delete("/api/users/" + this.modalObject.id)
                   .then(() => this.$store.getters.getUsers.splice(i, 1))
                   .then(() => {
                     if (result.value) {
@@ -595,24 +588,6 @@ export default {
         this.$store.getters.getUsers.splice(arr[0], k);
       } catch (error) {}
     },
-    async getProjects() {
-      await axios
-        .get("api/projects")
-        .then((response) => {
-          this.option_project = response.data.projects;
-        })
-        .catch((error) => {
-          const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
-          this.$bvToast.toast([vNodesMsg], {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
-          });
-        });
-    },
   },
   computed: {
     sorted() {
@@ -622,11 +597,13 @@ export default {
         return this.$store.getters.getUsers;
       }
     },
+    getProjects() {
+      return this.$store.getters.projects;
+    },
   },
   created() {
     this.getDataUser();
     this.getTableUsers();
-    this.getProjects();
   },
 };
 </script>

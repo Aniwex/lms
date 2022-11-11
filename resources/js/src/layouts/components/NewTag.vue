@@ -4,13 +4,20 @@
       <div class="container__appeal">
         <div class="form__appeal-group">
           <label class="form__apeal-label">Название</label>
-          <b-form-input
-            class="form__appeal-input"
-            v-model="name"
-            objective="text"
-            placeholder="Название"
-            :state="name !== ''"
-          />
+          <div>
+            <b-form-input
+              class="form__appeal-input"
+              v-model="name"
+              objective="text"
+              placeholder="Название"
+              :state="name !== ''"
+            />
+            <span style="color: red" class="db__tc" v-if="errors.name">
+              <span v-for="(err, index) in errors.name" :key="index"
+                >{{ err }}<br
+              /></span>
+            </span>
+          </div>
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Тип</label>
@@ -128,6 +135,7 @@ export default {
       dateAppeal: null,
       value_spinbutton: "",
       name: "",
+      errors: {},
       objective: false,
       client_plus_words: "",
       client_minus_words: "",
@@ -149,66 +157,58 @@ export default {
   methods: {
     async addAppeal() {
       try {
-        if (this.name) {
-          this.temp_client_plus_words = [];
-          this.temp_client_minus_words = [];
-          this.temp_operator_plus_words = [];
-          this.temp_operator_minus_words = [];
-          this.temp_client_plus_words.push(
-            this.client_plus_words.split(/(?=\/)|\s/).filter((item) => {
-              return item !== "";
-            })
-          );
-          this.temp_client_minus_words.push(
-            this.client_minus_words.split(/(?=\/)|\s/).filter((item) => {
-              return item !== "";
-            })
-          );
-          this.temp_operator_plus_words.push(
-            this.operator_plus_words.split(/(?=\/)|\s/).filter((item) => {
-              return item !== "";
-            })
-          );
-          this.temp_operator_minus_words.push(
-            this.operator_minus_words.split(/(?=\/)|\s/).filter((item) => {
-              return item !== "";
-            })
-          );
-          await axios
-            .post("api/projects/" + this.project.id + "/tags", {
-              name: this.name,
-              objective: this.objective,
-              client_plus_words: this.temp_client_plus_words[0],
-              client_minus_words: this.temp_client_minus_words[0],
-              operator_plus_words: this.temp_operator_plus_words[0],
-              operator_minus_words: this.temp_operator_minus_words[0],
-            })
-            .then(() => {
-              this.$store.dispatch("getTagsTable");
-              this.enter = true;
-              this.$router.push("/Tags");
+        this.temp_client_plus_words = [];
+        this.temp_client_minus_words = [];
+        this.temp_operator_plus_words = [];
+        this.temp_operator_minus_words = [];
+        this.temp_client_plus_words.push(
+          this.client_plus_words.split(/(?=\/)|\s/).filter((item) => {
+            return item !== "";
+          })
+        );
+        this.temp_client_minus_words.push(
+          this.client_minus_words.split(/(?=\/)|\s/).filter((item) => {
+            return item !== "";
+          })
+        );
+        this.temp_operator_plus_words.push(
+          this.operator_plus_words.split(/(?=\/)|\s/).filter((item) => {
+            return item !== "";
+          })
+        );
+        this.temp_operator_minus_words.push(
+          this.operator_minus_words.split(/(?=\/)|\s/).filter((item) => {
+            return item !== "";
+          })
+        );
+        await axios
+          .post("api/projects/" + this.project.id + "/tags", {
+            name: this.name,
+            objective: this.objective,
+            client_plus_words: this.temp_client_plus_words[0],
+            client_minus_words: this.temp_client_minus_words[0],
+            operator_plus_words: this.temp_operator_plus_words[0],
+            operator_minus_words: this.temp_operator_minus_words[0],
+          })
+          .then(() => {
+            this.$store.dispatch("getTagsTable");
+            this.enter = true;
+            this.$router.push("/Tags");
+          })
+          .catch((error) => {
+            this.errors = error.response.data.errors;
+            console.log(this.errors);
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
             });
-        } else {
-          this.$bvToast.toast("Пожалуйтса заполните все поля", {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 2000,
           });
-        }
-      } catch (error) {
-        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
-        this.$bvToast.toast([vNodesMsg], {
-          title: `Ошибка`,
-          variant: "danger",
-          solid: true,
-          appendToast: true,
-          toaster: "b-toaster-top-center",
-          autoHideDelay: 3000,
-        });
-      }
+      } catch (error) {}
     },
     async CreateAndAddAppeal() {
       try {

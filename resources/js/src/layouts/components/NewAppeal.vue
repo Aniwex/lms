@@ -35,6 +35,7 @@
                 class="input__number form-control"
                 v-model="selected.duration"
                 type="number"
+                :state="selected.duration !== 0"
               />
               <b-button
                 v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -51,6 +52,11 @@
               </b-button>
             </div>
             <label class="form__apeal-label-seconds">Значение в секундах</label>
+            <span style="color: red" class="db__tc" v-if="errors.duration">
+              <span v-for="(err, index) in errors.duration" :key="index">{{
+                err
+              }}</span>
+            </span>
           </div>
         </div>
         <div class="form__appeal-group">
@@ -68,6 +74,11 @@
               placeholder="Выберите источник"
             >
             </multiselect>
+            <span style="color: red" class="db__tc" v-if="errors.source_id">
+              <span v-for="(err, index) in errors.source_id" :key="index">{{
+                err
+              }}</span>
+            </span>
             <!-- <b-form-checkbox
               v-model="selectedCheckBox"
               value="true"
@@ -79,14 +90,21 @@
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Пользователь </label>
-          <b-form-input
-            class="form__appeal-input"
-            type="text"
-            placeholder="+7 (999) 999-99-99"
-            v-model="phone"
-            v-mask="'+7 (###) ###-##-##'"
-            :state="phone === '' || phone === null ? false : true"
-          />
+          <div>
+            <b-form-input
+              class="form__appeal-input"
+              type="text"
+              placeholder="+7 (999) 999-99-99"
+              v-model="phone"
+              v-mask="'+7 (###) ###-##-##'"
+              :state="phone === '' || phone === null ? false : true"
+            />
+            <span style="color: red" class="db__tc" v-if="errors.phone">
+              <span v-for="(err, index) in errors.phone" :key="index">{{
+                err
+              }}</span>
+            </span>
+          </div>
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Тэги </label>
@@ -232,6 +250,7 @@ export default {
       datetime: "",
       value_spinbutton: "",
       tags: [],
+      errors: {},
       selected: {
         duration: 0,
         source_id: [],
@@ -278,34 +297,27 @@ export default {
         tempTagsId.push(item.id);
       });
       try {
-        if (this.selected.duration) {
-          await axios
-            .post("api/projects/" + this.getProject.id + "/claims", {
-              duration: this.selected.duration,
-              datetime: this.datetime,
-              source_id: this.selected.source_id.id,
-              phone: this.phone,
-              manager_check: this.selected.manager_check.value,
-              client_check: this.selected.client_check.value,
-              manager_comment: this.selected.manager_comment,
-              client_comment: this.selected.client_comment,
-              tags: tempTagsId,
-            })
-            .then(() => {
-              this.$store.dispatch("getDataTable");
-              this.enter = true;
-              this.$router.push("/Home");
-            });
-        } else {
-          this.$bvToast.toast("Пожалуйтса заполните все поля", {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 2000,
+        await axios
+          .post("api/projects/" + this.getProject.id + "/claims", {
+            duration: this.selected.duration,
+            datetime: this.datetime,
+            source_id: this.selected.source_id.id,
+            phone: this.phone,
+            manager_check: this.selected.manager_check.value,
+            client_check: this.selected.client_check.value,
+            manager_comment: this.selected.manager_comment,
+            client_comment: this.selected.client_comment,
+            tags: tempTagsId,
+          })
+          .then(() => {
+            this.$store.dispatch("getDataTable");
+            this.enter = true;
+            this.$router.push("/Home");
+          })
+          .catch((error) => {
+            this.errors = error.response.data.errors;
+            console.log(this.errors);
           });
-        }
       } catch (error) {
         const vNodesMsg = [`${Object.values(error)}`];
         this.$bvToast.toast([vNodesMsg], {
@@ -346,7 +358,7 @@ export default {
               this.$store.dispatch("getDataTable");
             });
           this.datetime = null;
-          this.selected.duration = 0;
+          this.selected.duration = null;
           this.selected.source_id = null;
           this.phone = null;
           this.tags = null;

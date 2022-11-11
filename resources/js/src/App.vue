@@ -15,7 +15,6 @@ import useAppConfig from "@core/app-config/useAppConfig";
 import { useWindowSize, useCssVar } from "@vueuse/core";
 import axios from "axios";
 import store from "./store/index";
-
 const LayoutVertical = () => import("@/layouts/vertical/LayoutVertical.vue");
 const LayoutHorizontal = () =>
   import("@/layouts/horizontal/LayoutHorizontal.vue");

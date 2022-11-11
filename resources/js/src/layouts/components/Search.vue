@@ -14,15 +14,6 @@
         <b-button
           v-ripple.400="'rgba(255, 255, 255, 0.15)'"
           variant="primary"
-          to="NewIntegration"
-          v-b-tooltip.hover.top="'Добавить интеграцию'"
-          v-if="this.$route.path === '/Integration'"
-        >
-          Добавить интеграцию
-        </b-button>
-        <b-button
-          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-          variant="primary"
           to="NewSource"
           v-b-tooltip.hover.top="'Добавить иcточник'"
           v-if="this.$route.path === '/Sources'"

@@ -4,23 +4,37 @@
       <div class="container">
         <div class="form__group">
           <label class="form__label">Логин </label>
-          <b-form-input
-            class="row__user-input"
-            v-model="login"
-            type="text"
-            placeholder="Логин"
-            :state="login !== ''"
-          />
+          <div>
+            <b-form-input
+              class="row__user-input"
+              v-model="login"
+              type="text"
+              :placeholder="errors.login ? errors.login[1] : 'Логин'"
+              :state="login !== ''"
+            />
+            <span style="color: red" class="db__tc" v-if="errors.login">
+              <span v-for="(err, index) in errors.login" :key="index"
+                >{{ err }}<br
+              /></span>
+            </span>
+          </div>
         </div>
         <div class="form__group">
           <label class="form__label">Пароль </label>
-          <b-form-input
-            class="row__user-input"
-            v-model="password"
-            type="password"
-            placeholder="Пароль"
-            :state="password !== ''"
-          />
+          <div>
+            <b-form-input
+              class="row__user-input"
+              v-model="password"
+              type="password"
+              :placeholder="errors.password ? errors.password[1] : 'Пароль'"
+              :state="password !== ''"
+            />
+            <span style="color: red" class="db__tc" v-if="errors.password">
+              <span v-for="(err, index) in errors.password" :key="index"
+                >{{ err }}<br
+              /></span>
+            </span>
+          </div>
         </div>
         <div class="form__group">
           <label class="form__label">Роли </label>
@@ -122,6 +136,7 @@ export default {
     return {
       login: "",
       password: "",
+      errors: {},
       enter: false,
       enterAndAdd: false,
       options_roles: [],
@@ -169,8 +184,7 @@ export default {
     },
     async addUser() {
       try {
-        if (this.login && this.password && this.role) {
-          this.enter = true;
+        if (this.role) {
           await axios
             .post("/api/users", {
               login: this.login,
@@ -178,13 +192,14 @@ export default {
               role_id: this.role.id,
             })
             .then(() => {
+              this.enter = true;
               this.$router.push("/Users");
             })
             .catch((error) => {
               this.enter = false;
-              const vNodesMsg = [
-                `${Object.values(error.response.data.errors)}`,
-              ];
+              this.errors = error.response.data.errors;
+              console.log(this.errors);
+              const vNodesMsg = [`${error.response.data.error}`];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
                 variant: "danger",
@@ -195,7 +210,7 @@ export default {
               });
             });
         } else {
-          this.$bvToast.toast("Пожалуйста заполните все поля", {
+          this.$bvToast.toast("Пожалуйста выберете роль", {
             title: `Ошибка`,
             variant: "danger",
             solid: true,
@@ -208,19 +223,19 @@ export default {
     },
     async CreateAndAddUser() {
       try {
-        if (this.login && this.password && this.role) {
-          this.enterAndAdd = true;
+        if (this.role) {
           await axios
             .post("/api/users", {
               login: this.login,
               password: this.password,
               role_id: this.role,
             })
+            .then(() => {
+              this.enterAndAdd = true;
+            })
             .catch((error) => {
               this.enter = false;
-              const vNodesMsg = [
-                `${Object.values(error.response.data.errors)}`,
-              ];
+              const vNodesMsg = [`${error.response.data.errors}`];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
                 variant: "danger",
@@ -235,7 +250,7 @@ export default {
           this.role_id = "";
           this.enterAndAdd = false;
         } else {
-          this.$bvToast.toast("Пожалуйтса заполните все поля", {
+          this.$bvToast.toast("Пожалуйтса выберете роль", {
             title: `Ошибка`,
             variant: "danger",
             solid: true,

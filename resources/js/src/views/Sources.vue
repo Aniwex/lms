@@ -60,6 +60,10 @@
       @on-selected-rows-change="selectionChanged"
     >
       <template slot="table-row" slot-scope="props">
+        <!-- Column: id -->
+        <span v-if="props.column.field === 'ID'" class="text-nowrap db__tc">
+          <span class="text-nowrap">{{ props.row.id }}</span>
+        </span>
         <!-- Column: Integration -->
         <span
           v-if="props.column.field === 'integration'"
@@ -222,7 +226,7 @@
                         <b-form-group
                           label-cols="4"
                           label-cols-lg="2"
-                          :label="f.key"
+                          :label="f.value"
                           label-for="input-lg"
                           style="width: 400px"
                         >
@@ -230,7 +234,7 @@
                             v-if="f.key !== 'quiz_id'"
                             class="row__user-input"
                             style="margin-left: 10px"
-                            v-model="f.value"
+                            v-model="value__input"
                             type="text"
                             placeholder="Данные по источнику"
                           />
@@ -238,7 +242,7 @@
                             v-else
                             class="row__user-input"
                             style="margin-left: 10px"
-                            v-model="f.name"
+                            v-model="value__input"
                             type="text"
                             placeholder="Данные по источнику"
                           />
@@ -366,12 +370,19 @@ export default {
     return {
       rowsSource: [],
       user: "",
+      errors: {},
       rowSelection: [],
       modalArray: [],
       modalCounter: 0,
       searchTerm: "",
+      value__input: "",
       pageLength: 5,
       columns: [
+        {
+          label: "ID",
+          field: "ID",
+          thClass: "columnCenter",
+        },
         {
           label: "Интеграция",
           field: "integration",
@@ -518,7 +529,6 @@ export default {
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
-      console.log(this.tempFields[0]);
       try {
         await axios
           .put(
@@ -669,7 +679,6 @@ export default {
       }
     },
     getDataSources() {
-      console.log(this.$store.getters.getSources);
       return this.$store.getters.getSources;
     },
     getProject() {
@@ -688,8 +697,5 @@ export default {
   width: 400px;
   display: block;
   margin: 0 auto;
-}
-.col-form-label {
-  margin-top: 2.5%;
 }
 </style>

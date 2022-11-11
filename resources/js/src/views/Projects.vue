@@ -61,6 +61,10 @@
     >
       >
       <template slot="table-row" slot-scope="props">
+        <!-- Column: id -->
+        <span v-if="props.column.field === 'ID'" class="text-nowrap db__tc">
+          <span class="text-nowrap">{{ props.row.id }}</span>
+        </span>
         <!-- Column: name -->
         <span v-if="props.column.field === 'name'" class="text-nowrap db__tc">
           <span class="text-nowrap">{{ props.row.name }}</span>
@@ -81,7 +85,7 @@
             v-for="(mirrow, index) in props.row.mirrows"
             :key="index"
             class="text-nowrap"
-            >Зеркало №{{ index + 1 }} {{ mirrow }} <br
+            >{{ mirrow }} <br
           /></span>
         </span>
         <span v-else-if="props.column.field === 'action'">
@@ -155,139 +159,146 @@
     <b-modal
       id="modal__seeIntegration"
       centered
-      role="Просмотр пользователя"
       cancel-role="Отмена"
       size="lg"
+      title="Просмотр проекта"
       ref="modal__window"
       hide-footer
       no-close-on-esc
       no-close-on-backdrop
     >
-      <swiper
-        class="swiper-navigations"
-        :options="swiperOptions"
-        :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-        @slideNextTransitionStart="changeSlideNext"
-        @slidePrevTransitionStart="changeSlidePrev"
-      >
-        <swiper-slide v-for="(data, index) in modalArray" :key="index"
-          ><div class="see-project__form">
-            <h3 class="see-project__read">Данные для редактирования</h3>
-            <div class="container__see-project">
-              <div class="row__lables">
-                <div class="row__source-lables">
-                  <label class="row__lables-label">Название</label>
+      <div class="see-project__form">
+        <h3 class="see-project__read">Данные для редактирования</h3>
+        <div class="container__see-project">
+          <div class="row__lables">
+            <div class="row__source-lables">
+              <label class="row__lables-label">Название</label>
 
-                  <b-form-input
-                    class="row__user-input"
-                    v-model="data.name"
-                    type="text"
-                    placeholder="Название"
-                  />
-                </div>
-                <div class="row__source-lables">
-                  <label class="row__lables-label">Домен</label>
-                  <b-form-input
-                    class="row__user-input"
-                    v-model="data.domain"
-                    type="text"
-                    placeholder="Название"
-                  />
-                </div>
-                <div class="form__group-options">
-                  <div>
-                    <label class="row__lables-label">Зеркала</label>
-                    <b-form
-                      ref="form"
-                      class="repeater__form-project"
-                      @submit.prevent="repeateAgain"
+              <b-form-input
+                class="row__user-input"
+                v-model="modalObject.name"
+                type="text"
+                placeholder="Название"
+              />
+            </div>
+            <div class="row__source-lables">
+              <label class="row__lables-label">Домен</label>
+              <b-form-input
+                class="row__user-input"
+                v-model="modalObject.domain"
+                type="text"
+                placeholder="Название"
+              />
+            </div>
+            <div class="form__group-options">
+              <div>
+                <label class="row__lables-label">Зеркала</label>
+
+                <b-form
+                  ref="form"
+                  v-if="modalObject.mirrows"
+                  class="repeater__form-project"
+                  @submit.prevent="repeateAgain"
+                >
+                  <!-- Row Loop -->
+                  <div
+                    v-for="(item, index) in modalObject.mirrows"
+                    :id="index"
+                    :key="index"
+                    ref="row"
+                    :style="{ margin: trMargin + 'px' }"
+                  >
+                    <!-- Значение -->
+                    <b-form-group label="Значение">
+                      <b-form-input
+                        type="text"
+                        placeholder="Значение"
+                        v-model="modalObject.mirrows[index]"
+                        class="row__user-input"
+                        :state="
+                          modalObject.mirrows[index] === '' ? false : true
+                        "
+                      />
+                      <span class="db__tc" v-if="errors['mirrows.' + index]">{{
+                        errors["mirrows." + index][0]
+                      }}</span>
+                    </b-form-group>
+                    <hr />
+                    <!-- Добавить Button -->
+                    <b-button
+                      v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                      variant="primary"
+                      @click="repeateAgain"
                     >
-                      <!-- Row Loop -->
-                      <div
-                        v-for="(item, index) in data.mirrows"
-                        :id="index"
-                        :key="index"
-                        ref="row"
-                        :style="{ margin: trMargin + 'px' }"
-                      >
-                        <!-- Значение -->
-                        <b-form-group label="Значение">
-                          <b-form-input
-                            type="text"
-                            placeholder="Значение"
-                            v-model="data.mirrows[index]"
-                            class="row__user-input"
-                          />
-                        </b-form-group>
-                        <hr />
-                        <!-- Добавить Button -->
-                        <b-button
-                          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                          variant="primary"
-                          @click="repeateAgain"
-                        >
-                          <feather-icon icon="PlusIcon" class="mr-25" />
-                          <span>Добавить ещё</span>
-                        </b-button>
+                      <feather-icon icon="PlusIcon" class="mr-25" />
+                      <span>Добавить ещё</span>
+                    </b-button>
 
-                        <!-- Удалить Button -->
-                        <b-button
-                          v-ripple.400="'rgba(234, 84, 85, 0.15)'"
-                          variant="outline-danger"
-                          @click="removeItem(index)"
-                          class="btn__delete-project"
-                        >
-                          <feather-icon icon="XIcon" class="mr-25" />
-                          <span>Удалить</span>
-                        </b-button>
-                      </div>
-                    </b-form>
+                    <!-- Удалить Button -->
+                    <b-button
+                      v-ripple.400="'rgba(234, 84, 85, 0.15)'"
+                      variant="outline-danger"
+                      @click="removeItem(index)"
+                      class="btn__delete-project"
+                    >
+                      <feather-icon icon="XIcon" class="mr-25" />
+                      <span>Удалить</span>
+                    </b-button>
                   </div>
-                </div>
-
-                <div class="row__date-lables">
-                  <label class="row__lables-label">Пользователи</label>
-                  <multiselect
-                    onclick="this.querySelector('input').focus();"
-                    class="multiselect-input"
-                    v-model="users"
-                    :options="getUsers"
-                    :multiple="true"
-                    label="login"
-                    track-by="login"
-                    placeholder="Выберите пользователя"
-                    selectLabel="Нажмите enter для выбора"
-                    deselectLabel="Нажмите enter для удаления"
+                  <div
+                    class="db__tc"
+                    v-if="modalObject.mirrows.length === 0"
+                    style="margin-bottom: 20px"
                   >
-                  </multiselect>
-                </div>
-                <div class="modal__form-buttons">
-                  <b-button
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="secondary"
-                    @click="hideModal"
-                  >
-                    Отменить
-                  </b-button>
-                  <b-button
-                    @click="saveModal"
-                    class="form__button-margin"
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="primary"
-                  >
-                    Сохранить
-                  </b-button>
-                </div>
+                    <b-button
+                      v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                      variant="primary"
+                      @click="repeateAgain"
+                    >
+                      <feather-icon icon="PlusIcon" class="mr-25" />
+                      <span>Добавить ещё</span>
+                    </b-button>
+                  </div>
+                </b-form>
               </div>
             </div>
-          </div>
-        </swiper-slide>
 
-        <!-- Arrows -->
-        <div slot="button-next" class="swiper-button-next" />
-        <div slot="button-prev" class="swiper-button-prev" />
-        <div slot="pagination" class="swiper-pagination" />
-      </swiper>
+            <div class="row__date-lables">
+              <label class="row__lables-label">Пользователи</label>
+              <multiselect
+                onclick="this.querySelector('input').focus();"
+                class="multiselect-input"
+                v-model="users"
+                :options="getUsers"
+                :multiple="true"
+                label="login"
+                track-by="login"
+                placeholder="Выберите пользователя"
+                selectLabel="Нажмите enter для выбора"
+                deselectLabel="Нажмите enter для удаления"
+              >
+              </multiselect>
+            </div>
+            <div class="modal__form-buttons">
+              <b-button
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="secondary"
+                @click="hideModal"
+              >
+                Отменить
+              </b-button>
+              <b-button
+                @click="saveModal"
+                class="form__button-margin"
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="primary"
+              >
+                Сохранить
+              </b-button>
+            </div>
+          </div>
+        </div>
+      </div>
     </b-modal>
   </div>
 </template>
@@ -297,7 +308,9 @@ import { VueGoodTable } from "vue-good-table";
 import axios from "axios";
 import "vue-good-table/dist/vue-good-table.css";
 import { Trash2Icon } from "vue-feather-icons";
+import { ValidationProvider, ValidationObserver } from "vee-validate";
 import {
+  BInputGroup,
   BForm,
   BFormGroup,
   BBadge,
@@ -325,6 +338,9 @@ import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 export default {
   components: {
+    ValidationProvider,
+    ValidationObserver,
+    BInputGroup,
     vSelect,
     BForm,
     Trash2Icon,
@@ -359,14 +375,20 @@ export default {
     return {
       rowsProjects: [],
       password: "",
+      errors: {},
       rowSelection: [],
-      modalArray: [],
+      modalObject: [],
       arraySearch: "",
       user: "",
       modalCounter: 0,
       searchTerm: "",
       pageLength: 5,
       columns: [
+        {
+          label: "ID",
+          field: "ID",
+          thClass: "columnCenter",
+        },
         {
           label: "Название",
           field: "name",
@@ -404,30 +426,20 @@ export default {
         },
       ],
       users: [],
-      option_users: [],
     };
   },
   methods: {
     repeateAgain() {
-      this.modalArray[this.modalCounter].mirrows.push("");
+      this.modalObject.mirrows.push("");
       this.trHeight += 250;
     },
     removeItem(index) {
-      this.modalArray[this.modalCounter].mirrows.splice(index, 1);
+      this.modalObject.mirrows.splice(index, 1);
       this.trHeight -= 250;
-    },
-    changeSlideNext() {
-      this.modalCounter++;
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     pushArraySearch(search) {
       this.arraySearch = search;
     },
-    changeSlidePrev() {
-      this.modalCounter--;
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
-    },
-
     async getTableProjects() {
       await axios
         .get("api/projects")
@@ -497,23 +509,13 @@ export default {
       }
     },
     async ActionOnProject(item, row) {
-      if (item === "Посмотреть") {
-        this.users = [];
-        let temp = row;
-        this.modalArray = [];
-        let i = 0;
-        this.rowsProjects.filter((item) => {
-          if (temp.id === item.id) {
-            i++;
-          }
-          if (i === 1) {
-            this.modalArray.push(item);
-          }
+      this.users = [];
+      this.modalObject = row;
+      await axios
+        .get("api/projects/" + this.modalObject.id)
+        .then((response) => {
+          this.users = response.data.project.users;
         });
-      }
-      if (item === "Удалить") {
-        this.modalArray = row;
-      }
     },
     hideModal() {
       this.getTableProjects();
@@ -525,28 +527,26 @@ export default {
         this.users.filter((item) => {
           tempUserId.push(item.id);
         });
-        await axios.put(
-          "/api/projects/" + this.modalArray[this.modalCounter].id,
-          {
-            name: this.modalArray[this.modalCounter].name,
-            mirrows: this.modalArray[this.modalCounter].mirrows,
-            domain: this.modalArray[this.modalCounter].domain,
+        await axios
+          .put("/api/projects/" + this.modalObject.id, {
+            name: this.modalObject.name,
+            mirrows:
+              this.modalObject.mirrows.length === 0
+                ? [""]
+                : this.modalObject.mirrows,
+            domain: this.modalObject.domain,
             users: tempUserId,
-          }
-        );
-        this.$refs["modal__window"].hide();
+          })
+          .then(() => {
+            this.$refs["modal__window"].hide();
+            this.errors = {};
+          });
+
         await this.getTableProjects();
         await this.$store.dispatch("SET_USER");
       } catch (error) {
-        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
-        this.$bvToast.toast([vNodesMsg], {
-          title: `Ошибка`,
-          variant: "danger",
-          solid: true,
-          appendToast: true,
-          toaster: "b-toaster-top-center",
-          autoHideDelay: 3000,
-        });
+        this.errors = {};
+        this.errors = error.response.data.errors;
       }
     },
     async deleteModal() {
@@ -566,9 +566,9 @@ export default {
         }).then((result) => {
           if (this.rowsProjects.length) {
             this.rowsProjects.filter((index, i) => {
-              if (index.id === this.modalArray.id) {
+              if (index.id === this.modalObject.id) {
                 axios
-                  .delete("/api/projects/" + this.modalArray.id)
+                  .delete("/api/projects/" + this.modalObject.id)
                   .then(() => {
                     this.rowsProjects.splice(i, 1);
                     this.$store.dispatch("SET_USER");
@@ -578,7 +578,7 @@ export default {
                       this.$swal({
                         icon: "success",
                         role: "Удалено!",
-                        text: "Ваш проект был удален.",
+                        text: "Проект был удален.",
                         customClass: {
                           confirmButton: "btn btn-success",
                         },

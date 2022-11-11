@@ -61,6 +61,10 @@
     >
       >
       <template slot="table-row" slot-scope="props">
+        <!-- Column: id -->
+        <span v-if="props.column.field === 'ID'" class="text-nowrap db__tc">
+          <span class="text-nowrap">{{ props.row.id }}</span>
+        </span>
         <!-- Column: title -->
         <span v-if="props.column.field === 'title'" class="text-nowrap db__tc">
           <span class="text-nowrap">{{ props.row.title }}</span>
@@ -151,144 +155,128 @@
       no-close-on-esc
       no-close-on-backdrop
     >
-      <swiper
-        class="swiper-navigations"
-        :options="swiperOptions"
-        :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-        @slideNextTransitionStart="changeSlideNext"
-        @slidePrevTransitionStart="changeSlidePrev"
-      >
-        <swiper-slide v-for="(data, index) in modalArray" :key="index"
-          ><div class="see-project__form">
-            <h3 class="see-project__read">Данные для редактирования</h3>
-            <div class="container__see-project">
-              <div class="row__lables" :style="{ height: trHeight + 'px' }">
-                <div class="row__date-lables">
-                  <label class="row__lables-label">Название</label>
-                  <multiselect
-                    v-model="integration"
-                    onclick="this.querySelector('input').focus();"
-                    :options="options_integrations"
-                    selectedLabel="Выбрано"
-                    class="multiselect-input"
-                    label="title"
-                    track-by="title"
-                    placeholder="Выберите интеграцию"
-                    :showLabels="false"
-                  >
-                  </multiselect>
-                </div>
-                <div class="row__source-lables">
-                  <label class="row__lables-label">Код</label>
-                  <b-form-input
-                    class="row__user-input"
-                    v-model="data.slug"
-                    type="text"
-                    placeholder="Код"
-                  />
-                </div>
-                <div
-                  class="form__group-options"
-                  v-if="data.config.length !== 0"
+      <div class="see-project__form">
+        <h3 class="see-project__read">Данные для редактирования</h3>
+        <div class="container__see-project">
+          <div class="row__lables">
+            <div class="row__date-lables">
+              <label class="row__lables-label">Название</label>
+              <multiselect
+                v-model="integration"
+                onclick="this.querySelector('input').focus();"
+                :options="options_integrations"
+                selectedLabel="Выбрано"
+                class="multiselect-input"
+                label="title"
+                track-by="title"
+                placeholder="Выберите интеграцию"
+                :showLabels="false"
+              >
+              </multiselect>
+            </div>
+            <div class="row__source-lables">
+              <label class="row__lables-label">Код</label>
+              <b-form-input
+                class="row__user-input"
+                v-model="modalObject.slug"
+                type="text"
+                placeholder="Код"
+              />
+            </div>
+            <div class="form__group-options">
+              <div :style="{ height: trHeight + 'px' }">
+                <label class="row__lables-label">Настройки </label>
+                <b-form
+                  ref="form"
+                  class="repeater__form"
+                  @submit.prevent="repeateAgain"
                 >
-                  <div>
-                    <label class="row__lables-label">Настройки </label>
-                    <b-form
-                      ref="form"
-                      class="repeater__form"
-                      @submit.prevent="repeateAgain"
+                  <!-- Row Loop -->
+                  <div
+                    v-for="(item, index) in modalObject.config"
+                    :id="index"
+                    :key="index"
+                    ref="row"
+                    :style="{ margin: trMargin + 'px' }"
+                  >
+                    <!-- Ключ -->
+                    <b-form-group label="Ключ">
+                      <b-form-input
+                        type="text"
+                        placeholder="Ключ"
+                        v-model="item.key"
+                        class="row__user-input"
+                      />
+                    </b-form-group>
+                    <!-- Значение -->
+                    <b-form-group label="Значение">
+                      <b-form-input
+                        type="text"
+                        placeholder="Значение"
+                        v-model="item.value"
+                        class="row__user-input"
+                      />
+                    </b-form-group>
+                    <hr />
+                    <!-- Добавить Button -->
+                    <b-button
+                      v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                      variant="primary"
+                      @click="repeateAgain"
                     >
-                      <!-- Row Loop -->
-                      <div
-                        v-for="(item, index) in data.config"
-                        :id="index"
-                        :key="index"
-                        ref="row"
-                        :style="{ margin: trMargin + 'px' }"
-                      >
-                        <!-- Ключ -->
-                        <b-form-group label="Ключ">
-                          <b-form-input
-                            type="text"
-                            placeholder="Ключ"
-                            v-model="item.key"
-                            class="row__user-input"
-                          />
-                        </b-form-group>
-                        <!-- Значение -->
-                        <b-form-group label="Значение">
-                          <b-form-input
-                            type="text"
-                            placeholder="Значение"
-                            v-model="item.value"
-                            class="row__user-input"
-                          />
-                        </b-form-group>
-                        <hr />
-                        <!-- Добавить Button -->
-                        <b-button
-                          v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                          variant="primary"
-                          @click="repeateAgain"
-                        >
-                          <feather-icon icon="PlusIcon" class="mr-25" />
-                          <span>Добавить ещё</span>
-                        </b-button>
+                      <feather-icon icon="PlusIcon" class="mr-25" />
+                      <span>Добавить ещё</span>
+                    </b-button>
 
-                        <!-- Удалить Button -->
-                        <b-button
-                          v-ripple.400="'rgba(234, 84, 85, 0.15)'"
-                          variant="outline-danger"
-                          @click="removeItem(index)"
-                          class="btn__delete-integration"
-                        >
-                          <feather-icon icon="XIcon" class="mr-25" />
-                          <span>Удалить</span>
-                        </b-button>
-                      </div>
-                    </b-form>
+                    <!-- Удалить Button -->
+                    <b-button
+                      v-ripple.400="'rgba(234, 84, 85, 0.15)'"
+                      variant="outline-danger"
+                      @click="removeItem(index)"
+                      class="btn__delete-integration"
+                    >
+                      <feather-icon icon="XIcon" class="mr-25" />
+                      <span>Удалить</span>
+                    </b-button>
                   </div>
-                </div>
-                <div v-else>
-                  <label class="row__lables-label db__tc">Настроек нет </label>
-                  <!-- Добавить Button -->
-                  <b-button
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="primary"
-                    @click="repeateAgain"
-                    class="btn__plus-integration"
-                  >
-                    <feather-icon icon="PlusIcon" class="mr-25" />
-                    <span>Добавить ещё</span>
-                  </b-button>
-                </div>
-                <div class="modal__form-buttons">
-                  <b-button
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="secondary"
-                    @click="hideModal"
-                  >
-                    Отменить
-                  </b-button>
-                  <b-button
-                    @click="saveModal"
-                    class="form__button-margin"
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="primary"
-                  >
-                    Сохранить
-                  </b-button>
-                </div>
+                </b-form>
               </div>
             </div>
+            <div
+              v-if="!modalObject.config || this.modalObject.config.length === 0"
+            >
+              <label class="row__lables-label db__tc">Настроек нет </label>
+              <!-- Добавить Button -->
+              <b-button
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="primary"
+                @click="repeateAgain"
+                class="btn__plus-integration"
+              >
+                <feather-icon icon="PlusIcon" class="mr-25" />
+                <span>Добавить ещё</span>
+              </b-button>
+            </div>
+            <div class="modal__form-buttons">
+              <b-button
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="secondary"
+                @click="hideModal"
+              >
+                Отменить
+              </b-button>
+              <b-button
+                @click="saveModal"
+                class="form__button-margin"
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="primary"
+              >
+                Сохранить
+              </b-button>
+            </div>
           </div>
-        </swiper-slide>
-
-        <!-- Arrows -->
-        <div slot="button-next" class="swiper-button-next" />
-        <div slot="button-prev" class="swiper-button-prev" />
-        <div slot="pagination" class="swiper-pagination" />
-      </swiper>
+        </div>
+      </div>
     </b-modal>
   </div>
 </template>
@@ -356,14 +344,20 @@ export default {
   data() {
     return {
       rowsIntegration: [],
+      errors: {},
       rowSelection: [],
-      modalArray: [],
+      modalObject: [],
       arraySearch: "",
       user: "",
       modalCounter: 0,
       searchTerm: "",
       pageLength: 5,
       columns: [
+        {
+          label: "ID",
+          field: "ID",
+          thClass: "columnCenter",
+        },
         {
           label: "Название",
           field: "title",
@@ -388,7 +382,7 @@ export default {
         },
       },
       getInt: false,
-      trHeight: 550,
+      trHeight: 50,
       trMargin: 20,
       tempHeightPlus: null,
       tempHeightMinus: null,
@@ -398,48 +392,18 @@ export default {
   },
   methods: {
     repeateAgain() {
-      this.modalArray[this.modalCounter].config.push({
+      this.modalObject.config.push({
         key: null,
         value: null,
       });
       this.trHeight += 250;
     },
     removeItem(index) {
-      this.modalArray[this.modalCounter].config.splice(index, 1);
-      if (this.modalArray[this.modalCounter].config.length === 0) {
-        this.trHeight = 350;
-      } else {
-        this.trHeight -= 250;
-      }
-    },
-    changeSlideNext() {
-      this.modalCounter++;
-      this.integration = this.modalArray[this.modalCounter];
-      if (this.modalArray[this.modalCounter].config.length >= 2) {
-        this.trHeight =
-          297 +
-          277 * this.modalArray[this.modalCounter].config.length -
-          this.trMargin * this.modalArray[this.modalCounter].config.length;
-      } else {
-        this.trHeight = 550;
-      }
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
+      this.modalObject.config.splice(index, 1);
+      this.trHeight -= 250;
     },
     pushArraySearch(search) {
       this.arraySearch = search;
-    },
-    changeSlidePrev() {
-      this.modalCounter--;
-      this.integration = this.modalArray[this.modalCounter];
-      if (this.modalArray[this.modalCounter].config.length >= 2) {
-        this.trHeight =
-          297 +
-          277 * this.modalArray[this.modalCounter].config.length -
-          this.trMargin * this.modalArray[this.modalCounter].config.length;
-      } else {
-        this.trHeight = 550;
-      }
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     async getIntegration() {
       await axios
@@ -511,29 +475,17 @@ export default {
     },
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
-        let temp = row;
-        this.modalArray = [];
-        let i = 0;
-        this.rowsIntegration.filter((item) => {
-          if (temp.id === item.id) {
-            i++;
-          }
-          if (i === 1) {
-            this.modalArray.push(item);
-          }
-          this.integration = this.modalArray[this.modalCounter];
-        });
-        if (this.modalArray[this.modalCounter].config.length === 0) {
-          this.trHeight = 350;
+        this.modalObject = row;
+        this.integration = this.modalObject;
+        if (this.modalObject.config === null) {
+          this.modalObject.config = [];
+          this.trHeight = 50;
         } else {
-          this.trHeight =
-            297 +
-            277 * this.modalArray[this.modalCounter].config.length -
-            this.trMargin * this.modalArray[this.modalCounter].config.length;
+          this.trHeight = 300;
         }
       }
       if (item === "Удалить") {
-        this.modalArray = row;
+        this.modalObject = row;
       }
     },
     hideModal() {
@@ -543,11 +495,11 @@ export default {
     async saveModal() {
       try {
         await axios
-          .put("/api/integrations/" + this.modalArray[this.modalCounter].id, {
-            id: this.modalArray[this.modalCounter].id,
+          .put("/api/integrations/" + this.modalObject.id, {
+            id: this.modalObject.id,
             title: this.integration.title,
-            slug: this.modalArray[this.modalCounter].slug,
-            config: this.modalArray[this.modalCounter].config,
+            slug: this.modalObject.slug,
+            config: this.modalObject.config,
           })
           .then(() => {
             this.$refs["modal__window"].hide();
@@ -584,21 +536,23 @@ export default {
           if (result.value) {
             if (this.rowsIntegration.length) {
               this.rowsIntegration.filter((index, i) => {
-                if (index.id === this.modalArray.id) {
+                if (index.id === this.modalObject.id) {
                   axios
-                    .delete("/api/integrations/" + this.modalArray.id)
+                    .delete("/api/integrations/" + this.modalObject.id)
                     .then(() => {
                       this.rowsIntegration.splice(i, 1);
                       this.$swal({
                         icon: "success",
                         title: "Удалено!",
-                        text: "Ваша интеграция была удалена.",
+                        text: "Интеграция была удалена.",
                         customClass: {
                           confirmButton: "btn btn-success",
                         },
                       });
                     })
                     .catch((error) => {
+                      this.errors = error.response.data;
+                      console.log(error.response.data.errors);
                       const vNodesMsg = [
                         `${Object.values(error.response.data.errors)}`,
                       ];

@@ -92,8 +92,11 @@
       <template slot="table-row" slot-scope="props">
         <!-- Column: Name -->
         <!-- Column: datetime -->
+        <span v-if="props.column.field === 'ID'" class="text-nowrap">
+          <span class="text-nowrap">{{ props.row.id }}</span>
+        </span>
         <span
-          v-if="props.column.field === 'datetime'"
+          v-else-if="props.column.field === 'datetime'"
           class="text-nowrap db__tc"
         >
           <span class="text-nowrap">{{ props.row.datetime }}</span>
@@ -322,17 +325,234 @@
       </template>
     </vue-good-table>
     <!-- modal see project -->
-    <ModalSeeProject
-      v-if="create_window"
+    <b-modal
+      v-if="getDataTable && user && modalObject"
       id="modal__seeProject"
-      :user="user"
-      :modalArray="modalArray"
-      :options_source="getSourceTable"
-      :options_tags="getTagsTable"
-      :options_manager="options_manager_check"
-      :options_client="options_client_check"
-      :project="getProject"
-    ></ModalSeeProject>
+      centered
+      title="Просмотр обращения"
+      cancel-title="Отмена"
+      size="lg"
+      ref="modal__window"
+      hide-footer
+      no-close-on-esc
+      no-close-on-backdrop
+    >
+      <div class="see-project__form">
+        <h3 style="margin-top: 30px">Диалог</h3>
+        <div
+          class="dialog__none"
+          v-if="arrayChat === undefined || arrayChat.length === 0"
+        >
+          <p class="dialog__none-item">Диалог отсутствует</p>
+        </div>
+        <div class="container__dialog" v-else>
+          <div
+            v-for="(msgGrp, index) in arrayChat"
+            :key="index"
+            class="chat-content"
+          >
+            <p
+              :class="{
+                message_operator: msgGrp.value === 'operator',
+                message_subscriber: msgGrp.value === 'subscriber',
+              }"
+            >
+              {{ msgGrp.message }}
+            </p>
+          </div>
+        </div>
+        <h3>Данные для редактирования</h3>
+        <div class="container__see-project">
+          <div class="row__lables">
+            <div v-if="user.role.id === 1" class="row__tag-lables">
+              <label class="row__lables-label">Дата и время</label>
+              <flat-pickr
+                placeholder="Выберите дату и время"
+                v-model="modalObject.datetime"
+                class="form-control row__datetime-pickr"
+                :config="{
+                  enableTime: true,
+                  datetimeFormat: 'd.m.Y H:i:s',
+                  enableSeconds: true,
+                }"
+              />
+            </div>
+            <div v-if="user.role.id === 1" class="row__tag-lables">
+              <label class="row__lables-label">Продолжительность звонка</label>
+              <div class="mutiselect-margin">
+                <div class="modal__input">
+                  <b-button
+                    @click="quantity_minus()"
+                    type="button"
+                    size="sm"
+                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                    variant="primary"
+                  >
+                    <minus-icon
+                      size="1x"
+                      class="plus-icon align-middle mr-25"
+                    ></minus-icon>
+                  </b-button>
+                  <b-form-input
+                    v-if="modalObject.duration"
+                    class="input__number form-control"
+                    v-model="modalObject.duration.original"
+                    type="number"
+                    :state="modalObject.duration.original !== 0"
+                  />
+                  <b-button
+                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                    variant="primary"
+                    type="button"
+                    size="sm"
+                    @click="quantity_plus()"
+                  >
+                    <plus-icon
+                      size="1x"
+                      class="plus-icon align-middle mr-25"
+                    ></plus-icon>
+                  </b-button>
+                </div>
+                <span style="color: red" class="db__tc" v-if="errors.duration">
+                  <span v-for="(err, index) in errors.duration" :key="index">{{
+                    err
+                  }}</span>
+                </span>
+              </div>
+            </div>
+            <div v-if="user.role.id === 1" class="row__tag-lables">
+              <label class="row__lables-label">Источник</label>
+              <div
+                class="multiselect-input mutiselect-margin"
+                :class="{ mb__50: errors.source_id }"
+              >
+                <multiselect
+                  v-model="modalObject.source"
+                  onclick="this.querySelector('input').focus();"
+                  :options="getSourceTable"
+                  selectedLabel="Выбрано"
+                  label="name"
+                  track-by="name"
+                  placeholder="Выберите источник"
+                  :showLabels="false"
+                >
+                </multiselect>
+                <span style="color: red" class="db__tc" v-if="errors.source_id">
+                  <span v-for="(err, index) in errors.source_id" :key="index">{{
+                    err
+                  }}</span>
+                </span>
+              </div>
+            </div>
+            <div v-if="user.role.id === 1" class="row__user-lables">
+              <label class="row__lables-label">Пользователь</label>
+              <b-form-input
+                class="row__user-input mutiselect-margin"
+                type="text"
+                placeholder="+7 (999) 999-99-99"
+                v-model="phone"
+                v-mask="'+7 (###) ###-##-##'"
+                maxlength="18"
+              />
+            </div>
+            <div
+              v-if="user.role.id === 1 || user.role.id === 2"
+              class="row__tag-lables"
+            >
+              <label class="row__lables-label">Тэги</label>
+              <multiselect
+                v-model="modalObject.tags"
+                onclick="this.querySelector('input').focus();"
+                :options="getTagsTable"
+                selectedLabel="Выбрано"
+                :multiple="true"
+                class="multiselect-input mutiselect-margin"
+                label="name"
+                track-by="name"
+                placeholder="Выберите тэг"
+                :showLabels="false"
+              >
+              </multiselect>
+            </div>
+            <div
+              v-if="user.role.id === 1 || user.role.id === 2"
+              class="row__tag-lables"
+            >
+              <label class="row__lables-label">Проверка менеджера</label>
+              <multiselect
+                v-model="manager__check"
+                onclick="this.querySelector('input').focus();"
+                :options="options_manager_check"
+                selectedLabel="Выбрано"
+                class="multiselect-input mutiselect-margin"
+                label="text"
+                track-by="text"
+                placeholder="Проверка менеджера"
+                :showLabels="false"
+              >
+              </multiselect>
+            </div>
+            <div
+              v-if="user.role.id === 1 || user.role.id === 2"
+              class="row__comment-manager-lables"
+            >
+              <label class="row__lables-label">Комментарий менеджера</label>
+              <b-form-textarea
+                v-if="modalObject.manager"
+                class="form__textarea-manager"
+                placeholder="Комментарий менеджера"
+                rows="5"
+                no-resize
+                v-model="modalObject.manager.comment"
+              />
+            </div>
+            <div v-if="user.role.id === 1" class="row__tag-lables">
+              <label class="row__lables-label">Проверка клиента</label>
+              <multiselect
+                v-model="client__check"
+                onclick="this.querySelector('input').focus();"
+                :options="options_client_check"
+                selectedLabel="Выбрано"
+                class="multiselect-input mutiselect-margin"
+                label="text"
+                track-by="text"
+                placeholder="Проверка клиента"
+                :showLabels="false"
+              >
+              </multiselect>
+            </div>
+            <div class="row__comment-client-lables">
+              <label class="row__lables-label">Комментарий клиента</label>
+              <b-form-textarea
+                v-if="modalObject.client"
+                class="form__textarea-client"
+                placeholder="Комментарий клиента"
+                rows="5"
+                no-resize
+                v-model="modalObject.client.comment"
+              />
+            </div>
+            <div class="modal__form-buttons">
+              <b-button
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="secondary"
+                @click="hideModal"
+              >
+                Отменить
+              </b-button>
+              <b-button
+                @click="saveModal"
+                class="form__button-margin"
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="primary"
+              >
+                Сохранить
+              </b-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </b-modal>
   </div>
   <div v-else>
     <b-button
@@ -348,29 +568,31 @@
       id="Project__modal"
       cancel-variant="secondary"
       centered
-      title="Выберите проект"
+      title="Проекты"
       ref="b_modal"
       modal-close="false"
       no-close-on-esc
       no-close-on-backdrop
-      hide-header-close
       hide-footer
     >
-      <h3 class="list__projects">Список доступных проектов</h3>
-      <multiselect
-        v-model="project"
-        :options="option_project"
-        selectLabel="Нажмите enter для выбора"
-        deselectLabel="Нажмите enter для удаления"
-        selectedLabel="Выбрано"
-        class="multiselect-input"
-        label="name"
-        track-by="name"
-        placeholder="Выберите проект"
-        @select="selectProject"
-        style="margin: 20px"
-      >
-      </multiselect>
+      <div v-if="option_project.length !== 0">
+        <h3 class="list__projects">Список доступных проектов</h3>
+        <multiselect
+          v-model="project"
+          :options="option_project"
+          selectLabel="Нажмите enter для выбора"
+          deselectLabel="Нажмите enter для удаления"
+          selectedLabel="Выбрано"
+          class="multiselect-input"
+          label="name"
+          track-by="name"
+          placeholder="Выберите проект"
+          @select="selectProject"
+          style="margin: 20px"
+        >
+        </multiselect>
+      </div>
+      <div v-else>Доступных проектов нет</div>
     </b-modal>
   </div>
 </template>
@@ -394,7 +616,6 @@ import {
   BFormTextarea,
   BSpinner,
 } from "bootstrap-vue";
-import ModalSeeProject from "./ModalSeeProject.vue";
 import Search from "./Search.vue";
 import Filters from "./Filters.vue";
 import { Swiper, SwiperSlide } from "vue-awesome-swiper";
@@ -421,7 +642,6 @@ import {
 export default {
   components: {
     Trash2Icon,
-    ModalSeeProject,
     BSpinner,
     Filters,
     Search,
@@ -467,6 +687,11 @@ export default {
       pageLength: 10,
       dir: false,
       columns: [
+        {
+          label: "ID",
+          field: "id",
+          thClass: "columnCenter",
+        },
         {
           label: "Дата и время",
           field: "datetime",
@@ -527,6 +752,7 @@ export default {
           thClass: "columnCenter",
         },
       ],
+      errors: {},
       selected: {},
       options_tags: [],
       options_source: [],
@@ -542,28 +768,20 @@ export default {
       ],
       rows: [],
       searchTerm: "",
+      duration: 0,
       arr: [],
       rowSelection: [],
       arraySearch: [],
       managerArray: [],
       clientArray: [],
-      modalArray: [],
-      modalArrayNext: [],
-      modalArrayPrev: [],
+      modalObject: [],
       modalCounter: 0,
-      swiperOptions: {
-        navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev",
-        },
-        pagination: {
-          el: ".swiper-pagination",
-          type: "progressbar",
-        },
-      },
+      client__check: [],
+      manager__check: [],
       checkboxUser: [],
       arrayChat: [],
       project: [],
+      phone: "",
       option_project: [],
       user: "",
       tempProject: null,
@@ -578,6 +796,95 @@ export default {
       await this.$store.dispatch("getSourceTable");
       await this.$store.dispatch("getTagsTable");
     },
+    //modalSeeProject
+    quantity_minus() {
+      if (this.modalObject.duration.original >= 1) {
+        this.modalObject.duration.original--;
+      }
+    },
+    quantity_plus() {
+      this.modalObject.duration.original++;
+    },
+    hideModal() {
+      this.$refs["modal__window"].hide();
+      this.$store.commit("SET_CREATE_MODAL_WINDOW", false);
+    },
+    async saveModal() {
+      if (this.manager__check === null) {
+        this.manager__check = {
+          value: "unidentified",
+        };
+      }
+      if (this.client__check === null) {
+        this.client__check = {
+          value: "unchecked",
+        };
+      }
+      if (this.modalObject.source === null) {
+        this.modalObject.source = {
+          id: 0,
+        };
+      }
+      try {
+        let tempTagsId = [];
+        this.modalObject.tags.filter((item) => {
+          tempTagsId.push(item.id);
+        });
+        await axios
+          .put(
+            " api/projects/" +
+              this.getProject.id +
+              "/claims/" +
+              this.modalObject.id,
+            {
+              id: this.modalObject.id,
+              datetime: this.modalObject.datetime,
+              duration: this.modalObject.duration.original,
+              manager_comment: this.modalObject.manager_comment,
+              source_id: this.modalObject.source.id,
+              phone: this.phone,
+              tags: tempTagsId,
+              client_comment: this.modalObject.client_comment,
+              manager_check: this.manager__check.value,
+              client_check: this.client__check.value,
+              dialog: this.modalObject.dialog,
+              manager_comment: this.modalObject.manager.comment,
+              client_comment: this.modalObject.client.comment,
+            }
+          )
+          .then(() => {
+            this.$store.dispatch("getDataTable");
+            this.$refs["modal__window"].hide();
+          })
+          .catch((error) => {
+            this.errors = error.response.data.errors;
+            console.log(this.errors);
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
+          });
+      } catch (error) {
+        const vNodesMsg = [`${error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
+      }
+    },
+    inputSpinButton(duration) {
+      this.modalObject.duration = duration + " секунд";
+    },
+    //modalSeeProject end
     deleteSelected() {
       try {
         let k = 0;
@@ -629,14 +936,6 @@ export default {
     },
     async saveProjectModal() {
       await this.$store.commit("SET_PROJECT", this.project);
-    },
-    changeSlideNext() {
-      this.modalCounter++;
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
-    },
-    changeSlidePrev() {
-      this.modalCounter--;
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
     },
     handleHide(bvEvent) {
       if (!this.isCloseable) {
@@ -714,23 +1013,21 @@ export default {
     },
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
-        let temp = row;
-        this.modalArray = [];
-        let i = 0;
-        this.getDataTable.filter((item) => {
-          if (temp.id === item.id) {
-            i++;
-          }
-          if (i === 1) {
-            this.modalArray.push(item);
-          }
-        });
-        this.arrayChat = await this.modalArray[this.modalCounter].dialog;
-        await this.$store.commit("SET_CREATE_MODAL_WINDOW", true);
+        await axios
+          .get("api/projects/" + this.getProject.id + "/claims/" + row.id)
+          .then((response) => {
+            this.modalObject = response.data.claim;
+          });
+        this.errors = {};
+        this.client__check = this.modalObject.client.check;
+        this.manager__check = this.modalObject.manager.check;
+        this.duration = this.modalObject.duration.original;
+        this.phone = this.modalObject.phone.original;
+        this.arrayChat = await this.modalObject.dialog;
         this.$bvModal.show("modal__seeProject");
       }
       if (item === "Удалить") {
-        this.modalArray = row;
+        this.modalObject = row;
       }
     },
     async deleteModal() {
@@ -759,13 +1056,13 @@ export default {
             });
             if (this.getDataTable.length) {
               this.getDataTable.filter((index, i) => {
-                if (index.id === this.modalArray.id) {
+                if (index.id === this.modalObject.id) {
                   axios
                     .delete(
                       "api/projects/" +
                         this.getProject.id +
                         "/claims/" +
-                        this.modalArray.id
+                        this.modalObject.id
                     )
                     .then(() => {
                       this.getDataTable.splice(i, 1);
@@ -869,7 +1166,7 @@ export default {
       });
     },
     inputSpinButton(duration) {
-      this.modalArray[this.modalCounter].duration = duration + " секунд";
+      this.modalObject.duration = duration + " секунд";
     },
     async verifyLocalStorage() {
       if (this.LocalStorageProject !== null) {
