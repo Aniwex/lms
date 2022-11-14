@@ -319,7 +319,7 @@ export default {
             console.log(this.errors);
           });
       } catch (error) {
-        const vNodesMsg = [`${Object.values(error)}`];
+        const vNodesMsg = [`${error}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",
@@ -332,52 +332,47 @@ export default {
     },
     async CreateAndAddAppeal() {
       try {
-        if (
-          this.datetime &&
-          this.selected.duration &&
-          this.selected.source_id &&
-          this.phone &&
-          this.tags &&
-          this.selected.client_check &&
-          this.selected.manager_check &&
-          this.phone.length === 18
-        ) {
+        let tempTagsId = [];
+        if (this.tags) {
+          this.tags.filter((item) => {
+            tempTagsId.push(item.id);
+          });
+        }
+
+        {
           await axios
-            .post(" api/projects/{project}/claims", {
-              datetime: this.datetime,
+            .post(" api/projects/" + this.getProject.id + "/claims", {
               duration: this.selected.duration,
-              source_id: this.selected.source_id,
+              datetime: this.datetime,
+              source_id: this.selected.source_id.id,
               phone: this.phone,
-              tags: this.tags,
-              client_check: this.selected.client_check,
-              manager_check: this.selected.manager_check,
+              manager_check: this.selected.manager_check.value,
+              client_check: this.selected.client_check.value,
               manager_comment: this.selected.manager_comment,
               client_comment: this.selected.client_comment,
+              tags: tempTagsId,
             })
             .then(() => {
               this.$store.dispatch("getDataTable");
+              this.errors = {};
+              this.datetime = null;
+              this.selected.duration = 0;
+              this.selected.source_id = null;
+              this.phone = null;
+              this.tags = [];
+              this.selected.manager_check = "";
+              this.selected.client_check = "";
+              this.selected.manager_comment = "";
+              this.selected.client_comment = "";
+            })
+            .catch((error) => {
+              this.errors = error.response.data.errors;
+              console.log(this.errors);
             });
-          this.datetime = null;
-          this.selected.duration = null;
-          this.selected.source_id = null;
-          this.phone = null;
-          this.tags = null;
-          this.selected.manager_check = null;
-          this.selected.client_check = null;
-          this.selected.manager_comment = null;
-          this.selected.client_comment = null;
-        } else {
-          this.$bvToast.toast("Пожалуйтса заполните все поля", {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 2000,
-          });
         }
       } catch (error) {
-        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
+        console.log(error);
+        const vNodesMsg = [`${error}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",

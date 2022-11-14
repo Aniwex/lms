@@ -35,6 +35,7 @@
     <filters
       @arrayCheckboxUser="pushChangeCheckBox"
       @selected="pushSelected"
+      @sortedFilter="pushSortedFilter"
       :getDataTable="getDataTable"
       :role_id="user.role.id"
       :project="getProject"
@@ -326,7 +327,7 @@
     </vue-good-table>
     <!-- modal see project -->
     <b-modal
-      v-if="getDataTable && user && modalObject"
+      v-if="openModalProject"
       id="modal__seeProject"
       centered
       title="Просмотр обращения"
@@ -334,8 +335,7 @@
       size="lg"
       ref="modal__window"
       hide-footer
-      no-close-on-esc
-      no-close-on-backdrop
+      @hidden="hideModal"
     >
       <div class="see-project__form">
         <h3 style="margin-top: 30px">Диалог</h3>
@@ -372,7 +372,7 @@
                 class="form-control row__datetime-pickr"
                 :config="{
                   enableTime: true,
-                  datetimeFormat: 'd.m.Y H:i:s',
+                  datetimeFormat: 'Y-m-d H:i:s',
                   enableSeconds: true,
                 }"
               />
@@ -393,6 +393,7 @@
                       class="plus-icon align-middle mr-25"
                     ></minus-icon>
                   </b-button>
+
                   <b-form-input
                     v-if="modalObject.duration"
                     class="input__number form-control"
@@ -413,7 +414,7 @@
                     ></plus-icon>
                   </b-button>
                 </div>
-                <span style="color: red" class="db__tc" v-if="errors.duration">
+                <span style="color: red" class="db__tc" v-if="errors">
                   <span v-for="(err, index) in errors.duration" :key="index">{{
                     err
                   }}</span>
@@ -437,7 +438,7 @@
                   :showLabels="false"
                 >
                 </multiselect>
-                <span style="color: red" class="db__tc" v-if="errors.source_id">
+                <span style="color: red" class="db__tc" v-if="errors">
                   <span v-for="(err, index) in errors.source_id" :key="index">{{
                     err
                   }}</span>
@@ -557,7 +558,6 @@
   <div v-else>
     <b-button
       style="display: none"
-      v-b-modal.Project__modal
       class="form__button-margin"
       v-ripple.400="'rgba(255, 255, 255, 0.15)'"
       variant="primary"
@@ -683,6 +683,7 @@ export default {
         maxScrollbarLength: 150,
       },
       managerObject: {},
+      sortedFilter: [],
       clientObject: {},
       pageLength: 10,
       dir: false,
@@ -768,7 +769,6 @@ export default {
       ],
       rows: [],
       searchTerm: "",
-      duration: 0,
       arr: [],
       rowSelection: [],
       arraySearch: [],
@@ -786,6 +786,7 @@ export default {
       user: "",
       tempProject: null,
       historyArray: [],
+      openModalProject: false,
     };
   },
   methods: {
@@ -795,6 +796,7 @@ export default {
       await this.$store.dispatch("getDataTable");
       await this.$store.dispatch("getSourceTable");
       await this.$store.dispatch("getTagsTable");
+      this.$bvModal.hide("modal__seeProject");
     },
     //modalSeeProject
     quantity_minus() {
@@ -806,14 +808,17 @@ export default {
       this.modalObject.duration.original++;
     },
     hideModal() {
+      this.$store.dispatch("getDataTable");
       this.$refs["modal__window"].hide();
-      this.$store.commit("SET_CREATE_MODAL_WINDOW", false);
     },
     async saveModal() {
       if (this.manager__check === null) {
         this.manager__check = {
           value: "unidentified",
         };
+      }
+      if (this.phone === "") {
+        this.phone = this.modalObject.phone.original;
       }
       if (this.client__check === null) {
         this.client__check = {
@@ -881,25 +886,21 @@ export default {
         });
       }
     },
-    inputSpinButton(duration) {
-      this.modalObject.duration = duration + " секунд";
-    },
     //modalSeeProject end
     deleteSelected() {
       try {
-        let k = 0;
-        let arr = [];
         if (this.getDataTable.length) {
-          this.getDataTable.filter((item) => {
+          this.rowSelection.filter((item) => {
             this.getDataTable.map((index, i) => {
               if (item.id === index.id) {
-                k++;
-                arr.push(i);
                 axios
                   .delete(
                     "api/projects/" + this.getProject.id + "/claims/" + item.id
                   )
-                  .then(() => {})
+                  .then(() => {
+                    this.$store.dispatch("getDataTable");
+                    console.log(item);
+                  })
                   .catch((error) => {
                     console.log(error.response.data);
                   });
@@ -907,7 +908,6 @@ export default {
             });
           });
         }
-        this.getDataTable.splice(arr[0], k);
       } catch (error) {}
     },
     handleSearch() {
@@ -953,6 +953,10 @@ export default {
     },
     pushSelected(select) {
       this.selected = select;
+    },
+    pushSortedFilter(sorted) {
+      this.sortedFilter = sorted;
+      //console.log(this.sortedFilter);
     },
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
@@ -1013,17 +1017,18 @@ export default {
     },
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
+        this.phone = "";
         await axios
           .get("api/projects/" + this.getProject.id + "/claims/" + row.id)
           .then((response) => {
             this.modalObject = response.data.claim;
+            this.openModalProject = true;
           });
         this.errors = {};
         this.client__check = this.modalObject.client.check;
         this.manager__check = this.modalObject.manager.check;
-        this.duration = this.modalObject.duration.original;
-        this.phone = this.modalObject.phone.original;
-        this.arrayChat = await this.modalObject.dialog;
+        this.phone = this.modalObject.phone.formatted;
+        this.arrayChat = this.modalObject.dialog;
         this.$bvModal.show("modal__seeProject");
       }
       if (item === "Удалить") {
@@ -1065,7 +1070,7 @@ export default {
                         this.modalObject.id
                     )
                     .then(() => {
-                      this.getDataTable.splice(i, 1);
+                      this.$store.dispatch("getDataTable");
                     })
                     .catch((error) => {
                       const vNodesMsg = [
@@ -1165,9 +1170,6 @@ export default {
         }
       });
     },
-    inputSpinButton(duration) {
-      this.modalObject.duration = duration + " секунд";
-    },
     async verifyLocalStorage() {
       if (this.LocalStorageProject !== null) {
         await this.$store.commit("SET_PROJECT", this.LocalStorageProject);
@@ -1218,17 +1220,21 @@ export default {
       if (this.checkboxUser.length) {
         return this.checkboxUser;
       }
-      // const filteredRows = this.getDataTable.filter((row) => {
-      //   let flag = true;
-      //   for (const [key, value] of Object.entries(this.selected)) {
-      //     if (!!value && !row[key].includes(value)) {
-      //       // если value фильтра истинно (то есть не равно ни null, ни 0) и если то же поле в строке (с тем же ключом что и в фильтре) не содержит значение фильтра...
-      //       flag = false; // ... то флаг = false...
-      //       break; // ... и цикл прерывается
-      //     }
-      //   }
-      //   return flag; // возвращаем флаг, если флаг == false - строка не проходит фильтрацию
-      // });
+      if (this.sortedFilter.length) {
+        // const filteredRows = this.sortedFilter.filter((row) => {
+        //   let flag = true;
+        //   for (const [key, value] of Object.entries(this.selected)) {
+        //     if (!!value && !row[key].includes(value)) {
+        //       // если value фильтра истинно (то есть не равно ни null, ни 0) и если то же поле в строке (с тем же ключом что и в фильтре) не содержит значение фильтра...
+        //       flag = false; // ... то флаг = false...
+        //       break; // ... и цикл прерывается
+        //     }
+        //   }
+        //   return flag; // возвращаем флаг, если флаг == false - строка не проходит фильтрацию
+        // });
+        return this.sortedFilter;
+      }
+
       return this.getDataTable;
     },
     getProject() {

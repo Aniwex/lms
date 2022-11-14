@@ -252,6 +252,7 @@ export default {
             users: tempUserId,
           })
           .then(() => {
+            this.$store.dispatch("SET_PROJECTS");
             this.$router.push("/Projects");
           });
         await this.$store.dispatch("SET_USER");
@@ -288,6 +289,7 @@ export default {
             users: tempUserId,
           })
           .then(() => {
+            this.$store.dispatch("SET_PROJECTS");
             this.$store.dispatch("SET_USER");
             this.mirrows = [{ value: "" }];
             this.name = "";

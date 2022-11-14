@@ -239,14 +239,14 @@ export default {
               operator_minus_words: this.temp_operator_minus_words[0],
             })
             .then(() => {
+              this.name = "";
+              this.objective = false;
+              this.client_plus_words = "";
+              this.client_minus_words = "";
+              this.operator_plus_words = "";
+              this.operator_minus_words = "";
               this.$store.dispatch("getTagsTable");
             });
-          this.name = "";
-          this.objective = false;
-          this.client_plus_words = "";
-          this.client_minus_words = "";
-          this.operator_plus_words = "";
-          this.operator_minus_words = "";
         } else {
           this.$bvToast.toast("Пожалуйтса заполните все поля", {
             title: `Ошибка`,

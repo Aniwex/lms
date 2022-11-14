@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="text-center" v-if="!getInt || !user">
+    <div class="text-center" v-if="!getIntegrations || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />
         Загрузка...
@@ -10,7 +10,7 @@
     <search
       :rows="rowsIntegration"
       :searchTerm="searchTerm"
-      v-if="getInt && user"
+      v-if="getIntegrations && user"
       :role_id="user.role.id"
       @arraySearch="pushArraySearch"
     />
@@ -39,7 +39,7 @@
     <vue-good-table
       :columns="columns"
       :rows="sorted"
-      v-if="getInt && user"
+      v-if="getIntegrations && user"
       :search-options="{
         enabled: true,
       }"
@@ -152,8 +152,7 @@
       size="lg"
       ref="modal__window"
       hide-footer
-      no-close-on-esc
-      no-close-on-backdrop
+      @hidden="hideModal"
     >
       <div class="see-project__form">
         <h3 class="see-project__read">Данные для редактирования</h3>
@@ -161,18 +160,12 @@
           <div class="row__lables">
             <div class="row__date-lables">
               <label class="row__lables-label">Название</label>
-              <multiselect
-                v-model="integration"
-                onclick="this.querySelector('input').focus();"
-                :options="options_integrations"
-                selectedLabel="Выбрано"
-                class="multiselect-input"
-                label="title"
-                track-by="title"
-                placeholder="Выберите интеграцию"
-                :showLabels="false"
-              >
-              </multiselect>
+              <b-form-input
+                type="text"
+                placeholder="Ключ"
+                v-model="integration.title"
+                class="row__user-input"
+              />
             </div>
             <div class="row__source-lables">
               <label class="row__lables-label">Код</label>
@@ -381,7 +374,6 @@ export default {
           type: "progressbar",
         },
       },
-      getInt: false,
       trHeight: 50,
       trMargin: 20,
       tempHeightPlus: null,
@@ -404,26 +396,6 @@ export default {
     },
     pushArraySearch(search) {
       this.arraySearch = search;
-    },
-    async getIntegration() {
-      await axios
-        .get("api/integrations")
-        .then((response) => {
-          this.rowsIntegration = response.data.integrations;
-          this.options_integrations = this.rowsIntegration;
-          this.getInt = true;
-        })
-        .catch((error) => {
-          const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
-          this.$bvToast.toast([vNodesMsg], {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
-          });
-        });
     },
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
@@ -489,7 +461,7 @@ export default {
       }
     },
     hideModal() {
-      this.getIntegration();
+      this.$store.dispatch("getIntegrationTable");
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
@@ -502,9 +474,11 @@ export default {
             config: this.modalObject.config,
           })
           .then(() => {
+            this.$store.dispatch("getIntegrationTable");
             this.$refs["modal__window"].hide();
           })
           .catch((error) => {
+            console.log(error.response.data);
             const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
@@ -515,7 +489,6 @@ export default {
               autoHideDelay: 3000,
             });
           });
-        await this.getIntegration();
       } catch (error) {}
     },
     async deleteModal() {
@@ -540,7 +513,7 @@ export default {
                   axios
                     .delete("/api/integrations/" + this.modalObject.id)
                     .then(() => {
-                      this.rowsIntegration.splice(i, 1);
+                      this.$store.dispatch("getIntegrationTable");
                       this.$swal({
                         icon: "success",
                         title: "Удалено!",
@@ -591,20 +564,17 @@ export default {
     },
     deleteSelected() {
       try {
-        let k = 0;
-        let arr = [];
         if (this.rowsIntegration.length) {
           this.rowSelection.filter((item) => {
             this.rowsIntegration.filter((index, i) => {
               if (item.id === index.id) {
-                k++;
-                arr.push(i);
-                axios.delete("/api/integrations/" + item.id).then(() => {});
+                axios.delete("/api/integrations/" + item.id).then(() => {
+                  this.$store.dispatch("getIntegrationTable");
+                });
               }
             });
           });
         }
-        this.rowsIntegration.splice(arr[0], k);
       } catch (error) {}
     },
   },
@@ -616,13 +586,16 @@ export default {
       if (this.arraySearch.length) {
         return this.arraySearch;
       } else {
-        return this.rowsIntegration;
+        return this.getIntegrations;
       }
+    },
+    getIntegrations() {
+      return this.$store.getters.getIntegrations;
     },
   },
   created() {
     this.getDataUser();
-    this.getIntegration();
+    this.$store.dispatch("getIntegrationTable");
   },
 };
 </script>

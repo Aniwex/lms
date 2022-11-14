@@ -95,10 +95,8 @@
             :key="index"
             class="text-nowrap"
           >
-            <span v-if="data.key !== 'quiz_id'"
-              >{{ data.key }}: {{ data.value }}</span
-            >
-            <span v-else>{{ data.key }}: {{ data.name }}</span>
+            <span v-if="data.message">{{ data.message }}</span>
+            <span v-else>{{ data }}</span>
           </div>
         </span>
         <span v-else-if="props.column.field === 'action'">
@@ -174,137 +172,161 @@
       size="lg"
       ref="modal__window"
       hide-footer
-      no-close-on-esc
-      no-close-on-backdrop
+      @hidden="hideModal"
     >
-      <swiper
-        class="swiper-navigations"
-        :options="swiperOptions"
-        :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-        @slideNextTransitionStart="changeSlideNext"
-        @slidePrevTransitionStart="changeSlidePrev"
-      >
-        <swiper-slide v-for="(data, index) in modalArray" :key="index"
-          ><div class="see-project__form">
-            <h3 class="see-project__read">Данные для редактирования</h3>
-            <div class="container__see-project">
-              <div class="row__lables">
-                <div class="row__date-lables" v-if="data.integration">
-                  <label class="row__lables-label">Интеграция</label>
-                  <b-form-input
-                    class="row__user-input"
-                    v-model="data.integration.title"
-                    type="text"
-                    placeholder="Интеграция"
-                  />
-                </div>
-                <div class="row__date-lables">
-                  <label class="row__lables-label">Название</label>
-                  <b-form-input
-                    class="row__user-input"
-                    v-model="data.name"
-                    type="text"
-                    placeholder="Название"
-                  />
-                </div>
-                <div class="row__source-lables">
-                  <label class="row__lables-label">Код</label>
-                  <b-form-input
-                    class="row__user-input"
-                    v-model="data.code"
-                    type="text"
-                    placeholder="Код"
-                  />
-                </div>
-                <div class="data__source">
-                  <label class="db__tc data__source-label"
-                    >Данные по источнику</label
-                  >
-                  <div v-for="(fields, index) in tempFields" :key="index">
-                    <div v-for="(f, index) in fields" :key="index">
-                      <div v-if="f.type === 'text'">
-                        <b-form-group
-                          label-cols="4"
-                          label-cols-lg="2"
-                          :label="f.value"
-                          label-for="input-lg"
-                          style="width: 400px"
-                        >
-                          <b-form-input
-                            v-if="f.key !== 'quiz_id'"
-                            class="row__user-input"
-                            style="margin-left: 10px"
-                            v-model="value__input"
-                            type="text"
-                            placeholder="Данные по источнику"
-                          />
-                          <b-form-input
-                            v-else
-                            class="row__user-input"
-                            style="margin-left: 10px"
-                            v-model="value__input"
-                            type="text"
-                            placeholder="Данные по источнику"
-                          />
-                        </b-form-group>
-                      </div>
-                      <div v-else-if="f.type === 'select'">
-                        <b-form-group
-                          label-cols="4"
-                          label-cols-lg="2"
-                          :label="f.key"
-                          label-for="input-lg"
-                          style="width: 400px"
-                        >
-                          <multiselect
-                            v-model="f.value"
-                            onclick="this.querySelector('input').focus();"
-                            :options="f.options"
-                            selectedLabel="Выбрано"
-                            style="margin-top: 10px"
-                            label="value"
-                            track-by="value"
-                            placeholder="Выберите источник"
-                            :showLabels="false"
-                          >
-                          </multiselect>
-                        </b-form-group>
-                      </div>
-                      <div v-else-if="f.type === 'hint'">
-                        <p class="fields__hint db__tc">
-                          {{ f.message }}
-                        </p>
-                      </div>
-                    </div>
+      <div class="see-project__form">
+        <h3 class="see-project__read">Данные для редактирования</h3>
+        <div class="container__see-project">
+          <div class="row__lables">
+            <div class="row__date-lables" v-if="modalObject.integration">
+              <label class="row__lables-label">Интеграция</label>
+              <b-form-input
+                class="row__user-input"
+                v-model="modalObject.integration.title"
+                type="text"
+                placeholder="Интеграция"
+              />
+            </div>
+            <div class="row__date-lables">
+              <label class="row__lables-label">Название</label>
+              <b-form-input
+                class="row__user-input"
+                v-model="modalObject.name"
+                type="text"
+                placeholder="Название"
+              />
+            </div>
+            <div class="row__source-lables">
+              <label class="row__lables-label">Код</label>
+              <b-form-input
+                class="row__user-input"
+                v-model="modalObject.code"
+                type="text"
+                placeholder="Код"
+              />
+            </div>
+            <div class="data__source">
+              <label class="db__tc data__source-label"
+                >Данные по источнику</label
+              >
+              <div v-for="(fields, index) in tempFields" :key="index">
+                <div v-for="(f, index) in fields" :key="index">
+                  <div v-if="f.type === 'text'">
+                    <b-form-group
+                      v-if="f.key === 'roistat_id'"
+                      label-cols="4"
+                      label-cols-lg="2"
+                      :label="f.value"
+                      label-for="input-lg"
+                      style="width: 400px"
+                    >
+                      <b-form-input
+                        class="row__user-input"
+                        style="margin-left: 10px"
+                        v-model="value__input"
+                        type="text"
+                        placeholder="roistat_id"
+                      />
+                    </b-form-group>
+                    <b-form-group
+                      v-if="f.key === 'quiz_id'"
+                      label-cols="4"
+                      label-cols-lg="2"
+                      :label="f.name"
+                      label-for="input-lg"
+                      style="width: 400px"
+                    >
+                      <b-form-input
+                        class="row__user-input"
+                        style="margin-left: 10px"
+                        v-model="value__input"
+                        type="text"
+                        placeholder="quiz_id"
+                      />
+                    </b-form-group>
+                    <b-form-group
+                      v-if="f.key === 'api_key'"
+                      label-cols="4"
+                      label-cols-lg="2"
+                      :label="f.value"
+                      label-for="input-lg"
+                      style="width: 400px"
+                    >
+                      <b-form-input
+                        class="row__user-input"
+                        style="margin-left: 10px"
+                        v-model="api_key"
+                        type="text"
+                        placeholder="api_key"
+                      />
+                    </b-form-group>
+                    <b-form-group
+                      v-if="f.key === 'api_secret'"
+                      label-cols="4"
+                      label-cols-lg="2"
+                      :label="f.value"
+                      label-for="input-lg"
+                      style="width: 400px"
+                    >
+                      <b-form-input
+                        class="row__user-input"
+                        style="margin-left: 10px"
+                        v-model="api_secret"
+                        type="text"
+                        placeholder="api_secret"
+                      />
+                    </b-form-group>
                   </div>
-                </div>
-                <div class="modal__form-buttons">
-                  <b-button
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="secondary"
-                    @click="hideModal"
-                  >
-                    Отменить
-                  </b-button>
-                  <b-button
-                    @click="saveModal"
-                    class="form__button-margin"
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="primary"
-                  >
-                    Сохранить
-                  </b-button>
+                  <div v-else-if="f.type === 'select'">
+                    <b-form-group
+                      label-cols="4"
+                      label-cols-lg="2"
+                      :label="f.key"
+                      label-for="input-lg"
+                      style="width: 400px"
+                    >
+                      <multiselect
+                        v-model="f.value"
+                        onclick="this.querySelector('input').focus();"
+                        :options="f.options"
+                        selectedLabel="Выбрано"
+                        style="margin-top: 10px"
+                        label="value"
+                        track-by="value"
+                        placeholder="Выберите источник"
+                        :showLabels="false"
+                      >
+                      </multiselect>
+                    </b-form-group>
+                  </div>
+                  <div v-else-if="f.type === 'hint'">
+                    <p class="fields__hint db__tc">
+                      {{ f.message }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
+            <div class="modal__form-buttons">
+              <b-button
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="secondary"
+                @click="hideModal"
+              >
+                Отменить
+              </b-button>
+              <b-button
+                @click="saveModal"
+                class="form__button-margin"
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="primary"
+              >
+                Сохранить
+              </b-button>
+            </div>
           </div>
-        </swiper-slide>
-
-        <!-- Arrows -->
-        <div slot="button-next" class="swiper-button-next" />
-        <div slot="button-prev" class="swiper-button-prev" />
-        <div slot="pagination" class="swiper-pagination" />
-      </swiper>
+        </div>
+      </div>
     </b-modal>
   </div>
 </template>
@@ -370,9 +392,11 @@ export default {
     return {
       rowsSource: [],
       user: "",
+      api_key: "",
+      api_secret: "",
       errors: {},
       rowSelection: [],
-      modalArray: [],
+      modalObject: [],
       modalCounter: 0,
       searchTerm: "",
       value__input: "",
@@ -424,45 +448,6 @@ export default {
     pushArraySearch(search) {
       this.arraySearch = search;
     },
-    changeSlideNext() {
-      this.modalCounter++;
-      this.tempFields = [];
-      axios
-        .get(
-          "api/projects/" +
-            this.project.id +
-            "/sources/" +
-            this.modalArray[this.modalCounter].id +
-            "/integration-fields"
-        )
-        .then((response) => {
-          this.tempFields.push(response.data.fields);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
-    },
-    changeSlidePrev() {
-      this.modalCounter--;
-      this.tempFields = [];
-      axios
-        .get(
-          "api/projects/" +
-            this.project.id +
-            "/sources/" +
-            this.modalArray[this.modalCounter].id +
-            "/integration-fields"
-        )
-        .then((response) => {
-          this.tempFields.push(response.data.fields);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
-    },
     async getDataUser() {
       if (!this.$store.getters.project) {
         this.$router.push("/Home");
@@ -491,24 +476,15 @@ export default {
     },
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
-        let temp = row;
-        this.modalArray = [];
+        this.modalObject = row;
         this.tempFields = [];
-        let i = 0;
-        this.getDataSources.filter((item) => {
-          if (temp.id === item.id) {
-            i++;
-          }
-          if (i === 1) {
-            this.modalArray.push(item);
-          }
-        });
+        this.value__input = "";
         await axios
           .get(
             "api/projects/" +
               this.project.id +
               "/sources/" +
-              this.modalArray[this.modalCounter].id +
+              this.modalObject.id +
               "/integration-fields"
           )
           .then((response) => {
@@ -517,45 +493,49 @@ export default {
           .catch((error) => {
             console.log(error);
           });
-        //this.tempFields.filter((field) => console.log(field));
-        // console.log(this.tempFields[0]);
+        console.log(this.tempFields[0].length);
+        console.log(this.tempFields[0]);
       }
       if (item === "Удалить") {
-        this.modalArray = row;
+        this.modalObject = row;
       }
     },
     hideModal() {
-      this.modalArray = this.getDataSources;
+      this.$store.dispatch("getSourceTable");
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
       try {
+        console.log([this.tempFields[0][0].key]);
         await axios
           .put(
             " api/projects/" +
               this.project.id +
               "/sources/" +
-              this.modalArray[this.modalCounter].id,
+              this.modalObject.id,
             {
-              integration_id: this.modalArray[this.modalCounter].integration.id,
-              name: this.modalArray[this.modalCounter].name,
-              code: this.modalArray[this.modalCounter].code,
-              data: this.tempFields[0],
+              integration_id: this.modalObject.integration.id,
+              name: this.modalObject.name,
+              code: this.modalObject.code,
+              data:
+                this.tempFields[0].length !== 4
+                  ? { [this.tempFields[0][0].key]: this.value__input }
+                  : {
+                      [this.tempFields[0][0].key]: this.api_key,
+                      [this.tempFields[0][1].key]: this.api_secret,
+                    },
             }
           )
           .then(() => {
-            this.getDataSources.filter((item) => {
-              if (item.id == this.modalArray[this.modalCounter].id) {
-                item.data = this.tempFields[0];
-              }
-            });
+            this.$store.dispatch("getSourceTable");
             this.$refs["modal__window"].hide();
           })
           .catch((error) => {
             console.log(error.response.data);
           });
       } catch (error) {
-        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
+        console.log(error);
+        const vNodesMsg = [`${error}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",
@@ -569,7 +549,7 @@ export default {
     async deleteModal() {
       try {
         this.$swal({
-          title: "Вы согласны удалить обращение?",
+          title: "Вы согласны удалить источник?",
           text: "Это действие необратимо!",
           icon: "warning",
           showCancelButton: true,
@@ -583,20 +563,20 @@ export default {
         }).then((result) => {
           if (this.getDataSources.length) {
             this.getDataSources.filter((index, i) => {
-              if (index.id === this.modalArray.id) {
+              if (index.id === this.modalObject.id) {
                 axios
                   .delete(
                     "api/projects/" +
                       this.project.id +
                       "/sources/" +
-                      this.modalArray.id
+                      this.modalObject.id
                   )
                   .then(() => {
-                    this.getDataSources.splice(i, 1);
+                    this.$store.dispatch("getSourceTable");
                     this.$swal({
                       icon: "success",
                       title: "Удалено!",
-                      text: "Обращение было удалено.",
+                      text: "Источник был удалён.",
                       customClass: {
                         confirmButton: "btn btn-success",
                       },
@@ -618,7 +598,7 @@ export default {
           } else if (result.dismiss === "cancel") {
             this.$swal({
               title: "Отмена",
-              text: "Удаление обращения было отменено",
+              text: "Удаление источника было отменено",
               icon: "error",
               customClass: {
                 confirmButton: "btn btn-success",
@@ -638,19 +618,17 @@ export default {
     },
     deleteSelected() {
       try {
-        let k = 0;
-        let arr = [];
         if (this.getDataSources.length) {
           this.rowSelection.filter((item) => {
             this.getDataSources.map((index, i) => {
               if (item.id === index.id) {
-                k++;
-                arr.push(i);
                 axios
                   .delete(
                     "api/projects/" + this.project.id + "/sources/" + +item.id
                   )
-                  .then(() => {})
+                  .then(() => {
+                    this.$store.dispatch("getSourceTable");
+                  })
                   .catch((error) => {
                     const vNodesMsg = [`${Object.values(error.response.data)}`];
                     this.$bvToast.toast([vNodesMsg], {
@@ -666,7 +644,6 @@ export default {
             });
           });
         }
-        this.getDataSources.splice(arr[0], k);
       } catch (error) {}
     },
   },
@@ -675,7 +652,7 @@ export default {
       if (this.arraySearch.length) {
         return this.arraySearch;
       } else {
-        return this.getDataSources;
+        return this.$store.getters.getSources;
       }
     },
     getDataSources() {

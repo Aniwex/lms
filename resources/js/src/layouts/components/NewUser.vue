@@ -184,12 +184,17 @@ export default {
     },
     async addUser() {
       try {
+        let tempProject = [];
+        this.project.filter((item) => {
+          tempProject.push(item.id);
+        });
         if (this.role) {
           await axios
             .post("/api/users", {
               login: this.login,
               password: this.password,
               role_id: this.role.id,
+              projects: tempProject,
             })
             .then(() => {
               this.enter = true;
@@ -223,18 +228,28 @@ export default {
     },
     async CreateAndAddUser() {
       try {
+        let tempProject = [];
+        this.project.filter((item) => {
+          tempProject.push(item.id);
+        });
         if (this.role) {
           await axios
             .post("/api/users", {
               login: this.login,
               password: this.password,
-              role_id: this.role,
+              role_id: this.role.id,
+              projects: tempProject,
             })
             .then(() => {
-              this.enterAndAdd = true;
+              this.login = "";
+              this.password = "";
+              this.role = "";
+              this.project = [];
             })
             .catch((error) => {
               this.enter = false;
+              this.errors = error.response.data.errors;
+              console.log(this.errors);
               const vNodesMsg = [`${error.response.data.errors}`];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
@@ -245,10 +260,6 @@ export default {
                 autoHideDelay: 3000,
               });
             });
-          this.login = "";
-          this.password = "";
-          this.role_id = "";
-          this.enterAndAdd = false;
         } else {
           this.$bvToast.toast("Пожалуйтса выберете роль", {
             title: `Ошибка`,

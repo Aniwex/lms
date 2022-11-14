@@ -209,158 +209,138 @@
       size="lg"
       ref="modal__window"
       hide-footer
-      no-close-on-esc
-      no-close-on-backdrop
+      @hidden="hideModal"
     >
-      <swiper
-        class="swiper-navigations"
-        :options="swiperOptions"
-        :dir="$store.state.appConfig.isRTL ? 'rtl' : 'ltr'"
-        @slideNextTransitionStart="changeSlideNext"
-        @slidePrevTransitionStart="changeSlidePrev"
-      >
-        <swiper-slide v-for="(data, index) in modalArray" :key="index"
-          ><div class="see-project__form">
-            <h3 class="see-project__read">Данные для редактирования</h3>
-            <div class="container__see-project">
-              <div class="row__lables">
-                <div class="row__date-lables">
-                  <label class="row__lables-label">Название</label>
-                  <b-form-input
-                    class="row__user-input"
-                    v-model="data.name"
-                    objective="text"
-                    placeholder="Название"
-                  />
-                </div>
-                <div class="row__source-lables">
-                  <label class="row__lables-label">Тип</label>
-                  <b-form-checkbox
-                    v-model="data.objective"
-                    class="form__checkbox"
-                  >
-                    Целевой (да/нет)
-                  </b-form-checkbox>
-                </div>
-                <div class="row__source-lables">
-                  <label class="row__lables-label">Плюс слова клиента</label>
-                  <div>
-                    <b-form-textarea
-                      style="text-align: left; width: 300px"
-                      :placeholder="
-                        errors['client_plus_words.' + 0]
-                          ? errors['client_plus_words.' + 0][0]
-                          : 'Плюс слова клиента'
-                      "
-                      class="row__user-input"
-                      rows="5"
-                      no-resize
-                      v-model="data.client_plus_words"
-                      :state="data.client_plus_words !== ''"
-                    />
-                    <span
-                      class="db__tc"
-                      v-if="errors['client_plus_words.' + 0]"
-                      >{{ errors["client_plus_words." + 0][0] }}</span
-                    >
-                  </div>
-                </div>
-                <div class="row__source-lables">
-                  <label class="row__lables-label">Минус слова клиента</label>
-                  <div>
-                    <b-form-textarea
-                      class="row__user-input"
-                      style="text-align: left; width: 300px"
-                      :placeholder="
-                        errors['client_minus_words.' + 0]
-                          ? errors['client_minus_words.' + 0][0]
-                          : 'Плюс слова клиента'
-                      "
-                      rows="5"
-                      no-resize
-                      v-model="data.client_minus_words"
-                      :state="data.client_minus_words !== ''"
-                    />
-                    <span
-                      class="db__tc"
-                      v-if="errors['client_minus_words.' + 0]"
-                      >{{ errors["client_minus_words." + 0][0] }}</span
-                    >
-                  </div>
-                </div>
-                <div class="row__source-lables">
-                  <label class="row__lables-label">Плюс слова оператора</label>
-                  <div>
-                    <b-form-textarea
-                      class="row__user-input"
-                      style="text-align: left; width: 300px"
-                      :placeholder="
-                        errors['operator_plus_words.' + 0]
-                          ? errors['operator_plus_words.' + 0][0]
-                          : 'Плюс слова клиента'
-                      "
-                      rows="5"
-                      no-resize
-                      v-model="data.operator_plus_words"
-                      :state="data.operator_plus_words !== ''"
-                    />
-                    <span
-                      class="db__tc"
-                      v-if="errors['operator_plus_words.' + 0]"
-                      >{{ errors["operator_plus_words." + 0][0] }}</span
-                    >
-                  </div>
-                </div>
-                <div class="row__source-lables">
-                  <label class="row__lables-label">Минус слова оператора</label>
-                  <div>
-                    <b-form-textarea
-                      class="row__user-input"
-                      style="text-align: left; width: 300px"
-                      :placeholder="
-                        errors['operator_minus_words.' + 0]
-                          ? errors['operator_minus_words.' + 0][0]
-                          : 'Плюс слова клиента'
-                      "
-                      rows="5"
-                      no-resize
-                      v-model="data.operator_minus_words"
-                      :state="data.operator_minus_words !== ''"
-                    />
-                    <span
-                      class="db__tc"
-                      v-if="errors['operator_minus_words.' + 0]"
-                      >{{ errors["operator_minus_words." + 0][0] }}</span
-                    >
-                  </div>
-                </div>
-                <div class="modal__form-buttons">
-                  <b-button
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="secondary"
-                    @click="hideModal"
-                  >
-                    Отменить
-                  </b-button>
-                  <b-button
-                    @click="saveModal"
-                    class="form__button-margin"
-                    v-ripple.400="'rgba(255, 255, 255, 0.15)'"
-                    variant="primary"
-                  >
-                    Сохранить
-                  </b-button>
-                </div>
+      <div class="see-project__form">
+        <h3 class="see-project__read">Данные для редактирования</h3>
+        <div class="container__see-project">
+          <div class="row__lables">
+            <div class="row__date-lables">
+              <label class="row__lables-label">Название</label>
+              <b-form-input
+                class="row__user-input"
+                v-model="modalObject.name"
+                objective="text"
+                placeholder="Название"
+              />
+            </div>
+            <div class="row__source-lables">
+              <label class="row__lables-label">Тип</label>
+              <b-form-checkbox
+                v-model="modalObject.objective"
+                class="form__checkbox"
+              >
+                Целевой (да/нет)
+              </b-form-checkbox>
+            </div>
+            <div class="row__source-lables">
+              <label class="row__lables-label">Плюс слова клиента</label>
+              <div>
+                <b-form-textarea
+                  style="text-align: left; width: 300px"
+                  :placeholder="
+                    errors['client_plus_words.' + 0]
+                      ? errors['client_plus_words.' + 0][0]
+                      : 'Плюс слова клиента'
+                  "
+                  class="row__user-input"
+                  rows="5"
+                  no-resize
+                  v-model="modalObject.client_plus_words"
+                  :state="modalObject.client_plus_words !== ''"
+                />
+                <span class="db__tc" v-if="errors['client_plus_words.' + 0]">{{
+                  errors["client_plus_words." + 0][0]
+                }}</span>
               </div>
             </div>
+            <div class="row__source-lables">
+              <label class="row__lables-label">Минус слова клиента</label>
+              <div>
+                <b-form-textarea
+                  class="row__user-input"
+                  style="text-align: left; width: 300px"
+                  :placeholder="
+                    errors['client_minus_words.' + 0]
+                      ? errors['client_minus_words.' + 0][0]
+                      : 'Плюс слова клиента'
+                  "
+                  rows="5"
+                  no-resize
+                  v-model="modalObject.client_minus_words"
+                  :state="modalObject.client_minus_words !== ''"
+                />
+                <span class="db__tc" v-if="errors['client_minus_words.' + 0]">{{
+                  errors["client_minus_words." + 0][0]
+                }}</span>
+              </div>
+            </div>
+            <div class="row__source-lables">
+              <label class="row__lables-label">Плюс слова оператора</label>
+              <div>
+                <b-form-textarea
+                  class="row__user-input"
+                  style="text-align: left; width: 300px"
+                  :placeholder="
+                    errors['operator_plus_words.' + 0]
+                      ? errors['operator_plus_words.' + 0][0]
+                      : 'Плюс слова клиента'
+                  "
+                  rows="5"
+                  no-resize
+                  v-model="modalObject.operator_plus_words"
+                  :state="modalObject.operator_plus_words !== ''"
+                />
+                <span
+                  class="db__tc"
+                  v-if="errors['operator_plus_words.' + 0]"
+                  >{{ errors["operator_plus_words." + 0][0] }}</span
+                >
+              </div>
+            </div>
+            <div class="row__source-lables">
+              <label class="row__lables-label">Минус слова оператора</label>
+              <div>
+                <b-form-textarea
+                  class="row__user-input"
+                  style="text-align: left; width: 300px"
+                  :placeholder="
+                    errors['operator_minus_words.' + 0]
+                      ? errors['operator_minus_words.' + 0][0]
+                      : 'Плюс слова клиента'
+                  "
+                  rows="5"
+                  no-resize
+                  v-model="modalObject.operator_minus_words"
+                  :state="modalObject.operator_minus_words !== ''"
+                />
+                <span
+                  class="db__tc"
+                  v-if="errors['operator_minus_words.' + 0]"
+                  >{{ errors["operator_minus_words." + 0][0] }}</span
+                >
+              </div>
+            </div>
+            <div class="modal__form-buttons">
+              <b-button
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="secondary"
+                @click="hideModal"
+              >
+                Отменить
+              </b-button>
+              <b-button
+                @click="saveModal"
+                class="form__button-margin"
+                v-ripple.400="'rgba(255, 255, 255, 0.15)'"
+                variant="primary"
+              >
+                Сохранить
+              </b-button>
+            </div>
           </div>
-        </swiper-slide>
-
-        <!-- Arrows -->
-        <div slot="button-next" class="swiper-button-next" />
-        <div slot="button-prev" class="swiper-button-prev" />
-        <div slot="pagination" class="swiper-pagination" />
-      </swiper>
+        </div>
+      </div>
     </b-modal>
   </div>
 </template>
@@ -430,7 +410,7 @@ export default {
     return {
       rowsTags: [],
       rowSelection: [],
-      modalArray: [],
+      modalObject: [],
       errors: {},
       modalCounter: 0,
       searchTerm: "",
@@ -488,14 +468,6 @@ export default {
     };
   },
   methods: {
-    changeSlideNext() {
-      this.modalCounter++;
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
-    },
-    changeSlidePrev() {
-      this.modalCounter--;
-      this.arrayChat = this.modalArray[this.modalCounter].dialog;
-    },
     async getDataUser() {
       if (!this.getProject) {
         this.$router.push("/Home");
@@ -538,23 +510,14 @@ export default {
     },
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
-        let temp = row;
-        this.modalArray = [];
-        let i = 0;
-        this.getDataTags.filter((item) => {
-          if (temp.id === item.id) {
-            i++;
-          }
-          if (i === 1) {
-            this.modalArray.push(item);
-          }
-        });
+        this.modalObject = row;
       }
       if (item === "Удалить") {
-        this.modalArray = row;
+        this.modalObject = row;
       }
     },
     hideModal() {
+      this.$store.dispatch("getTagsTable");
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
@@ -563,20 +526,16 @@ export default {
       let temp_operator_plus_words = [];
       let temp_operator_minus_words = [];
       temp_client_plus_words.push(
-        this.modalArray[this.modalCounter].client_plus_words.split(/(?=\/)|\s/)
+        this.modalObject.client_plus_words.split(/(?=\/)|\s/)
       );
       temp_client_minus_words.push(
-        this.modalArray[this.modalCounter].client_minus_words.split(/(?=\/)|\s/)
+        this.modalObject.client_minus_words.split(/(?=\/)|\s/)
       );
       temp_operator_plus_words.push(
-        this.modalArray[this.modalCounter].operator_plus_words.split(
-          /(?=\/)|\s/
-        )
+        this.modalObject.operator_plus_words.split(/(?=\/)|\s/)
       );
       temp_operator_minus_words.push(
-        this.modalArray[this.modalCounter].operator_minus_words.split(
-          /(?=\/)|\s/
-        )
+        this.modalObject.operator_minus_words.split(/(?=\/)|\s/)
       );
       try {
         await axios
@@ -584,10 +543,10 @@ export default {
             "api/projects/" +
               this.getProject.id +
               "/tags/" +
-              this.modalArray[this.modalCounter].id,
+              this.modalObject.id,
             {
-              name: this.modalArray[this.modalCounter].name,
-              objective: this.modalArray[this.modalCounter].objective,
+              name: this.modalObject.name,
+              objective: this.modalObject.objective,
               client_plus_words: temp_client_plus_words[0],
               client_minus_words: temp_client_minus_words[0],
               operator_plus_words: temp_operator_plus_words[0],
@@ -630,16 +589,16 @@ export default {
           if (this.getDataTags.length) {
             if (result.value) {
               this.getDataTags.filter((index, i) => {
-                if (index.id === this.modalArray.id) {
+                if (index.id === this.modalObject.id) {
                   axios
                     .delete(
                       "api/projects/" +
                         this.getProject.id +
                         "/tags/" +
-                        this.modalArray.id
+                        this.modalObject.id
                     )
                     .then(() => {
-                      this.getDataTags.splice(i, 1);
+                      this.$store.dispatch("getTagsTable");
                     })
                     .catch((error) => {
                       const vNodesMsg = [
@@ -688,19 +647,17 @@ export default {
     },
     deleteSelected() {
       try {
-        let k = 0;
-        let arr = [];
         if (this.getDataTags.length) {
           this.rowSelection.filter((item) => {
             this.getDataTags.map((index, i) => {
               if (item.id === index.id) {
-                k++;
-                arr.push(i);
                 axios
                   .delete(
                     "api/projects/" + this.getProject.id + "/tags/" + item.id
                   )
-                  .then(() => {})
+                  .then(() => {
+                    this.$store.dispatch("getTagsTable");
+                  })
                   .catch((error) => {
                     const vNodesMsg = [
                       `${Object.values(error.response.data.errors)}`,
@@ -718,7 +675,6 @@ export default {
             });
           });
         }
-        this.getDataTags.splice(arr[0], k);
       } catch (error) {}
     },
     pushArraySearch(search) {

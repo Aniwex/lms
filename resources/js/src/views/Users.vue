@@ -151,8 +151,7 @@
       size="lg"
       ref="modal__window"
       hide-footer
-      no-close-on-esc
-      no-close-on-backdrop
+      @hidden="hideModal"
     >
       <div class="see-project__form">
         <h3 class="see-project__read">Данные для редактирования</h3>
@@ -453,7 +452,7 @@ export default {
       }
     },
     hideModal() {
-      this.getTableUsers();
+      this.$store.dispatch("getDataUsers");
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
@@ -472,9 +471,10 @@ export default {
           .then(() => {
             if (tempProjects.length === 0) {
               this.$store.dispatch("SET_USER");
+              this.$store.dispatch("getDataUsers");
               this.$store.commit("SET_PROJECT", "");
-
               localStorage.removeItem("project");
+              this.$refs["modal__window"].hide();
             } else {
               localStorage.setItem("project", JSON.stringify(this.project[0]));
               this.$store.dispatch("SET_USER");
@@ -485,8 +485,6 @@ export default {
             this.errors = error.response.data;
             console.log(error.response.data);
           });
-        this.$refs["modal__window"].hide();
-        await this.getTableUsers();
       } catch (error) {}
     },
     async deleteModal() {
@@ -509,7 +507,7 @@ export default {
               if (index.id === this.modalObject.id) {
                 axios
                   .delete("/api/users/" + this.modalObject.id)
-                  .then(() => this.$store.getters.getUsers.splice(i, 1))
+                  .then(() => this.$store.dispatch("getDataUsers"))
                   .then(() => {
                     if (result.value) {
                       this.$swal({
@@ -557,17 +555,15 @@ export default {
     },
     deleteSelected() {
       try {
-        let k = 0;
-        let arr = [];
         if (this.$store.getters.getUsers.length) {
           this.rowSelection.filter((item) => {
             this.$store.getters.getUsers.map((index, i) => {
               if (item.id === index.id) {
-                k++;
-                arr.push(i);
                 axios
                   .delete("/api/users/" + item.id)
-                  .then(() => {})
+                  .then(() => {
+                    this.$store.dispatch("getDataUsers");
+                  })
                   .catch((error) => {
                     const vNodesMsg = [
                       `${Object.values(error.response.data.error)}`,
@@ -585,7 +581,6 @@ export default {
             });
           });
         }
-        this.$store.getters.getUsers.splice(arr[0], k);
       } catch (error) {}
     },
   },

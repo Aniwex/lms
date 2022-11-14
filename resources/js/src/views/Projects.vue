@@ -164,8 +164,7 @@
       title="Просмотр проекта"
       ref="modal__window"
       hide-footer
-      no-close-on-esc
-      no-close-on-backdrop
+      @hidden="hideModal"
     >
       <div class="see-project__form">
         <h3 class="see-project__read">Данные для редактирования</h3>
@@ -415,7 +414,6 @@ export default {
           type: "progressbar",
         },
       },
-      getProjects: false,
       trHeight: 550,
       trMargin: 20,
       tempHeightPlus: null,
@@ -440,25 +438,7 @@ export default {
     pushArraySearch(search) {
       this.arraySearch = search;
     },
-    async getTableProjects() {
-      await axios
-        .get("api/projects")
-        .then((response) => {
-          this.rowsProjects = response.data.projects;
-          this.getProjects = true;
-        })
-        .catch((error) => {
-          const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
-          this.$bvToast.toast([vNodesMsg], {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 3000,
-          });
-        });
-    },
+
     async getDataUser() {
       await this.$store.dispatch("getDataUsers");
       await axios.get("/sanctum/csrf-cookie").then((response) => {
@@ -518,7 +498,7 @@ export default {
         });
     },
     hideModal() {
-      this.getTableProjects();
+      this.$store.dispatch("SET_PROJECTS");
       this.$refs["modal__window"].hide();
     },
     async saveModal() {
@@ -538,11 +518,11 @@ export default {
             users: tempUserId,
           })
           .then(() => {
+            this.$store.dispatch("SET_PROJECTS");
             this.$refs["modal__window"].hide();
             this.errors = {};
           });
 
-        await this.getTableProjects();
         await this.$store.dispatch("SET_USER");
       } catch (error) {
         this.errors = {};
@@ -570,7 +550,7 @@ export default {
                 axios
                   .delete("/api/projects/" + this.modalObject.id)
                   .then(() => {
-                    this.rowsProjects.splice(i, 1);
+                    this.$store.dispatch("SET_PROJECTS");
                     this.$store.dispatch("SET_USER");
                   })
                   .then(() => {
@@ -621,21 +601,25 @@ export default {
     },
     deleteSelected() {
       try {
-        let k = 0;
-        let arr = [];
-        if (this.rowsProjects.length) {
+        if (this.getProjects.length) {
           this.rowSelection.filter((item) => {
-            this.rowsProjects.map((index, i) => {
+            this.getProjects.map((index, i) => {
               if (item.id === index.id) {
-                k++;
-                arr.push(i);
-                axios.delete("/api/projects/" + item.id).then(() => {});
+                axios
+                  .delete("/api/projects/" + item.id)
+                  .then(() => {
+                    this.$store.dispatch("SET_PROJECTS");
+                  })
+                  .catch((error) => {
+                    console.log(error.response.data);
+                  });
               }
             });
           });
         }
-        this.rowsProjects.splice(arr[0], k);
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     },
   },
   computed: {
@@ -649,12 +633,15 @@ export default {
       if (this.arraySearch.length) {
         return this.arraySearch;
       } else {
-        return this.rowsProjects;
+        return this.$store.getters.projects;
       }
+    },
+    getProjects() {
+      return this.$store.getters.projects;
     },
   },
   created() {
-    this.getTableProjects();
+    this.$store.dispatch("SET_PROJECTS");
     this.getDataUser();
   },
 };

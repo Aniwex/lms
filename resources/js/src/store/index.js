@@ -21,6 +21,7 @@ export default new Vuex.Store({
         claims: [],
         sources: [],
         tags: [],
+        integrations: [],
         options_manager_check: [
             { value: "targeted", text: "целевой" },
             { value: "untargeted", text: "нецелевой" },
@@ -68,6 +69,9 @@ export default new Vuex.Store({
         SET_PROJECT: (state, payload) => {
             state.project = payload;
         },
+        SET_INTEGRATIONS: (state, payload) => {
+            state.integrations = payload;
+        },
     },
     actions: {
         SET_PROJECTS: async (ctx) => {
@@ -82,6 +86,7 @@ export default new Vuex.Store({
 
                 .then((response) => {
                     let sources = response.data.sources;
+
                     ctx.commit("SET_SOURCES", sources);
                 });
         },
@@ -108,7 +113,19 @@ export default new Vuex.Store({
                 .get("api/projects/" + ctx.getters.project.id + "/claims")
                 .then((response) => {
                     let claims = response.data.claims;
+                    console.log(claims);
                     ctx.commit("SET_CLAIMS", claims);
+                })
+                .catch((err) => {
+                    console.log(err.response.data);
+                });
+        },
+        getIntegrationTable: async (ctx) => {
+            await axios
+                .get("api/integrations")
+                .then((response) => {
+                    let integrations = response.data.integrations;
+                    ctx.commit("SET_INTEGRATIONS", integrations);
                 })
                 .catch((err) => {
                     console.log(err.response.data);
@@ -195,6 +212,9 @@ export default new Vuex.Store({
         },
         getClaims: (state) => {
             return state.claims;
+        },
+        getIntegrations: (state) => {
+            return state.integrations;
         },
         getSources: (state) => {
             return state.sources;

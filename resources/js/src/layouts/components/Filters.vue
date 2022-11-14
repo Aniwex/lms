@@ -30,6 +30,7 @@
                 track-by="name"
                 placeholder="Выберите тэг"
                 :showLabels="false"
+                @input="selectTag"
               >
               </multiselect>
               <b-dropdown-divider />
@@ -43,6 +44,7 @@
                 track-by="name"
                 placeholder="Выберите источник"
                 :showLabels="false"
+                @input="selectSource"
               >
               </multiselect>
 
@@ -52,7 +54,8 @@
                 v-model="selected.date"
                 class="form-control row__date-pickr db__tc"
                 placeholder="Выберите дату и время"
-                :config="{ dateFormat: 'd.m.Y' }"
+                :config="{ datetimeFormat: 'Y-m-d H:i:s' }"
+                @input="selectedDate"
               />
               <b-dropdown-divider />
               <p>Продолжительность Звонка</p>
@@ -72,6 +75,8 @@
                 <b-form-input
                   class="input__number form-control multiselect-width"
                   v-model="selected.duration"
+                  type="number"
+                  @input="selectedDuration"
                 />
                 <b-button
                   v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -94,6 +99,7 @@
                 placeholder="+7 (999) 999-99-99"
                 v-model="selected.user"
                 v-mask="'+7 (###) ###-##-##'"
+                @input="selectedUser"
               />
               <b-dropdown-divider />
               <p>Целевой по мнению менеджера</p>
@@ -106,6 +112,7 @@
                 track-by="text"
                 placeholder="Выберите источник"
                 :showLabels="false"
+                @input="selectManager"
               >
               </multiselect>
               <b-dropdown-divider />
@@ -119,6 +126,7 @@
                 track-by="text"
                 placeholder="Выберите источник"
                 :showLabels="false"
+                @input="selectClient"
               >
               </multiselect>
               <b-dropdown-divider />
@@ -136,7 +144,6 @@
         </div>
       </b-dropdown>
     </b-form-group>
-
   </div>
 </template>
 
@@ -202,6 +209,7 @@ export default {
         client: null,
         duration: 0,
       },
+      sortedFilter: [],
       checkboxUser: false,
       arrayCheckboxUser: [],
     };
@@ -211,9 +219,96 @@ export default {
       if (this.selected.duration >= 1) {
         this.selected.duration--;
       }
+      this.selectedDuration();
     },
     quantity_plus() {
       this.selected.duration++;
+      this.selectedDuration();
+    },
+    selectTag() {
+      this.sortedFilter = [];
+      let tempTags = [];
+      this.selected.tag.filter((item) => {
+        tempTags.push(item.name);
+      });
+      this.getDataTable.filter((row) => {
+        row.tags.filter((item, i) => {
+          tempTags.filter((tag) => {
+            if (item.name === tag) {
+              this.sortedFilter.push(row);
+            }
+          });
+        });
+      });
+      this.sortedFilter = [...new Set(this.sortedFilter)];
+      this.$emit("sortedFilter", this.sortedFilter);
+    },
+    selectSource() {
+      this.sortedFilter = [];
+      let tempSource = this.selected.source;
+      if (tempSource) {
+        this.getDataTable.filter((row) => {
+          if (row.source.name === tempSource.name) {
+            this.sortedFilter.push(row);
+          }
+        });
+      }
+      this.$emit("sortedFilter", this.sortedFilter);
+    },
+    selectedDate() {
+      let tempDate;
+      this.sortedFilter = [];
+      this.getDataTable.filter((item) => {
+        tempDate = item.datetime.substr(0, 10);
+        if (tempDate === this.selected.date) {
+          this.sortedFilter.push(item);
+        }
+      });
+      this.$emit("sortedFilter", this.sortedFilter);
+    },
+    selectedDuration() {
+      this.sortedFilter = [];
+      let tempDuration = Number(this.selected.duration);
+      this.getDataTable.map((item, call) => {
+        call = item.duration.original;
+        call = Number(call);
+        console.log(typeof call);
+        if (call === tempDuration) {
+          this.sortedFilter.push(item);
+        }
+      });
+      this.$emit("sortedFilter", this.sortedFilter);
+    },
+    selectedUser() {
+      this.sortedFilter = [];
+      this.getDataTable.filter((item) => {
+        if (item.phone.formatted.includes(this.selected.user)) {
+          this.sortedFilter.push(item);
+        }
+      });
+      this.$emit("sortedFilter", this.sortedFilter);
+    },
+    selectManager() {
+      this.sortedFilter = [];
+      if (this.selected.manager) {
+        this.getDataTable.filter((item) => {
+          if (item.manager.check.value === this.selected.manager.value) {
+            this.sortedFilter.push(item);
+          }
+        });
+      }
+      this.$emit("sortedFilter", this.sortedFilter);
+    },
+    selectClient() {
+      this.sortedFilter = [];
+      if (this.selected.client) {
+        this.getDataTable.filter((item) => {
+          if (item.client.check.value === this.selected.client.value) {
+            this.sortedFilter.push(item);
+          }
+        });
+      }
+      this.$emit("sortedFilter", this.sortedFilter);
     },
     resetFilters() {
       this.selected.tag = null;
@@ -226,10 +321,11 @@ export default {
       this.sortedFilter = [];
       this.arrayCheckboxUser = [];
       this.checkboxUser = false;
+      this.$emit("sortedFilter", this.sortedFilter);
       this.$emit("arrayCheckboxUser", this.arrayCheckboxUser);
       this.$emit("selected", this.selected);
     },
-    
+
     changeCheckBox(chek) {
       if (chek) {
         let arr = [];
