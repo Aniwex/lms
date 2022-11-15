@@ -1,5 +1,5 @@
 <template>
-  <div v-if="LocalStorageProject !== null || getProject">
+  <div v-if="LocalStorageProject || getProject">
     <div class="text-center" v-if="!getDataTable || !user">
       <b-button variant="primary" disabled class="mr-1">
         <b-spinner small />

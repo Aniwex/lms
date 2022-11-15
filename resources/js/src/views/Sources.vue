@@ -86,16 +86,11 @@
           <span class="text-nowrap">{{ props.row.code }}</span>
         </span>
         <!-- Column: Source_data -->
-        <span
-          v-else-if="props.column.field === 'source_data'"
-          class="text-nowrap db__tc"
-        >
-          <div
-            v-for="(data, index) in props.row.data"
-            :key="index"
-            class="text-nowrap"
-          >
-            <span v-if="data.message">{{ data.message }}</span>
+        <span v-else-if="props.column.field === 'source_data'" class="db__tc">
+          <div v-for="(data, index) in props.row.data" :key="index" class="">
+            <span style="word-break: break-all" v-if="data.message">{{
+              data.message
+            }}</span>
             <span v-else>{{ data }}</span>
           </div>
         </span>
@@ -213,7 +208,7 @@
                 <div v-for="(f, index) in fields" :key="index">
                   <div v-if="f.type === 'text'">
                     <b-form-group
-                      v-if="f.key === 'roistat_id'"
+                      v-if="fields.length !== 4"
                       label-cols="4"
                       label-cols-lg="2"
                       :label="f.value"
@@ -226,22 +221,6 @@
                         v-model="value__input"
                         type="text"
                         placeholder="roistat_id"
-                      />
-                    </b-form-group>
-                    <b-form-group
-                      v-if="f.key === 'quiz_id'"
-                      label-cols="4"
-                      label-cols-lg="2"
-                      :label="f.name"
-                      label-for="input-lg"
-                      style="width: 400px"
-                    >
-                      <b-form-input
-                        class="row__user-input"
-                        style="margin-left: 10px"
-                        v-model="value__input"
-                        type="text"
-                        placeholder="quiz_id"
                       />
                     </b-form-group>
                     <b-form-group
@@ -426,6 +405,7 @@ export default {
           label: "Данные по источнику",
           field: "source_data",
           thClass: "columnCenter",
+          width: "700px",
         },
       ],
       swiperOptions: {
@@ -491,6 +471,7 @@ export default {
             this.tempFields.push(response.data.fields);
           })
           .catch((error) => {});
+        console.log(this.tempFields);
       }
       if (item === "Удалить") {
         this.modalObject = row;
