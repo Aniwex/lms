@@ -490,11 +490,7 @@ export default {
           .then((response) => {
             this.tempFields.push(response.data.fields);
           })
-          .catch((error) => {
-            console.log(error);
-          });
-        console.log(this.tempFields[0].length);
-        console.log(this.tempFields[0]);
+          .catch((error) => {});
       }
       if (item === "Удалить") {
         this.modalObject = row;
@@ -506,7 +502,6 @@ export default {
     },
     async saveModal() {
       try {
-        console.log([this.tempFields[0][0].key]);
         await axios
           .put(
             " api/projects/" +
@@ -530,11 +525,8 @@ export default {
             this.$store.dispatch("getSourceTable");
             this.$refs["modal__window"].hide();
           })
-          .catch((error) => {
-            console.log(error.response.data);
-          });
+          .catch((error) => {});
       } catch (error) {
-        console.log(error);
         const vNodesMsg = [`${error}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,

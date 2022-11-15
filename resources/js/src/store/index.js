@@ -113,11 +113,11 @@ export default new Vuex.Store({
                 .get("api/projects/" + ctx.getters.project.id + "/claims")
                 .then((response) => {
                     let claims = response.data.claims;
-                    console.log(claims);
+                    
                     ctx.commit("SET_CLAIMS", claims);
                 })
                 .catch((err) => {
-                    console.log(err.response.data);
+                    
                 });
         },
         getIntegrationTable: async (ctx) => {
@@ -128,7 +128,7 @@ export default new Vuex.Store({
                     ctx.commit("SET_INTEGRATIONS", integrations);
                 })
                 .catch((err) => {
-                    console.log(err.response.data);
+                    
                 });
         },
         SET_USER: async (ctx) => {

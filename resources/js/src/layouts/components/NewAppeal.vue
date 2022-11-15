@@ -316,7 +316,7 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-            console.log(this.errors);
+          
           });
       } catch (error) {
         const vNodesMsg = [`${error}`];
@@ -367,11 +367,11 @@ export default {
             })
             .catch((error) => {
               this.errors = error.response.data.errors;
-              console.log(this.errors);
+              
             });
         }
       } catch (error) {
-        console.log(error);
+       
         const vNodesMsg = [`${error}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,

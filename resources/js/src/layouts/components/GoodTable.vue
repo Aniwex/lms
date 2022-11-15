@@ -791,12 +791,11 @@ export default {
   },
   methods: {
     async selectProject(project) {
-      await localStorage.setItem("project", JSON.stringify(project));
       await this.$store.commit("SET_PROJECT", project);
+      await localStorage.setItem("project", JSON.stringify(project));
       await this.$store.dispatch("getDataTable");
       await this.$store.dispatch("getSourceTable");
       await this.$store.dispatch("getTagsTable");
-      this.$bvModal.hide("modal__seeProject");
     },
     //modalSeeProject
     quantity_minus() {
@@ -863,7 +862,6 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-            console.log(this.errors);
             const vNodesMsg = [`${error.response.data.error}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
@@ -899,11 +897,8 @@ export default {
                   )
                   .then(() => {
                     this.$store.dispatch("getDataTable");
-                    console.log(item);
                   })
-                  .catch((error) => {
-                    console.log(error.response.data);
-                  });
+                  .catch((error) => {});
               }
             });
           });
@@ -1221,18 +1216,18 @@ export default {
         return this.checkboxUser;
       }
       if (this.sortedFilter.length) {
-        // const filteredRows = this.sortedFilter.filter((row) => {
-        //   let flag = true;
-        //   for (const [key, value] of Object.entries(this.selected)) {
-        //     if (!!value && !row[key].includes(value)) {
-        //       // если value фильтра истинно (то есть не равно ни null, ни 0) и если то же поле в строке (с тем же ключом что и в фильтре) не содержит значение фильтра...
-        //       flag = false; // ... то флаг = false...
-        //       break; // ... и цикл прерывается
-        //     }
-        //   }
-        //   return flag; // возвращаем флаг, если флаг == false - строка не проходит фильтрацию
-        // });
-        return this.sortedFilter;
+        const filteredRows = this.sortedFilter.filter((row) => {
+          let flag = true;
+          for (const [key, value] of Object.entries(this.selected)) {
+            if (!!value && !row[key] === value) {
+              // если value фильтра истинно (то есть не равно ни null, ни 0) и если то же поле в строке (с тем же ключом что и в фильтре) не содержит значение фильтра...
+              flag = false; // ... то флаг = false...
+              break; // ... и цикл прерывается
+            }
+          }
+          return flag; // возвращаем флаг, если флаг == false - строка не проходит фильтрацию
+        });
+        return filteredRows;
       }
 
       return this.getDataTable;

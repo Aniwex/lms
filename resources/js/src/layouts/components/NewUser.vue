@@ -203,7 +203,7 @@ export default {
             .catch((error) => {
               this.enter = false;
               this.errors = error.response.data.errors;
-              console.log(this.errors);
+           
               const vNodesMsg = [`${error.response.data.error}`];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
@@ -244,12 +244,13 @@ export default {
               this.login = "";
               this.password = "";
               this.role = "";
+              this.errors = {};
               this.project = [];
             })
             .catch((error) => {
               this.enter = false;
               this.errors = error.response.data.errors;
-              console.log(this.errors);
+            
               const vNodesMsg = [`${error.response.data.errors}`];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,

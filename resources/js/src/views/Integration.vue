@@ -478,7 +478,7 @@ export default {
             this.$refs["modal__window"].hide();
           })
           .catch((error) => {
-            console.log(error.response.data);
+            
             const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
@@ -525,7 +525,7 @@ export default {
                     })
                     .catch((error) => {
                       this.errors = error.response.data;
-                      console.log(error.response.data.errors);
+                  
                       const vNodesMsg = [
                         `${Object.values(error.response.data.errors)}`,
                       ];
@@ -568,14 +568,22 @@ export default {
           this.rowSelection.filter((item) => {
             this.rowsIntegration.filter((index, i) => {
               if (item.id === index.id) {
-                axios.delete("/api/integrations/" + item.id).then(() => {
-                  this.$store.dispatch("getIntegrationTable");
-                });
+                axios
+                  .delete("/api/integrations/" + item.id)
+                  .then(() => {
+                    this.$store.dispatch("getIntegrationTable");
+                  })
+                  .catch((error) => {
+                    this.errors = error.response.data;
+                    
+                  });
               }
             });
           });
         }
-      } catch (error) {}
+      } catch (error) {
+        
+      }
     },
   },
   computed: {

@@ -558,7 +558,7 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-            console.log(error.response.data.errors);
+           
             const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,

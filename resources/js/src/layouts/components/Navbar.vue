@@ -175,6 +175,7 @@ export default {
   methods: {
     async selectProject(project) {
       await this.$store.commit("SET_PROJECT", project);
+      await localStorage.setItem("project", JSON.stringify(project));
       await this.$store.dispatch("getDataTable");
       await this.$store.dispatch("getSourceTable");
       await this.$store.dispatch("getTagsTable");

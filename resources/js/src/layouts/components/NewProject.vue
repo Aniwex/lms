@@ -254,6 +254,9 @@ export default {
           .then(() => {
             this.$store.dispatch("SET_PROJECTS");
             this.$router.push("/Projects");
+          })
+          .catch(() => {
+            this.errors = error.response.data.errors;
           });
         await this.$store.dispatch("SET_USER");
       } catch (error) {
@@ -295,6 +298,7 @@ export default {
             this.name = "";
             this.domain = "";
             this.users = [];
+            this.errors = {};
           });
 
         this.enterAndAdd = false;

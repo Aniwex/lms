@@ -441,6 +441,7 @@ export default {
 
     async getDataUser() {
       await this.$store.dispatch("getDataUsers");
+      await this.$store.dispatch("SET_PROJECTS");
       await axios.get("/sanctum/csrf-cookie").then((response) => {
         axios
           .get("api/user")
@@ -468,9 +469,7 @@ export default {
                 this.$store.commit("SET_ENTERED", false);
               });
             } else {
-              const vNodesMsg = [
-                `${Object.values(error.response.data.errors)}`,
-              ];
+              const vNodesMsg = [`${error}`];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
                 variant: "danger",
@@ -611,14 +610,14 @@ export default {
                     this.$store.dispatch("SET_PROJECTS");
                   })
                   .catch((error) => {
-                    console.log(error.response.data);
+                    
                   });
               }
             });
           });
         }
       } catch (error) {
-        console.log(error);
+        
       }
     },
   },
@@ -641,7 +640,6 @@ export default {
     },
   },
   created() {
-    this.$store.dispatch("SET_PROJECTS");
     this.getDataUser();
   },
 };

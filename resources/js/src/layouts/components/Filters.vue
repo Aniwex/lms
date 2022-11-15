@@ -268,12 +268,8 @@ export default {
     },
     selectedDuration() {
       this.sortedFilter = [];
-      let tempDuration = Number(this.selected.duration);
-      this.getDataTable.map((item, call) => {
-        call = item.duration.original;
-        call = Number(call);
-        console.log(typeof call);
-        if (call === tempDuration) {
+      this.getDataTable.map((item) => {
+        if (Number(item.duration.original) === Number(this.selected.duration)) {
           this.sortedFilter.push(item);
         }
       });

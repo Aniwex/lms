@@ -479,13 +479,16 @@ export default {
               localStorage.setItem("project", JSON.stringify(this.project[0]));
               this.$store.dispatch("SET_USER");
               this.$store.commit("SET_PROJECT", this.project[0]);
+              this.$refs["modal__window"].hide();
             }
           })
           .catch((error) => {
             this.errors = error.response.data;
-            console.log(error.response.data);
+            
           });
-      } catch (error) {}
+      } catch (error) {
+        
+      }
     },
     async deleteModal() {
       try {
