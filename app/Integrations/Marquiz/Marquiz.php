@@ -18,7 +18,7 @@ class Marquiz extends BaseIntegration
             [
                 'type'        => 'text',
                 'key'         => 'quiz_id',
-                'name'        => 'QUIZ ID',
+                'value'       => 'QUIZ ID',
                 'description' => 'Идентификатор квиза. Извлекается из урла на странице с квизом. Например: https://panel.marquiz.ru/quizzes/607444fda3f3f400447a0482/edit'
             ]
         ];
