@@ -86,7 +86,6 @@ export default new Vuex.Store({
 
                 .then((response) => {
                     let sources = response.data.sources;
-                    console.log(sources);
                     ctx.commit("SET_SOURCES", sources);
                 });
         },

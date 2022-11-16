@@ -88,7 +88,8 @@
         <!-- Column: Source_data -->
         <span v-else-if="props.column.field === 'source_data'" class="db__tc">
           <div v-for="(data, index) in props.row.data" :key="index" class="">
-            <span>{{ data }}</span>
+            <span v-if="data.message">{{ data.message }}</span>
+            <span v-else>{{ data }}</span>
           </div>
         </span>
         <span v-else-if="props.column.field === 'action'">
