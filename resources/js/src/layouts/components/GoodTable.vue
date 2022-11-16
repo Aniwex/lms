@@ -507,7 +507,7 @@
                 v-model="modalObject.manager.comment"
               />
             </div>
-            <div v-if="user.role.id === 1" class="row__tag-lables">
+            <div class="row__tag-lables">
               <label class="row__lables-label">Проверка клиента</label>
               <multiselect
                 v-model="client__check"
@@ -749,7 +749,6 @@ export default {
         {
           label: "Действие",
           field: "Действие",
-          width: "120px",
           thClass: "columnCenter",
         },
       ],
@@ -1166,7 +1165,7 @@ export default {
       });
     },
     async verifyLocalStorage() {
-      if (this.LocalStorageProject !== null) {
+      if (this.LocalStorageProject) {
         await this.$store.commit("SET_PROJECT", this.LocalStorageProject);
         await this.$store.dispatch("getDataTable");
         await this.$store.dispatch("getSourceTable");

@@ -558,7 +558,7 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-           
+
             const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
@@ -599,6 +599,14 @@ export default {
                     )
                     .then(() => {
                       this.$store.dispatch("getTagsTable");
+                      this.$swal({
+                        icon: "success",
+                        title: "Удалено!",
+                        text: "Обращение было удалено.",
+                        customClass: {
+                          confirmButton: "btn btn-success",
+                        },
+                      });
                     })
                     .catch((error) => {
                       const vNodesMsg = [
@@ -614,14 +622,6 @@ export default {
                       });
                     });
                 }
-              });
-              this.$swal({
-                icon: "success",
-                title: "Удалено!",
-                text: "Обращение было удалено.",
-                customClass: {
-                  confirmButton: "btn btn-success",
-                },
               });
             }
           } else if (result.dismiss === "cancel") {

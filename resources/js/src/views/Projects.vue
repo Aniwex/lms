@@ -531,7 +531,7 @@ export default {
     async deleteModal() {
       try {
         this.$swal({
-          role: "Вы согласны удалить проект?",
+          title: "Вы согласны удалить проект?",
           text: "Это действие необратимо!",
           icon: "warning",
           showCancelButton: true,
@@ -609,16 +609,12 @@ export default {
                   .then(() => {
                     this.$store.dispatch("SET_PROJECTS");
                   })
-                  .catch((error) => {
-                    
-                  });
+                  .catch((error) => {});
               }
             });
           });
         }
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     },
   },
   computed: {

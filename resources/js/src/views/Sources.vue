@@ -88,10 +88,7 @@
         <!-- Column: Source_data -->
         <span v-else-if="props.column.field === 'source_data'" class="db__tc">
           <div v-for="(data, index) in props.row.data" :key="index" class="">
-            <span style="word-break: break-all" v-if="data.message">{{
-              data.message
-            }}</span>
-            <span v-else>{{ data }}</span>
+            <span>{{ data }}</span>
           </div>
         </span>
         <span v-else-if="props.column.field === 'action'">
@@ -173,14 +170,19 @@
         <h3 class="see-project__read">Данные для редактирования</h3>
         <div class="container__see-project">
           <div class="row__lables">
-            <div class="row__date-lables" v-if="modalObject.integration">
+            <div class="row__date-lables" v-if="getIntegrationTable">
               <label class="row__lables-label">Интеграция</label>
-              <b-form-input
-                class="row__user-input"
-                v-model="modalObject.integration.title"
-                type="text"
-                placeholder="Интеграция"
-              />
+              <multiselect
+                class="multiselect-input"
+                v-model="modalObject.integration"
+                :options="getIntegrationTable"
+                label="title"
+                track-by="title"
+                placeholder="Выберите интеграцию"
+                selectLabel="Нажмите enter для выбора"
+                deselectLabel="Нажмите enter для удаления"
+              >
+              </multiselect>
             </div>
             <div class="row__date-lables">
               <label class="row__lables-label">Название</label>
@@ -208,7 +210,6 @@
                 <div v-for="(f, index) in fields" :key="index">
                   <div v-if="f.type === 'text'">
                     <b-form-group
-                      v-if="fields.length !== 4"
                       label-cols="4"
                       label-cols-lg="2"
                       :label="f.value"
@@ -218,41 +219,9 @@
                       <b-form-input
                         class="row__user-input"
                         style="margin-left: 10px"
-                        v-model="value__input"
+                        v-model="value__input[f.key]"
                         type="text"
                         placeholder="roistat_id"
-                      />
-                    </b-form-group>
-                    <b-form-group
-                      v-if="f.key === 'api_key'"
-                      label-cols="4"
-                      label-cols-lg="2"
-                      :label="f.value"
-                      label-for="input-lg"
-                      style="width: 400px"
-                    >
-                      <b-form-input
-                        class="row__user-input"
-                        style="margin-left: 10px"
-                        v-model="api_key"
-                        type="text"
-                        placeholder="api_key"
-                      />
-                    </b-form-group>
-                    <b-form-group
-                      v-if="f.key === 'api_secret'"
-                      label-cols="4"
-                      label-cols-lg="2"
-                      :label="f.value"
-                      label-for="input-lg"
-                      style="width: 400px"
-                    >
-                      <b-form-input
-                        class="row__user-input"
-                        style="margin-left: 10px"
-                        v-model="api_secret"
-                        type="text"
-                        placeholder="api_secret"
                       />
                     </b-form-group>
                   </div>
@@ -371,8 +340,6 @@ export default {
     return {
       rowsSource: [],
       user: "",
-      api_key: "",
-      api_secret: "",
       errors: {},
       rowSelection: [],
       modalObject: [],
@@ -432,6 +399,7 @@ export default {
       if (!this.$store.getters.project) {
         this.$router.push("/Home");
       } else {
+        await this.$store.dispatch("getIntegrationTable");
         await axios.get("/sanctum/csrf-cookie").then((response) => {
           axios.get("api/user ").then((response) => {
             this.user = response.data;
@@ -469,6 +437,9 @@ export default {
           )
           .then((response) => {
             this.tempFields.push(response.data.fields);
+            if (this.modalObject.data) {
+              this.value__input = this.modalObject.data;
+            }
           })
           .catch((error) => {});
         console.log(this.tempFields);
@@ -495,10 +466,15 @@ export default {
               code: this.modalObject.code,
               data:
                 this.tempFields[0].length !== 4
-                  ? { [this.tempFields[0][0].key]: this.value__input }
+                  ? {
+                      [this.tempFields[0][0].key]:
+                        this.value__input[this.tempFields[0][0].key],
+                    }
                   : {
-                      [this.tempFields[0][0].key]: this.api_key,
-                      [this.tempFields[0][1].key]: this.api_secret,
+                      [this.tempFields[0][0].key]:
+                        this.value__input[this.tempFields[0][0].key],
+                      [this.tempFields[0][1].key]:
+                        this.value__input[this.tempFields[0][1].key],
                     },
             }
           )
@@ -534,41 +510,7 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.getDataSources.length) {
-            this.getDataSources.filter((index, i) => {
-              if (index.id === this.modalObject.id) {
-                axios
-                  .delete(
-                    "api/projects/" +
-                      this.project.id +
-                      "/sources/" +
-                      this.modalObject.id
-                  )
-                  .then(() => {
-                    this.$store.dispatch("getSourceTable");
-                    this.$swal({
-                      icon: "success",
-                      title: "Удалено!",
-                      text: "Источник был удалён.",
-                      customClass: {
-                        confirmButton: "btn btn-success",
-                      },
-                    });
-                  })
-                  .catch((error) => {
-                    const vNodesMsg = [`${Object.values(error.response.data)}`];
-                    this.$bvToast.toast([vNodesMsg], {
-                      title: `Ошибка`,
-                      variant: "danger",
-                      solid: true,
-                      appendToast: true,
-                      toaster: "b-toaster-top-center",
-                      autoHideDelay: 3000,
-                    });
-                  });
-              }
-            });
-          } else if (result.dismiss === "cancel") {
+          if (result.dismiss === "cancel") {
             this.$swal({
               title: "Отмена",
               text: "Удаление источника было отменено",
@@ -577,6 +519,44 @@ export default {
                 confirmButton: "btn btn-success",
               },
             });
+          } else {
+            if (this.getDataSources.length) {
+              this.getDataSources.filter((index, i) => {
+                if (index.id === this.modalObject.id) {
+                  axios
+                    .delete(
+                      "api/projects/" +
+                        this.project.id +
+                        "/sources/" +
+                        this.modalObject.id
+                    )
+                    .then(() => {
+                      this.$store.dispatch("getSourceTable");
+                      this.$swal({
+                        icon: "success",
+                        title: "Удалено!",
+                        text: "Источник был удалён.",
+                        customClass: {
+                          confirmButton: "btn btn-success",
+                        },
+                      });
+                    })
+                    .catch((error) => {
+                      const vNodesMsg = [
+                        `${Object.values(error.response.data)}`,
+                      ];
+                      this.$bvToast.toast([vNodesMsg], {
+                        title: `Ошибка`,
+                        variant: "danger",
+                        solid: true,
+                        appendToast: true,
+                        toaster: "b-toaster-top-center",
+                        autoHideDelay: 3000,
+                      });
+                    });
+                }
+              });
+            }
           }
         });
       } catch (error) {}
@@ -634,6 +614,9 @@ export default {
     getProject() {
       this.project = this.$store.getters.project;
       return this.$store.getters.project;
+    },
+    getIntegrationTable() {
+      return this.$store.getters.getIntegrations;
     },
   },
   created() {

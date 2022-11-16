@@ -484,16 +484,13 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data;
-            
           });
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     },
     async deleteModal() {
       try {
         this.$swal({
-          role: "Вы согласны удалить пользователя?",
+          title: "Вы согласны удалить пользователя?",
           text: "Это действие необратимо!",
           icon: "warning",
           showCancelButton: true,
@@ -505,45 +502,47 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.$store.getters.getUsers.length) {
-            this.$store.getters.getUsers.filter((index, i) => {
-              if (index.id === this.modalObject.id) {
-                axios
-                  .delete("/api/users/" + this.modalObject.id)
-                  .then(() => this.$store.dispatch("getDataUsers"))
-                  .then(() => {
-                    if (result.value) {
-                      this.$swal({
-                        icon: "success",
-                        role: "Удалено!",
-                        text: "Пользователь был удален.",
-                        customClass: {
-                          confirmButton: "btn btn-success",
-                        },
-                      });
-                    } else if (result.dismiss === "cancel") {
-                      this.$swal({
-                        role: "Отмена",
-                        text: "Удаление пользователя было отменено",
-                        icon: "error",
-                        customClass: {
-                          confirmButton: "btn btn-success",
-                        },
-                      });
-                    }
-                  })
-                  .catch(() => {
-                    this.$bvToast.toast("Удалять супер админа запрещено", {
-                      title: `Ошибка`,
-                      variant: "danger",
-                      solid: true,
-                      appendToast: true,
-                      toaster: "b-toaster-top-center",
-                      autoHideDelay: 2000,
-                    });
-                  });
-              }
+          if (result.dismiss === "cancel") {
+            this.$swal({
+              role: "Отмена",
+              text: "Удаление пользователя было отменено",
+              icon: "error",
+              customClass: {
+                confirmButton: "btn btn-success",
+              },
             });
+          } else {
+            if (this.$store.getters.getUsers.length) {
+              this.$store.getters.getUsers.filter((index, i) => {
+                if (index.id === this.modalObject.id) {
+                  axios
+                    .delete("/api/users/" + this.modalObject.id)
+                    .then(() => this.$store.dispatch("getDataUsers"))
+                    .then(() => {
+                      if (result.value) {
+                        this.$swal({
+                          icon: "success",
+                          role: "Удалено!",
+                          text: "Пользователь был удален.",
+                          customClass: {
+                            confirmButton: "btn btn-success",
+                          },
+                        });
+                      }
+                    })
+                    .catch(() => {
+                      this.$bvToast.toast("Удалять супер админа запрещено", {
+                        title: `Ошибка`,
+                        variant: "danger",
+                        solid: true,
+                        appendToast: true,
+                        toaster: "b-toaster-top-center",
+                        autoHideDelay: 2000,
+                      });
+                    });
+                }
+              });
+            }
           }
         });
       } catch (error) {}

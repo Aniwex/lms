@@ -86,7 +86,7 @@ export default new Vuex.Store({
 
                 .then((response) => {
                     let sources = response.data.sources;
-
+                    console.log(sources);
                     ctx.commit("SET_SOURCES", sources);
                 });
         },
@@ -113,12 +113,10 @@ export default new Vuex.Store({
                 .get("api/projects/" + ctx.getters.project.id + "/claims")
                 .then((response) => {
                     let claims = response.data.claims;
-                    
+
                     ctx.commit("SET_CLAIMS", claims);
                 })
-                .catch((err) => {
-                    
-                });
+                .catch((err) => {});
         },
         getIntegrationTable: async (ctx) => {
             await axios
@@ -127,9 +125,7 @@ export default new Vuex.Store({
                     let integrations = response.data.integrations;
                     ctx.commit("SET_INTEGRATIONS", integrations);
                 })
-                .catch((err) => {
-                    
-                });
+                .catch((err) => {});
         },
         SET_USER: async (ctx) => {
             await axios.get("/sanctum/csrf-cookie").then((response) => {
