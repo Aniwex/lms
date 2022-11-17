@@ -184,6 +184,7 @@ export default {
             password: this.password,
           })
           .then((resp) => {
+            this.$store.commit("SET_PROJECT", "");
             localStorage.setItem(
               "x_xsrf_token",
               resp.config.headers["X-XSRF-TOKEN"]
