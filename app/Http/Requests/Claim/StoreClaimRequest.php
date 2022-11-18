@@ -42,6 +42,8 @@ class StoreClaimRequest extends Request
     {
         return [
             'phone.regex' => 'Указан ненастоящий номер телефона',
+            'source_id.required' => 'Укажите источник обращения',
+            'source_id.exists' => 'Укажите существующий источник обращения'
         ];
     }
 }

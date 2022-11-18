@@ -19,8 +19,8 @@ class StoreUserRequest extends Request
     public function rules()
     {
         return [
-            'login' => ['string', 'required', 'unique:users', 'max:255', new Slug],
-            'password' => ['string', 'required', 'max:255', new Slug],
+            'login' => ['required', 'string', 'unique:users', 'max:255', new Slug],
+            'password' => ['required', 'string', 'max:255', new Slug],
             'role_id' => ['integer', 'exists:roles,id'],
             'projects' => ['array', 'nullable'],
             'projects.*' => ['integer', Rule::exists('projects', 'id')]

@@ -88,7 +88,10 @@ class Zadarma extends BaseIntegration
                             Source::whereIntegrationId($this->integration->id)->whereJsonContains('data->phone', $item['number'])->count() == 0
                             || (isset($this->source->data['phone']) && $this->source->data['phone'] == $item['number'])
                         ) {
-                            $options[$item['number']] = phone($item['number']) . ' (' . $item['number_name'] . ')';
+                            $options[] = [
+                                'value' => $item['number'],
+                                'label' => phone($item['number']) . ' (' . $item['number_name'] . ')'
+                            ];
                         }
                     }
                 }
