@@ -35,7 +35,9 @@
                 class="input__number form-control"
                 v-model="selected.duration"
                 type="number"
-                :state="selected.duration !== 0"
+                :class="{
+                  validation__input: errors.duration ? true : false,
+                }"
               />
               <b-button
                 v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -97,7 +99,9 @@
               placeholder="+7 (999) 999-99-99"
               v-model="phone"
               v-mask="'+7 (###) ###-##-##'"
-              :state="phone === '' || phone === null ? false : true"
+              :class="{
+                validation__input: errors.phone ? true : false,
+              }"
             />
             <span style="color: red" class="db__tc" v-if="errors.phone">
               <span v-for="(err, index) in errors.phone" :key="index">{{
@@ -316,7 +320,6 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-          
           });
       } catch (error) {
         const vNodesMsg = [`${error}`];
@@ -367,11 +370,9 @@ export default {
             })
             .catch((error) => {
               this.errors = error.response.data.errors;
-              
             });
         }
       } catch (error) {
-       
         const vNodesMsg = [`${error}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,

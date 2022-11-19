@@ -18,7 +18,9 @@
               class="row__user-input"
               v-model="domain"
               type="text"
-              :state="domain !== ''"
+              :class="{
+                validation__input: errors.domain ? true : false,
+              }"
               :placeholder="errors.domain ? errors.domain[0] : 'Главный домен'"
             />
             <span style="color: red" class="db__tc" v-if="errors.domain">
@@ -234,8 +236,11 @@ export default {
         });
     },
     async addProject() {
+      if (this.domain === undefined) {
+        this.domain = "";
+      }
+      console.log(this.domain);
       try {
-        this.enter = true;
         let tempUserId = [];
         let tempArrayMirrow = [];
         this.users.filter((item) => {
@@ -247,24 +252,34 @@ export default {
         await axios
           .post("/api/projects", {
             name: this.name,
-            mirrows: tempArrayMirrow,
+            mirrows: tempArrayMirrow[0] === "" ? [] : tempArrayMirrow,
             domain: this.domain,
             users: tempUserId,
           })
           .then(() => {
+            this.enter = true;
             this.$store.dispatch("SET_PROJECTS");
             this.$router.push("/Projects");
           })
-          .catch(() => {
+          .catch((error) => {
             this.errors = error.response.data.errors;
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
           });
         await this.$store.dispatch("SET_USER");
       } catch (error) {
         this.enter = false;
-        this.errors = error.response.data.errors;
+        //this.errors = error.response.data.errors;
         const vNodesMsg = [`${error.response.data.error}`];
         this.$bvToast.toast([vNodesMsg], {
-          name: `Ошибка`,
+          title: `Ошибка`,
           variant: "danger",
           solid: true,
           appendToast: true,

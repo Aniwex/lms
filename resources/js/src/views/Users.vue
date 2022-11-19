@@ -530,14 +530,15 @@ export default {
                         });
                       }
                     })
-                    .catch(() => {
-                      this.$bvToast.toast("Удалять супер админа запрещено", {
+                    .catch((error) => {
+                      const vNodesMsg = [`${error.response.data.error}`];
+                      this.$bvToast.toast([vNodesMsg], {
                         title: `Ошибка`,
                         variant: "danger",
                         solid: true,
                         appendToast: true,
                         toaster: "b-toaster-top-center",
-                        autoHideDelay: 2000,
+                        autoHideDelay: 3000,
                       });
                     });
                 }

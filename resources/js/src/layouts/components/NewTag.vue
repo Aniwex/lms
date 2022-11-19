@@ -10,7 +10,9 @@
               v-model="name"
               objective="text"
               placeholder="Название"
-              :state="name !== ''"
+              :class="{
+                validation__input: errors.name ? true : false,
+              }"
             />
             <span style="color: red" class="db__tc" v-if="errors.name">
               <span v-for="(err, index) in errors.name" :key="index"
@@ -197,7 +199,7 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-            
+
             const vNodesMsg = [`${error.response.data.error}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,

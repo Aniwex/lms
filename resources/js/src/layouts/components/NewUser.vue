@@ -45,8 +45,8 @@
             deselectLabel="Нажмите enter для удаления"
             selectedLabel="Выбрано"
             class="multiselect-input"
-            label="id"
-            track-by="id"
+            label="title"
+            track-by="title"
             placeholder="Выберите роль"
           >
           </multiselect>
@@ -203,7 +203,7 @@ export default {
             .catch((error) => {
               this.enter = false;
               this.errors = error.response.data.errors;
-           
+
               const vNodesMsg = [`${error.response.data.error}`];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,
@@ -250,7 +250,7 @@ export default {
             .catch((error) => {
               this.enter = false;
               this.errors = error.response.data.errors;
-            
+
               const vNodesMsg = [`${error.response.data.errors}`];
               this.$bvToast.toast([vNodesMsg], {
                 title: `Ошибка`,

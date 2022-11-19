@@ -218,9 +218,14 @@
                           modalObject.mirrows[index] === '' ? false : true
                         "
                       />
-                      <span class="db__tc" v-if="errors['mirrows.' + index]">{{
-                        errors["mirrows." + index][0]
-                      }}</span>
+                      <span v-if="modalObject.mirrows[index] === ''"
+                        ><span
+                          style="color: red"
+                          class="db__tc"
+                          v-if="errors['mirrows.' + index]"
+                          >{{ errors["mirrows." + index][0] }}</span
+                        >
+                      </span>
                     </b-form-group>
                     <hr />
                     <!-- Добавить Button -->
@@ -266,7 +271,7 @@
               <label class="row__lables-label">Пользователи</label>
               <multiselect
                 onclick="this.querySelector('input').focus();"
-                class="multiselect-input"
+                class="multiselect-input multiselect-margin"
                 v-model="users"
                 :options="getUsers"
                 :multiple="true"
@@ -543,8 +548,8 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.rowsProjects.length) {
-            this.rowsProjects.filter((index, i) => {
+          if (this.getProjects.length) {
+            this.getProjects.filter((index, i) => {
               if (index.id === this.modalObject.id) {
                 axios
                   .delete("/api/projects/" + this.modalObject.id)

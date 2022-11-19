@@ -225,7 +225,7 @@
               />
             </div>
             <div class="row__source-lables">
-              <label class="row__lables-label">Тип</label>
+              <label class="row__lables-label">Целевой(да/нет)</label>
               <b-form-checkbox
                 v-model="modalObject.objective"
                 class="form__checkbox"
@@ -249,9 +249,14 @@
                   v-model="modalObject.client_plus_words"
                   :state="modalObject.client_plus_words !== ''"
                 />
-                <span class="db__tc" v-if="errors['client_plus_words.' + 0]">{{
-                  errors["client_plus_words." + 0][0]
-                }}</span>
+                <span v-if="modalObject.client_plus_words === ''"
+                  ><span
+                    style="color: red"
+                    class="db__tc"
+                    v-if="errors['client_plus_words.' + 0]"
+                    >{{ errors["client_plus_words." + 0][0] }}</span
+                  ></span
+                >
               </div>
             </div>
             <div class="row__source-lables">
@@ -270,9 +275,14 @@
                   v-model="modalObject.client_minus_words"
                   :state="modalObject.client_minus_words !== ''"
                 />
-                <span class="db__tc" v-if="errors['client_minus_words.' + 0]">{{
-                  errors["client_minus_words." + 0][0]
-                }}</span>
+                <span v-if="modalObject.client_minus_words === ''"
+                  ><span
+                    style="color: red"
+                    class="db__tc"
+                    v-if="errors['client_minus_words.' + 0]"
+                    >{{ errors["client_minus_words." + 0][0] }}</span
+                  ></span
+                >
               </div>
             </div>
             <div class="row__source-lables">
@@ -291,10 +301,13 @@
                   v-model="modalObject.operator_plus_words"
                   :state="modalObject.operator_plus_words !== ''"
                 />
-                <span
-                  class="db__tc"
-                  v-if="errors['operator_plus_words.' + 0]"
-                  >{{ errors["operator_plus_words." + 0][0] }}</span
+                <span v-if="modalObject.operator_plus_words === ''"
+                  ><span
+                    style="color: red"
+                    class="db__tc"
+                    v-if="errors['operator_plus_words.' + 0]"
+                    >{{ errors["operator_plus_words." + 0][0] }}</span
+                  ></span
                 >
               </div>
             </div>
@@ -314,10 +327,13 @@
                   v-model="modalObject.operator_minus_words"
                   :state="modalObject.operator_minus_words !== ''"
                 />
-                <span
-                  class="db__tc"
-                  v-if="errors['operator_minus_words.' + 0]"
-                  >{{ errors["operator_minus_words." + 0][0] }}</span
+                <span v-if="modalObject.operator_minus_words === ''"
+                  ><span
+                    style="color: red"
+                    class="db__tc"
+                    v-if="errors['operator_minus_words.' + 0]"
+                    >{{ errors["operator_minus_words." + 0][0] }}</span
+                  ></span
                 >
               </div>
             </div>
@@ -428,7 +444,7 @@ export default {
           thClass: "columnCenter",
         },
         {
-          label: "Тип",
+          label: "Целевой(да/нет)",
           field: "objective",
           thClass: "columnCenter",
         },
@@ -558,8 +574,7 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-
-            const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
+            const vNodesMsg = [`${error.response.data.error}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
               variant: "danger",
@@ -602,7 +617,7 @@ export default {
                       this.$swal({
                         icon: "success",
                         title: "Удалено!",
-                        text: "Обращение было удалено.",
+                        text: "Тэг был удалён.",
                         customClass: {
                           confirmButton: "btn btn-success",
                         },

@@ -85,11 +85,12 @@
         >
           <span class="text-nowrap">{{ props.row.code }}</span>
         </span>
+
         <!-- Column: Source_data -->
         <span v-else-if="props.column.field === 'source_data'" class="db__tc">
           <div v-for="(data, index) in props.row.data" :key="index" class="">
             <span v-if="data.message">{{ data.message }}</span>
-            <span v-else>{{ data }}</span>
+            <span v-else>{{ index }}: {{ data }}</span>
           </div>
         </span>
         <span v-else-if="props.column.field === 'action'">
@@ -174,7 +175,7 @@
             <div class="row__date-lables" v-if="getIntegrationTable">
               <label class="row__lables-label">Интеграция</label>
               <multiselect
-                class="multiselect-input"
+                class="multiselect-input multiselect-margin"
                 v-model="modalObject.integration"
                 :options="getIntegrationTable"
                 label="title"
@@ -219,12 +220,15 @@
                     >
                       <b-form-input
                         class="row__user-input"
-                        style="margin-left: 10px"
+                        style="margin-left: 10px; margin-top: 0"
                         v-model="value__input[f.key]"
                         type="text"
                         placeholder="roistat_id"
                       />
                     </b-form-group>
+                    <span class="db__tc" v-if="f.description">{{
+                      f.description
+                    }}</span>
                   </div>
                   <div v-else-if="f.type === 'select'">
                     <b-form-group
@@ -234,7 +238,7 @@
                       label-for="input-lg"
                       style="width: 400px"
                     >
-                      <multiselect
+                      <!-- <multiselect
                         v-model="f.value"
                         onclick="this.querySelector('input').focus();"
                         :options="f.options"
@@ -245,7 +249,7 @@
                         placeholder="Выберите источник"
                         :showLabels="false"
                       >
-                      </multiselect>
+                      </multiselect> -->
                     </b-form-group>
                   </div>
                   <div v-else-if="f.type === 'hint'">

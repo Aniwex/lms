@@ -25,7 +25,9 @@
               v-model="name"
               type="text"
               :placeholder="errors.name ? errors.name[1] : 'Название'"
-              :state="name !== ''"
+              :class="{
+                validation__input: errors.name ? true : false,
+              }"
             />
             <span style="color: red" class="db__tc" v-if="errors.name">
               <span v-for="(err, index) in errors.name" :key="index"
@@ -42,7 +44,9 @@
               v-model="code"
               type="text"
               :placeholder="errors.code ? errors.code[1] : 'Код'"
-              :state="code !== ''"
+              :class="{
+                validation__input: errors.code ? true : false,
+              }"
             />
             <span style="color: red" class="db__tc" v-if="errors.code">
               <span v-for="(err, index) in errors.code" :key="index"
@@ -163,10 +167,10 @@ export default {
             .catch((error) => {
               this.enter = false;
               this.errors = error.response.data.errors;
-              
+
               const vNodesMsg = [`${error.response.data.error}`];
               this.$bvToast.toast([vNodesMsg], {
-                name: `Ошибка`,
+                title: `Ошибка`,
                 variant: "danger",
                 solid: true,
                 appendToast: true,

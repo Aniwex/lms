@@ -27,6 +27,9 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
     text-align: center;
     background: #fff;
   }
+  .row__user-input{
+    margin-top:15px
+  }
   .db__tc{
     display: block;
     text-align: center;
@@ -55,4 +58,6 @@ WE WILL RELEASE FUTURE UPDATES SO IN ORDER TO NOT OVERWRITE YOUR STYLES IT'S BET
   font-size: 18px;
   color: #7c858e;
 }
-
+.validation__input{
+  border:1px solid red !important
+}

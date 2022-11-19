@@ -696,13 +696,11 @@ export default {
         {
           label: "Дата и время",
           field: "datetime",
-          width: "100px",
           thClass: "columnCenter",
         },
         {
           label: "Продол. звонка",
           field: "duration",
-          width: "120px",
           thClass: "columnCenter",
         },
         {
@@ -720,36 +718,34 @@ export default {
         {
           label: "Менеджер",
           field: "manager",
-          width: "130px",
           thClass: "columnCenter",
         },
         {
           label: "Клиент",
           field: "client",
-          width: "130px",
           thClass: "columnCenter",
           // tdClass: 'text-center', пользовательский класс для ячеек таблицы
         },
         {
           label: "Тэги",
           field: "tags",
-          width: "130px",
           thClass: "columnCenter",
         },
-        {
-          label: "Комментарий менеджера",
-          field: "manager_comment",
-          thClass: "columnCenter",
-        },
-        {
-          label: "Комментарий клиента",
-          field: "client_comment",
-          thClass: "columnCenter",
-        },
+        // {
+        //   label: "Комментарий менеджера",
+        //   field: "manager_comment",
+        //   thClass: "columnCenter",
+        // },
+        // {
+        //   label: "Комментарий клиента",
+        //   field: "client_comment",
+        //   thClass: "columnCenter",
+        // },
         {
           label: "Действие",
           field: "Действие",
           thClass: "columnCenter",
+          width: "130px",
         },
       ],
       errors: {},

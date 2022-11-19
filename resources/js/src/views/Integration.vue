@@ -177,12 +177,13 @@
               />
             </div>
             <div class="form__group-options">
-              <div :style="{ height: trHeight + 'px' }">
+              <div>
                 <label class="row__lables-label">Настройки </label>
                 <b-form
                   ref="form"
                   class="repeater__form"
                   @submit.prevent="repeateAgain"
+                  style="margin-bottom: 20px"
                 >
                   <!-- Row Loop -->
                   <div
@@ -200,6 +201,12 @@
                         v-model="item.key"
                         class="row__user-input"
                       />
+                      <span
+                        style="color: red"
+                        class="db__tc"
+                        v-if="errors['config.' + index + '.key']"
+                        >{{ errors["config." + index + ".key"][0] }}</span
+                      >
                     </b-form-group>
                     <!-- Значение -->
                     <b-form-group label="Значение">
@@ -209,6 +216,12 @@
                         v-model="item.value"
                         class="row__user-input"
                       />
+                      <span
+                        style="color: red"
+                        class="db__tc"
+                        v-if="errors['config.' + index + '.value']"
+                        >{{ errors["config." + index + ".value"][0] }}</span
+                      >
                     </b-form-group>
                     <hr />
                     <!-- Добавить Button -->
@@ -220,7 +233,6 @@
                       <feather-icon icon="PlusIcon" class="mr-25" />
                       <span>Добавить ещё</span>
                     </b-button>
-
                     <!-- Удалить Button -->
                     <b-button
                       v-ripple.400="'rgba(234, 84, 85, 0.15)'"
@@ -374,7 +386,7 @@ export default {
           type: "progressbar",
         },
       },
-      trHeight: 50,
+      trHeight: 400,
       trMargin: 20,
       tempHeightPlus: null,
       tempHeightMinus: null,
@@ -388,11 +400,9 @@ export default {
         key: null,
         value: null,
       });
-      this.trHeight += 250;
     },
     removeItem(index) {
       this.modalObject.config.splice(index, 1);
-      this.trHeight -= 250;
     },
     pushArraySearch(search) {
       this.arraySearch = search;
@@ -448,12 +458,11 @@ export default {
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
         this.modalObject = row;
+        this.errors = {};
         this.integration = this.modalObject;
         if (this.modalObject.config === null) {
           this.modalObject.config = [];
-          this.trHeight = 50;
         } else {
-          this.trHeight = 300;
         }
       }
       if (item === "Удалить") {
@@ -475,10 +484,13 @@ export default {
           })
           .then(() => {
             this.$store.dispatch("getIntegrationTable");
+            this.errors = {};
             this.$refs["modal__window"].hide();
           })
           .catch((error) => {
-            const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
+            this.errors = error.response.data.errors;
+            console.log(this.errors);
+            const vNodesMsg = [`${error.response.data.error}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
               variant: "danger",
@@ -506,8 +518,8 @@ export default {
           buttonsStyling: false,
         }).then((result) => {
           if (result.value) {
-            if (this.rowsIntegration.length) {
-              this.rowsIntegration.filter((index, i) => {
+            if (this.getIntegrations.length) {
+              this.getIntegrations.filter((index, i) => {
                 if (index.id === this.modalObject.id) {
                   axios
                     .delete("/api/integrations/" + this.modalObject.id)
