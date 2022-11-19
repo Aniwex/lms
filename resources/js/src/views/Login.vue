@@ -11,11 +11,12 @@
       <!-- form -->
       <b-form class="auth-login-form mt-2" @submit.prevent="Login">
         <!-- login -->
-        <b-form-group label="Login">
+        <b-form-group label="Логин">
           <validation-provider
             #default="{ errors }"
             name="Login"
             rules="required"
+            ref="provider_login"
           >
             <b-form-input
               id="login-login"
@@ -31,7 +32,7 @@
         <!-- forgot password -->
         <b-form-group>
           <div class="d-flex justify-content-between">
-            <label for="login-password">Password</label>
+            <label for="login-password">Пароль</label>
             <!-- <b-link :to="{ name: 'auth-forgot-password-v2' }">
                 <small>Забыли пароль?</small>
               </b-link> -->
@@ -82,12 +83,12 @@
       </b-form>
 
       <!-- divider -->
-      <div class="divider my-2">
+      <!-- <div class="divider my-2">
         <div class="divider-text">or</div>
-      </div>
+      </div> -->
 
       <!-- social buttons -->
-      <div class="auth-footer-btn d-flex justify-content-center">
+      <!-- <div class="auth-footer-btn d-flex justify-content-center">
         <b-button variant="facebook" href="javascript:void(0)">
           <feather-icon icon="FacebookIcon" />
         </b-button>
@@ -100,7 +101,7 @@
         <b-button variant="github" href="javascript:void(0)">
           <feather-icon icon="GithubIcon" />
         </b-button>
-      </div>
+      </div> -->
 
       <!-- /Login-->
     </div>
@@ -222,6 +223,7 @@ export default {
   },
   async mounted() {
     this.$store.commit("SET_ENTERED", false);
+    
   },
 };
 </script>

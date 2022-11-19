@@ -364,7 +364,7 @@
         <h3>Данные для редактирования</h3>
         <div class="container__see-project">
           <div class="row__lables">
-            <div v-if="user.role.id === 1" class="row__tag-lables">
+            <div class="row__tag-lables">
               <label class="row__lables-label">Дата и время</label>
               <flat-pickr
                 placeholder="Выберите дату и время"
@@ -375,9 +375,12 @@
                   datetimeFormat: 'Y-m-d H:i:s',
                   enableSeconds: true,
                 }"
+                :disabled="
+                  user.role.id === 3 || user.role.id === 2 ? true : false
+                "
               />
             </div>
-            <div v-if="user.role.id === 1" class="row__tag-lables">
+            <div class="row__tag-lables">
               <label class="row__lables-label">Продолжительность звонка</label>
               <div class="mutiselect-margin">
                 <div class="modal__input">
@@ -400,6 +403,9 @@
                     v-model="modalObject.duration.original"
                     type="number"
                     :state="modalObject.duration.original !== 0"
+                    :disabled="
+                      user.role.id === 3 || user.role.id === 2 ? true : false
+                    "
                   />
                   <b-button
                     v-ripple.400="'rgba(255, 255, 255, 0.15)'"
@@ -414,14 +420,18 @@
                     ></plus-icon>
                   </b-button>
                 </div>
-                <span style="color: red" class="db__tc" v-if="errors">
-                  <span v-for="(err, index) in errors.duration" :key="index">{{
-                    err
-                  }}</span>
-                </span>
+                <span v-if="modalObject.duration.original === 0">
+                  <span style="color: red" class="db__tc" v-if="errors">
+                    <span
+                      v-for="(err, index) in errors.duration"
+                      :key="index"
+                      >{{ err }}</span
+                    >
+                  </span></span
+                >
               </div>
             </div>
-            <div v-if="user.role.id === 1" class="row__tag-lables">
+            <div class="row__tag-lables">
               <label class="row__lables-label">Источник</label>
               <div
                 class="multiselect-input mutiselect-margin"
@@ -436,6 +446,7 @@
                   track-by="name"
                   placeholder="Выберите источник"
                   :showLabels="false"
+                  :disabled="user.role.id === 3 ? true : false"
                 >
                 </multiselect>
                 <span style="color: red" class="db__tc" v-if="errors">
@@ -445,7 +456,7 @@
                 </span>
               </div>
             </div>
-            <div v-if="user.role.id === 1" class="row__user-lables">
+            <div class="row__user-lables">
               <label class="row__lables-label">Пользователь</label>
               <b-form-input
                 class="row__user-input mutiselect-margin"
@@ -454,12 +465,12 @@
                 v-model="phone"
                 v-mask="'+7 (###) ###-##-##'"
                 maxlength="18"
+                :disabled="
+                  user.role.id === 3 || user.role.id === 2 ? true : false
+                "
               />
             </div>
-            <div
-              v-if="user.role.id === 1 || user.role.id === 2"
-              class="row__tag-lables"
-            >
+            <div class="row__tag-lables">
               <label class="row__lables-label">Тэги</label>
               <multiselect
                 v-model="modalObject.tags"
@@ -472,13 +483,11 @@
                 track-by="name"
                 placeholder="Выберите тэг"
                 :showLabels="false"
+                :disabled="user.role.id === 3 ? true : false"
               >
               </multiselect>
             </div>
-            <div
-              v-if="user.role.id === 1 || user.role.id === 2"
-              class="row__tag-lables"
-            >
+            <div class="row__tag-lables">
               <label class="row__lables-label">Проверка менеджера</label>
               <multiselect
                 v-model="manager__check"
@@ -490,13 +499,11 @@
                 track-by="text"
                 placeholder="Проверка менеджера"
                 :showLabels="false"
+                :disabled="user.role.id === 3 ? true : false"
               >
               </multiselect>
             </div>
-            <div
-              v-if="user.role.id === 1 || user.role.id === 2"
-              class="row__comment-manager-lables"
-            >
+            <div class="row__comment-manager-lables">
               <label class="row__lables-label">Комментарий менеджера</label>
               <b-form-textarea
                 v-if="modalObject.manager"
@@ -505,6 +512,7 @@
                 rows="5"
                 no-resize
                 v-model="modalObject.manager.comment"
+                :disabled="user.role.id === 3 ? true : false"
               />
             </div>
             <div class="row__tag-lables">
@@ -519,6 +527,7 @@
                 track-by="text"
                 placeholder="Проверка клиента"
                 :showLabels="false"
+                :disabled="user.role.id === 2 ? true : false"
               >
               </multiselect>
             </div>
@@ -531,6 +540,7 @@
                 rows="5"
                 no-resize
                 v-model="modalObject.client.comment"
+                :disabled="user.role.id === 2 ? true : false"
               />
             </div>
             <div class="modal__form-buttons">
@@ -794,12 +804,16 @@ export default {
     },
     //modalSeeProject
     quantity_minus() {
-      if (this.modalObject.duration.original >= 1) {
-        this.modalObject.duration.original--;
+      if (this.user.role.id === 1) {
+        if (this.modalObject.duration.original >= 1) {
+          this.modalObject.duration.original--;
+        }
       }
     },
     quantity_plus() {
-      this.modalObject.duration.original++;
+      if (this.user.role.id === 1) {
+        this.modalObject.duration.original++;
+      }
     },
     hideModal() {
       this.$store.dispatch("getDataTable");
@@ -1040,15 +1054,16 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (result.value) {
+          if (result.dismiss === "cancel") {
             this.$swal({
-              icon: "success",
-              title: "Удалено!",
-              text: "Обращение было удалено.",
+              title: "Отмена",
+              text: "Удаление обращения было отменено",
+              icon: "error",
               customClass: {
                 confirmButton: "btn btn-success",
               },
             });
+          } else {
             if (this.getDataTable.length) {
               this.getDataTable.filter((index, i) => {
                 if (index.id === this.modalObject.id) {
@@ -1060,6 +1075,14 @@ export default {
                         this.modalObject.id
                     )
                     .then(() => {
+                      this.$swal({
+                        icon: "success",
+                        title: "Удалено!",
+                        text: "Обращение было удалено.",
+                        customClass: {
+                          confirmButton: "btn btn-success",
+                        },
+                      });
                       this.$store.dispatch("getDataTable");
                     })
                     .catch((error) => {
@@ -1078,15 +1101,6 @@ export default {
                 }
               });
             }
-          } else if (result.dismiss === "cancel") {
-            this.$swal({
-              title: "Отмена",
-              text: "Удаление обращения было отменено",
-              icon: "error",
-              customClass: {
-                confirmButton: "btn btn-success",
-              },
-            });
           }
         });
       } catch (error) {}

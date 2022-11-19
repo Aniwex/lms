@@ -234,22 +234,22 @@
                     <b-form-group
                       label-cols="4"
                       label-cols-lg="2"
-                      :label="f.key"
+                      :label="f.value"
                       label-for="input-lg"
                       style="width: 400px"
                     >
-                      <!-- <multiselect
-                        v-model="f.value"
+                      <multiselect
+                        v-model="phone_zadarma"
                         onclick="this.querySelector('input').focus();"
                         :options="f.options"
                         selectedLabel="Выбрано"
-                        style="margin-top: 10px"
-                        label="value"
+                        style="margin-top: 10px; margin-left: 10px"
+                        label="label"
                         track-by="value"
                         placeholder="Выберите источник"
                         :showLabels="false"
                       >
-                      </multiselect> -->
+                      </multiselect>
                     </b-form-group>
                   </div>
                   <div v-else-if="f.type === 'hint'">
@@ -346,6 +346,7 @@ export default {
       rowsSource: [],
       user: "",
       errors: {},
+      phone_zadarma: "",
       rowSelection: [],
       modalObject: [],
       modalCounter: 0,
@@ -442,12 +443,18 @@ export default {
           )
           .then((response) => {
             this.tempFields.push(response.data.fields);
+
             if (this.modalObject.data) {
               this.value__input = this.modalObject.data;
+              this.phone_zadarma = this.modalObject.data.phone;
+              this.tempFields[0][3].options.filter((item) => {
+                if (item.value == this.phone_zadarma) {
+                  this.phone_zadarma = item;
+                }
+              });
             }
           })
           .catch((error) => {});
-        console.log(this.tempFields);
       }
       if (item === "Удалить") {
         this.modalObject = row;
@@ -474,12 +481,14 @@ export default {
                   ? {
                       [this.tempFields[0][0].key]:
                         this.value__input[this.tempFields[0][0].key],
+                      phone: this.phone_zadarma.value,
                     }
                   : {
                       [this.tempFields[0][0].key]:
                         this.value__input[this.tempFields[0][0].key],
                       [this.tempFields[0][1].key]:
                         this.value__input[this.tempFields[0][1].key],
+                      phone: this.phone_zadarma.value,
                     },
             }
           )

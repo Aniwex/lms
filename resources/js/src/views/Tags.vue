@@ -601,8 +601,17 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.getDataTags.length) {
-            if (result.value) {
+          if (result.dismiss === "cancel") {
+            this.$swal({
+              title: "Отмена",
+              text: "Удаление тэга было отменено",
+              icon: "error",
+              customClass: {
+                confirmButton: "btn btn-success",
+              },
+            });
+          } else {
+            if (this.getDataTags.length) {
               this.getDataTags.filter((index, i) => {
                 if (index.id === this.modalObject.id) {
                   axios
@@ -639,15 +648,6 @@ export default {
                 }
               });
             }
-          } else if (result.dismiss === "cancel") {
-            this.$swal({
-              title: "Отмена",
-              text: "Удаление обращения было отменено",
-              icon: "error",
-              customClass: {
-                confirmButton: "btn btn-success",
-              },
-            });
           }
         });
       } catch (error) {}

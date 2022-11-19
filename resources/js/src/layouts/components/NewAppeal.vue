@@ -37,6 +37,7 @@
                 type="number"
                 :class="{
                   validation__input: errors.duration ? true : false,
+                  validation__input_false: selected.duration !== 0,
                 }"
               />
               <b-button
@@ -54,11 +55,13 @@
               </b-button>
             </div>
             <label class="form__apeal-label-seconds">Значение в секундах</label>
-            <span style="color: red" class="db__tc" v-if="errors.duration">
-              <span v-for="(err, index) in errors.duration" :key="index">{{
-                err
-              }}</span>
-            </span>
+            <span v-if="selected.duration === 0"
+              ><span style="color: red" class="db__tc" v-if="errors.duration">
+                <span v-for="(err, index) in errors.duration" :key="index">{{
+                  err
+                }}</span>
+              </span></span
+            >
           </div>
         </div>
         <div class="form__appeal-group">
@@ -101,13 +104,16 @@
               v-mask="'+7 (###) ###-##-##'"
               :class="{
                 validation__input: errors.phone ? true : false,
+                validation__input_false: phone !== null && phone !== '',
               }"
             />
-            <span style="color: red" class="db__tc" v-if="errors.phone">
-              <span v-for="(err, index) in errors.phone" :key="index">{{
-                err
-              }}</span>
-            </span>
+            <span v-if="phone === null || phone === ''"
+              ><span style="color: red" class="db__tc" v-if="errors.phone">
+                <span v-for="(err, index) in errors.phone" :key="index">{{
+                  err
+                }}</span>
+              </span></span
+            >
           </div>
         </div>
         <div class="form__appeal-group">

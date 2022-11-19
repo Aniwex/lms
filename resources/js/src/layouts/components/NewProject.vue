@@ -9,6 +9,7 @@
             v-model="name"
             type="text"
             placeholder="Название"
+            :state="name !== ''"
           />
         </div>
         <div class="form__group">
@@ -18,6 +19,7 @@
               class="row__user-input"
               v-model="domain"
               type="text"
+              :state="domain !== ''"
               :class="{
                 validation__input: errors.domain ? true : false,
               }"

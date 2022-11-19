@@ -548,17 +548,24 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (this.getProjects.length) {
-            this.getProjects.filter((index, i) => {
-              if (index.id === this.modalObject.id) {
-                axios
-                  .delete("/api/projects/" + this.modalObject.id)
-                  .then(() => {
-                    this.$store.dispatch("SET_PROJECTS");
-                    this.$store.dispatch("SET_USER");
-                  })
-                  .then(() => {
-                    if (result.value) {
+          if (result.dismiss === "cancel") {
+            this.$swal({
+              role: "Отмена",
+              text: "Удаление проекта было отменено",
+              icon: "error",
+              customClass: {
+                confirmButton: "btn btn-success",
+              },
+            });
+          } else {
+            if (this.getProjects.length) {
+              this.getProjects.filter((index, i) => {
+                if (index.id === this.modalObject.id) {
+                  axios
+                    .delete("/api/projects/" + this.modalObject.id)
+                    .then(() => {
+                      this.$store.dispatch("SET_PROJECTS");
+                      this.$store.dispatch("SET_USER");
                       this.$swal({
                         icon: "success",
                         role: "Удалено!",
@@ -567,30 +574,21 @@ export default {
                           confirmButton: "btn btn-success",
                         },
                       });
-                    } else if (result.dismiss === "cancel") {
-                      this.$swal({
-                        role: "Отмена",
-                        text: "Удаление проекта было отменено",
-                        icon: "error",
-                        customClass: {
-                          confirmButton: "btn btn-success",
-                        },
+                    })
+                    .catch(() => {
+                      const vNodesMsg = [`${error.response.data.error}`];
+                      this.$bvToast.toast([vNodesMsg], {
+                        title: `Ошибка`,
+                        variant: "danger",
+                        solid: true,
+                        appendToast: true,
+                        toaster: "b-toaster-top-center",
+                        autoHideDelay: 3000,
                       });
-                    }
-                  })
-                  .catch(() => {
-                    const vNodesMsg = [`${error.response.data.error}`];
-                    this.$bvToast.toast([vNodesMsg], {
-                      title: `Ошибка`,
-                      variant: "danger",
-                      solid: true,
-                      appendToast: true,
-                      toaster: "b-toaster-top-center",
-                      autoHideDelay: 3000,
                     });
-                  });
-              }
-            });
+                }
+              });
+            }
           }
         });
       } catch (error) {}

@@ -517,7 +517,16 @@ export default {
           },
           buttonsStyling: false,
         }).then((result) => {
-          if (result.value) {
+          if (result.dismiss === "cancel") {
+            this.$swal({
+              title: "Отмена",
+              text: "Удаление интеграции было отменено",
+              icon: "error",
+              customClass: {
+                confirmButton: "btn btn-success",
+              },
+            });
+          } else {
             if (this.getIntegrations.length) {
               this.getIntegrations.filter((index, i) => {
                 if (index.id === this.modalObject.id) {
@@ -537,9 +546,7 @@ export default {
                     .catch((error) => {
                       this.errors = error.response.data;
 
-                      const vNodesMsg = [
-                        `${Object.values(error.response.data.errors)}`,
-                      ];
+                      const vNodesMsg = [`${error.response.data.error}`];
                       this.$bvToast.toast([vNodesMsg], {
                         title: `Ошибка`,
                         variant: "danger",
@@ -552,15 +559,6 @@ export default {
                 }
               });
             }
-          } else if (result.dismiss === "cancel") {
-            this.$swal({
-              title: "Отмена",
-              text: "Удаление интеграции было отменено",
-              icon: "error",
-              customClass: {
-                confirmButton: "btn btn-success",
-              },
-            });
           }
         });
       } catch (error) {}
