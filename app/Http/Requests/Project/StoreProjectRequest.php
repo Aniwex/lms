@@ -18,7 +18,7 @@ class StoreProjectRequest extends Request
     public function rules()
     {
         return [
-            'name' => ['string', 'nullable', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'domain' => ['required', 'string', 'unique:projects', 'max:255'],
             'mirrows' => ['array', 'nullable'],
             'mirrows.*' => ['required', 'string', 'max:255'],

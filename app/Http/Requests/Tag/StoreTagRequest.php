@@ -17,7 +17,7 @@ class StoreTagRequest extends Request
     public function rules()
     {
         return [
-            'name' => ['string', 'required', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'objective' => ['required', 'boolean'],
             'client_plus_words' => ['array', 'nullable'],
             'client_plus_words.*' => ['required', 'string', 'max:255'],

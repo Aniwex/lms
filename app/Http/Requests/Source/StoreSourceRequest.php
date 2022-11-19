@@ -19,9 +19,9 @@ class StoreSourceRequest extends Request
     public function rules()
     {
         return [
-            'name' => ['string', 'required', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'integration_id' => ['integer', 'exists:integrations,id'],
-            'code' => ['string', 'required', 'max:255', Rule::unique('sources')->where('project_id', $this->project->id), new Slug],
+            'code' => ['required', 'string', 'max:255', Rule::unique('sources')->where('project_id', $this->project->id), new Slug],
             'data' => ['array', 'nullable']
         ];
     }
