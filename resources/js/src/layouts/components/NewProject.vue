@@ -25,11 +25,13 @@
               }"
               :placeholder="errors.domain ? errors.domain[0] : 'Главный домен'"
             />
-            <span style="color: red" class="db__tc" v-if="errors.domain">
-              <span v-for="(err, index) in errors.domain" :key="index">{{
-                err
-              }}</span>
-            </span>
+            <span v-if="domain === ''"
+              ><span style="color: red" class="db__tc" v-if="errors.domain">
+                <span v-for="(err, index) in errors.domain" :key="index">{{
+                  err
+                }}</span>
+              </span></span
+            >
           </div>
         </div>
 

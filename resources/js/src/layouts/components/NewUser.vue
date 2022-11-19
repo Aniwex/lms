@@ -12,11 +12,12 @@
               :placeholder="errors.login ? errors.login[1] : 'Логин'"
               :state="login !== ''"
             />
-            <span style="color: red" class="db__tc" v-if="errors.login">
-              <span v-for="(err, index) in errors.login" :key="index"
-                >{{ err }}<br
-              /></span>
-            </span>
+            <span v-if="login === ''"
+              ><span style="color: red" class="db__tc" v-if="errors.login">
+                <span v-for="(err, index) in errors.login" :key="index"
+                  >{{ err }}<br
+                /></span> </span
+            ></span>
           </div>
         </div>
         <div class="form__group">
@@ -29,11 +30,12 @@
               :placeholder="errors.password ? errors.password[1] : 'Пароль'"
               :state="password !== ''"
             />
-            <span style="color: red" class="db__tc" v-if="errors.password">
-              <span v-for="(err, index) in errors.password" :key="index"
-                >{{ err }}<br
-              /></span>
-            </span>
+            <span v-if="password === ''"
+              ><span style="color: red" class="db__tc" v-if="errors.password">
+                <span v-for="(err, index) in errors.password" :key="index"
+                  >{{ err }}<br
+                /></span> </span
+            ></span>
           </div>
         </div>
         <div class="form__group">
