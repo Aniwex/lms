@@ -628,8 +628,6 @@ import {
 } from "bootstrap-vue";
 import Search from "./Search.vue";
 import Filters from "./Filters.vue";
-import { Swiper, SwiperSlide } from "vue-awesome-swiper";
-import "swiper/css/swiper.css";
 import { VueGoodTable } from "vue-good-table";
 import flatPickr from "vue-flatpickr-component";
 import "@core/scss/vue/libs/vue-flatpicker.scss";
@@ -655,8 +653,6 @@ export default {
     BSpinner,
     Filters,
     Search,
-    Swiper,
-    SwiperSlide,
     VueGoodTable,
     BFormTextarea,
     BBadge,

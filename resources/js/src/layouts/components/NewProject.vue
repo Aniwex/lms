@@ -4,34 +4,46 @@
       <div class="container">
         <div class="form__group">
           <label class="form__label">Название </label>
-          <b-form-input
-            class="row__user-input"
-            v-model="name"
-            type="text"
-            placeholder="Название"
-            :state="name !== ''"
-          />
+          <div>
+            <b-form-input
+              class="db__tc"
+              v-model="name"
+              type="text"
+              :class="{
+                validation__input: errors.name ? true : false,
+                validation__input_false: name !== '' ? true : false,
+              }"
+              :placeholder="errors.name ? errors.name[0] : 'Название'"
+              :state="name !== ''"
+            />
+            <span v-if="name === ''"
+              ><span style="color: red" class="db__tc" v-if="errors.name">
+                <span v-for="(err, index) in errors.name" :key="index">{{
+                  err
+                }}</span>
+              </span></span
+            >
+          </div>
         </div>
         <div class="form__group">
           <label class="form__label">Главный домен</label>
           <div>
             <b-form-input
-              class="row__user-input"
+              class="db__tc"
               v-model="domain"
               type="text"
               :state="domain !== ''"
               :class="{
                 validation__input: errors.domain ? true : false,
+                validation__input_false: domain !== '' ? true : false,
               }"
               :placeholder="errors.domain ? errors.domain[0] : 'Главный домен'"
             />
-            <span v-if="domain === ''"
-              ><span style="color: red" class="db__tc" v-if="errors.domain">
-                <span v-for="(err, index) in errors.domain" :key="index">{{
-                  err
-                }}</span>
-              </span></span
-            >
+            <span style="color: red" class="db__tc" v-if="errors.domain">
+              <span v-for="(err, index) in errors.domain" :key="index">{{
+                err
+              }}</span>
+            </span>
           </div>
         </div>
 
@@ -243,7 +255,6 @@ export default {
       if (this.domain === undefined) {
         this.domain = "";
       }
-      console.log(this.domain);
       try {
         let tempUserId = [];
         let tempArrayMirrow = [];
@@ -267,6 +278,7 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
+            console.log(this.errors);
             const vNodesMsg = [`${error.response.data.error}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,

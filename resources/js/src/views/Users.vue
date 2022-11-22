@@ -159,18 +159,22 @@
           <div class="row__lables">
             <div class="row__source-lables">
               <label class="row__lables-label">Роль</label>
-              <multiselect
-                v-model="role"
-                :options="options_roles"
-                selectedLabel="Выбрано"
-                class="multiselect-input"
-                label="title"
-                track-by="title"
-                onclick="this.querySelector('input').focus();"
-                placeholder="Выберите роль"
-                :showLabels="false"
-              >
-              </multiselect>
+              <div class="multiselect-input">
+                <multiselect
+                  v-model="role"
+                  :options="options_roles"
+                  selectedLabel="Выбрано"
+                  label="title"
+                  track-by="title"
+                  onclick="this.querySelector('input').focus();"
+                  placeholder="Выберите роль"
+                  :showLabels="false"
+                >
+                </multiselect>
+                <span style="color: red" class="db__tc" v-if="errors.role_id">{{
+                  errors.role_id[0]
+                }}</span>
+              </div>
             </div>
             <div class="row__date-lables">
               <label class="row__lables-label">Логин</label>
@@ -441,7 +445,7 @@ export default {
       if (item === "Посмотреть") {
         this.modalObject = row;
         this.options_projects = [];
-
+        this.errors = {};
         this.role = this.modalObject.role;
         await axios.get("api/users/" + this.modalObject.id).then((response) => {
           this.project = response.data.user.projects;
@@ -465,7 +469,7 @@ export default {
           .put("/api/users/" + this.modalObject.id, {
             login: this.modalObject.login,
             password: this.password,
-            role_id: this.role.id,
+            role_id: this.role ? this.role.id : [],
             projects: tempProjects,
           })
           .then(() => {
@@ -483,7 +487,17 @@ export default {
             }
           })
           .catch((error) => {
-            this.errors = error.response.data;
+            this.errors = error.response.data.errors;
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
+            
           });
       } catch (error) {}
     },

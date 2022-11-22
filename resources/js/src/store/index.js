@@ -20,6 +20,8 @@ export default new Vuex.Store({
         project: "",
         claims: [],
         sources: [],
+        tempFields: [],
+        ObjectIdSources: "",
         tags: [],
         integrations: [],
         options_manager_check: [
@@ -72,21 +74,51 @@ export default new Vuex.Store({
         SET_INTEGRATIONS: (state, payload) => {
             state.integrations = payload;
         },
+        SET_TEMPFIELDS: (state, payload) => {
+            state.tempFields = payload;
+        },
+        SET_OBJECTIDSOURCES: (state, payload) => {
+            state.ObjectIdSources = payload;
+        },
     },
     actions: {
+        getTempFields: async (ctx) => {
+            await axios
+                .get(
+                    "api/projects/" +
+                        ctx.getters.project.id +
+                        "/sources/" +
+                        ctx.getters.getObjectIDSources +
+                        "/integration-fields"
+                )
+                .then((response) => {
+                    let tempFields = response.data.fields;
+                    ctx.commit("SET_TEMPFIELDS", tempFields);
+                })
+                .catch((error) => {
+                    alert(error.response.data.error);
+                });
+        },
         SET_PROJECTS: async (ctx) => {
-            await axios.get("/api/projects").then((response) => {
-                const projects = response.data.projects;
-                ctx.commit("SET_PROJECTS", projects);
-            });
+            await axios
+                .get("/api/projects")
+                .then((response) => {
+                    const projects = response.data.projects;
+                    ctx.commit("SET_PROJECTS", projects);
+                })
+                .catch((error) => {
+                    alert(error.response.data.error);
+                });
         },
         getSourceTable: async (ctx) => {
             await axios
                 .get(" api/projects/" + ctx.getters.project.id + "/sources")
-
                 .then((response) => {
                     let sources = response.data.sources;
                     ctx.commit("SET_SOURCES", sources);
+                })
+                .catch((error) => {
+                    alert(error.response.data.error);
                 });
         },
         getTagsTable: async (ctx) => {
@@ -105,6 +137,9 @@ export default new Vuex.Store({
                             item.operator_minus_words.join("\n");
                     });
                     ctx.commit("SET_TAGS", tags);
+                })
+                .catch((error) => {
+                    alert(error.response.data.error);
                 });
         },
         getDataTable: async (ctx) => {
@@ -115,7 +150,9 @@ export default new Vuex.Store({
 
                     ctx.commit("SET_CLAIMS", claims);
                 })
-                .catch((err) => {});
+                .catch((error) => {
+                    alert(error.response.data.error);
+                });
         },
         getIntegrationTable: async (ctx) => {
             await axios
@@ -124,7 +161,9 @@ export default new Vuex.Store({
                     let integrations = response.data.integrations;
                     ctx.commit("SET_INTEGRATIONS", integrations);
                 })
-                .catch((err) => {});
+                .catch((error) => {
+                    alert(error.response.data.error);
+                });
         },
         SET_USER: async (ctx) => {
             await axios.get("/sanctum/csrf-cookie").then((response) => {
@@ -145,17 +184,7 @@ export default new Vuex.Store({
                                 this.$store.commit("SET_ENTERED", false);
                             });
                         } else {
-                            const vNodesMsg = [
-                                `${Object.values(error.response.data.errors)}`,
-                            ];
-                            this.$bvToast.toast([vNodesMsg], {
-                                title: `Ошибка`,
-                                variant: "danger",
-                                solid: true,
-                                appendToast: true,
-                                toaster: "b-toaster-top-center",
-                                autoHideDelay: 3000,
-                            });
+                            alert(error.response.data.error);
                         }
                     });
             });
@@ -231,6 +260,12 @@ export default new Vuex.Store({
         },
         options_client_check: (state) => {
             return state.options_client_check;
+        },
+        getObjectIDSources: (state) => {
+            return state.ObjectIdSources;
+        },
+        tempFields: (state) => {
+            return state.tempFields;
         },
     },
     modules: {

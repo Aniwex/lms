@@ -34,43 +34,95 @@
       <div class="container__appeal">
         <div class="form__appeal-group">
           <label class="form__apeal-label">Плюс слова клиента</label>
-          <b-form-textarea
-            class="form__appeal-textarea"
-            placeholder="Плюс слова клиента"
-            rows="5"
-            no-resize
-            v-model="client_plus_words"
-          />
+          <div>
+            <b-form-textarea
+              class="form__appeal-textarea"
+              placeholder="Плюс слова клиента"
+              rows="5"
+              no-resize
+              v-model="client_plus_words"
+            />
+            <span
+              style="color: red"
+              class="db__tc"
+              v-if="errors['client_plus_words.0']"
+            >
+              <span
+                v-for="(err, index) in errors['client_plus_words.0']"
+                :key="index"
+                >{{ err }}<br
+              /></span>
+            </span>
+          </div>
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Минус слова клиента</label>
-          <b-form-textarea
-            class="form__appeal-textarea"
-            placeholder="Минус слова клиента"
-            rows="5"
-            no-resize
-            v-model="client_minus_words"
-          />
+          <div>
+            <b-form-textarea
+              class="form__appeal-textarea"
+              placeholder="Минус слова клиента"
+              rows="5"
+              no-resize
+              v-model="client_minus_words"
+            />
+            <span
+              style="color: red"
+              class="db__tc"
+              v-if="errors['client_minus_words.0']"
+            >
+              <span
+                v-for="(err, index) in errors['client_minus_words.0']"
+                :key="index"
+                >{{ err }}<br
+              /></span>
+            </span>
+          </div>
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Плюс слова оператора</label>
-          <b-form-textarea
-            class="form__appeal-textarea"
-            placeholder="Плюс слова оператора"
-            rows="5"
-            no-resize
-            v-model="operator_plus_words"
-          />
+          <div>
+            <b-form-textarea
+              class="form__appeal-textarea"
+              placeholder="Плюс слова оператора"
+              rows="5"
+              no-resize
+              v-model="operator_plus_words"
+            />
+            <span
+              style="color: red"
+              class="db__tc"
+              v-if="errors['operator_plus_words.0']"
+            >
+              <span
+                v-for="(err, index) in errors['operator_plus_words.0']"
+                :key="index"
+                >{{ err }}<br
+              /></span>
+            </span>
+          </div>
         </div>
         <div class="form__appeal-group">
           <label class="form__apeal-label">Минус слова оператора</label>
-          <b-form-textarea
-            class="form__appeal-textarea"
-            placeholder="Минус слова оператора"
-            rows="5"
-            no-resize
-            v-model="operator_minus_words"
-          />
+          <div>
+            <b-form-textarea
+              class="form__appeal-textarea"
+              placeholder="Минус слова оператора"
+              rows="5"
+              no-resize
+              v-model="operator_minus_words"
+            />
+            <span
+              style="color: red"
+              class="db__tc"
+              v-if="errors['operator_minus_words.0']"
+            >
+              <span
+                v-for="(err, index) in errors['operator_minus_words.0']"
+                :key="index"
+                >{{ err }}<br
+              /></span>
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -214,57 +266,56 @@ export default {
     },
     async CreateAndAddAppeal() {
       try {
-        if (this.name) {
-          this.temp_client_plus_words = [];
-          this.temp_client_minus_words = [];
-          this.temp_operator_plus_words = [];
-          this.temp_operator_minus_words = [];
-          this.temp_client_plus_words.push(
-            this.client_plus_words.split(/(?=\/)|\s/)
-          );
-          this.temp_client_minus_words.push(
-            this.client_minus_words.split(/(?=\/)|\s/)
-          );
-          this.temp_operator_plus_words.push(
-            this.operator_plus_words.split(/(?=\/)|\s/)
-          );
-          this.temp_operator_minus_words.push(
-            this.operator_minus_words.split(/(?=\/)|\s/)
-          );
-          await axios
-            .post("api/projects/" + this.project.id + "/tags", {
-              name: this.name,
-              objective: this.objective,
-              client_plus_words: this.temp_client_plus_words[0],
-              client_minus_words: this.temp_client_minus_words[0],
-              operator_plus_words: this.temp_operator_plus_words[0],
-              operator_minus_words: this.temp_operator_minus_words[0],
-            })
-            .then(() => {
-              this.name = "";
-              this.objective = false;
-              this.client_plus_words = "";
-              this.client_minus_words = "";
-              this.operator_plus_words = "";
-              this.operator_minus_words = "";
-              this.$store.dispatch("getTagsTable");
-              this.errors = {};
-            })
-            .catch(() => {
-              this.errors = error.response.data.errors;
+        this.temp_client_plus_words = [];
+        this.temp_client_minus_words = [];
+        this.temp_operator_plus_words = [];
+        this.temp_operator_minus_words = [];
+        this.temp_client_plus_words.push(
+          this.client_plus_words.split(/(?=\/)|\s/)
+        );
+        this.temp_client_minus_words.push(
+          this.client_minus_words.split(/(?=\/)|\s/)
+        );
+        this.temp_operator_plus_words.push(
+          this.operator_plus_words.split(/(?=\/)|\s/)
+        );
+        this.temp_operator_minus_words.push(
+          this.operator_minus_words.split(/(?=\/)|\s/)
+        );
+        await axios
+          .post("api/projects/" + this.project.id + "/tags", {
+            name: this.name,
+            objective: this.objective,
+            client_plus_words: this.temp_client_plus_words[0],
+            client_minus_words: this.temp_client_minus_words[0],
+            operator_plus_words: this.temp_operator_plus_words[0],
+            operator_minus_words: this.temp_operator_minus_words[0],
+          })
+          .then(() => {
+            this.name = "";
+            this.objective = false;
+            this.client_plus_words = "";
+            this.client_minus_words = "";
+            this.operator_plus_words = "";
+            this.operator_minus_words = "";
+            this.$store.dispatch("getTagsTable");
+            this.errors = {};
+          })
+          .catch((error) => {
+            this.errors = error.response.data.errors;
+            console.log(this.errors);
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
             });
-        } else {
-          this.$bvToast.toast("Пожалуйтса заполните все поля", {
-            title: `Ошибка`,
-            variant: "danger",
-            solid: true,
-            appendToast: true,
-            toaster: "b-toaster-top-center",
-            autoHideDelay: 2000,
           });
-        }
       } catch (error) {
-        const vNodesMsg = [`${Object.values(error.response.data.errors)}`];
+        const vNodesMsg = [`${error}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
           variant: "danger",
@@ -316,7 +367,7 @@ export default {
   margin: 0 0;
 }
 .form__create-appeal-two {
-  height: 800px;
+  height: 900px;
 }
 .form__create-appeal {
   height: 200px;

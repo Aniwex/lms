@@ -169,12 +169,19 @@
             </div>
             <div class="row__source-lables">
               <label class="row__lables-label">Код</label>
-              <b-form-input
-                class="row__user-input"
-                v-model="modalObject.slug"
-                type="text"
-                placeholder="Код"
-              />
+              <div class="container__row">
+                <b-form-input
+                  class="row__user-input"
+                  v-model="modalObject.slug"
+                  type="text"
+                  placeholder="Код"
+                />
+                <span style="color: red" class="db__tc" v-if="errors.slug">
+                  <span v-for="(err, index) in errors.slug" :key="index"
+                    >{{ err }}<br
+                  /></span>
+                </span>
+              </div>
             </div>
             <div class="form__group-options">
               <div>

@@ -6,7 +6,7 @@
           <label class="form__label">Логин </label>
           <div>
             <b-form-input
-              class="row__user-input"
+              class="db__tc"
               v-model="login"
               type="text"
               :placeholder="errors.login ? errors.login[1] : 'Логин'"
@@ -24,7 +24,7 @@
           <label class="form__label">Пароль </label>
           <div>
             <b-form-input
-              class="row__user-input"
+              class="db__tc"
               v-model="password"
               type="password"
               :placeholder="errors.password ? errors.password[1] : 'Пароль'"

@@ -204,7 +204,7 @@
     <b-modal
       id="modal__seeIntegration"
       centered
-      title="Просмотр обращения"
+      title="Просмотр тэга"
       cancel-title="Отмена"
       size="lg"
       ref="modal__window"
@@ -563,10 +563,26 @@ export default {
             {
               name: this.modalObject.name,
               objective: this.modalObject.objective,
-              client_plus_words: temp_client_plus_words[0],
-              client_minus_words: temp_client_minus_words[0],
-              operator_plus_words: temp_operator_plus_words[0],
-              operator_minus_words: temp_operator_minus_words[0],
+              client_plus_words:
+                temp_client_plus_words[0].length === 1 &&
+                temp_client_plus_words[0][0] === ""
+                  ? []
+                  : temp_client_plus_words[0],
+              client_minus_words:
+                temp_client_minus_words[0].length === 1 &&
+                temp_client_minus_words[0][0] === ""
+                  ? []
+                  : temp_client_minus_words[0],
+              operator_plus_words:
+                temp_operator_plus_words[0].length === 1 &&
+                temp_operator_plus_words[0][0] === ""
+                  ? []
+                  : temp_operator_plus_words[0],
+              operator_minus_words:
+                temp_operator_minus_words[0].length === 1 &&
+                temp_operator_minus_words[0][0] === ""
+                  ? []
+                  : temp_operator_minus_words[0],
             }
           )
           .then(() => {

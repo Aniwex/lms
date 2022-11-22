@@ -262,6 +262,12 @@
                       <feather-icon icon="PlusIcon" class="mr-25" />
                       <span>Добавить ещё</span>
                     </b-button>
+                    <span
+                      style="color: red"
+                      class="db__tc"
+                      v-if="errors['mirrows.0']"
+                      >{{ errors["mirrows.0"][0] }}</span
+                    >
                   </div>
                 </b-form>
               </div>
@@ -423,11 +429,6 @@ export default {
       trMargin: 20,
       tempHeightPlus: null,
       tempHeightMinus: null,
-      mirrows: [
-        {
-          value: "",
-        },
-      ],
       users: [],
     };
   },
@@ -525,12 +526,24 @@ export default {
             this.$store.dispatch("SET_PROJECTS");
             this.$refs["modal__window"].hide();
             this.errors = {};
+          })
+          .catch((error) => {
+            this.errors = error.response.data.errors;
+            console.log(this.errors);
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
           });
 
         await this.$store.dispatch("SET_USER");
       } catch (error) {
-        this.errors = {};
-        this.errors = error.response.data.errors;
+        console.log(error);
       }
     },
     async deleteModal() {
@@ -575,7 +588,7 @@ export default {
                         },
                       });
                     })
-                    .catch(() => {
+                    .catch((error) => {
                       const vNodesMsg = [`${error.response.data.error}`];
                       this.$bvToast.toast([vNodesMsg], {
                         title: `Ошибка`,
@@ -591,7 +604,9 @@ export default {
             }
           }
         });
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     },
     selectionChanged(params) {
       this.rowSelection = params.selectedRows;

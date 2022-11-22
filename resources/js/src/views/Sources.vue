@@ -89,8 +89,7 @@
         <!-- Column: Source_data -->
         <span v-else-if="props.column.field === 'source_data'" class="db__tc">
           <div v-for="(data, index) in props.row.data" :key="index" class="">
-            <span v-if="data.message">{{ data.message }}</span>
-            <span v-else>{{ index }}: {{ data }}</span>
+            <span>{{ index }}: {{ data }}</span>
           </div>
         </span>
         <span v-else-if="props.column.field === 'action'">
@@ -161,12 +160,12 @@
     <b-modal
       id="modal__seeIntegration"
       centered
-      title="Просмотр обращения"
+      title="Просмотр источника"
       cancel-title="Отмена"
       size="lg"
       ref="modal__window"
       hide-footer
-      @hidden="hideModal"
+      @hidden="cancelModal"
     >
       <div class="see-project__form">
         <h3 class="see-project__read">Данные для редактирования</h3>
@@ -183,80 +182,93 @@
                 placeholder="Выберите интеграцию"
                 selectLabel="Нажмите enter для выбора"
                 deselectLabel="Нажмите enter для удаления"
+                @input="inputIntegration"
               >
               </multiselect>
             </div>
             <div class="row__date-lables">
               <label class="row__lables-label">Название</label>
-              <b-form-input
-                class="row__user-input"
-                v-model="modalObject.name"
-                type="text"
-                placeholder="Название"
-              />
+              <div class="container__row">
+                <b-form-input
+                  class="row__user-input"
+                  v-model="modalObject.name"
+                  type="text"
+                  placeholder="Название"
+                />
+                <!-- <span style="color: red" class="db__tc" v-if="errors">
+                  <span v-for="(err, index) in errors.code" :key="index"
+                    >{{ err }}<br
+                  /></span>
+                </span> -->
+              </div>
             </div>
             <div class="row__source-lables">
               <label class="row__lables-label">Код</label>
-              <b-form-input
-                class="row__user-input"
-                v-model="modalObject.code"
-                type="text"
-                placeholder="Код"
-              />
+              <div class="container__row">
+                <b-form-input
+                  class="row__user-input"
+                  v-model="modalObject.code"
+                  type="text"
+                  placeholder="Код"
+                />
+                <span style="color: red" class="db__tc" v-if="errors">
+                  <span v-for="(err, index) in errors.code" :key="index"
+                    >{{ err }}<br
+                  /></span>
+                </span>
+              </div>
             </div>
             <div class="data__source">
               <label class="db__tc data__source-label"
                 >Данные по источнику</label
               >
-              <div v-for="(fields, index) in tempFields" :key="index">
-                <div v-for="(f, index) in fields" :key="index">
-                  <div v-if="f.type === 'text'">
-                    <b-form-group
-                      label-cols="4"
-                      label-cols-lg="2"
-                      :label="f.value"
-                      label-for="input-lg"
-                      style="width: 400px"
+              <div v-for="(fields, index) in getTempFields" :key="index">
+                <div v-if="fields.type === 'text'">
+                  <b-form-group
+                    label-cols="4"
+                    label-cols-lg="2"
+                    :label="fields.value"
+                    label-for="input-lg"
+                    style="width: 400px"
+                  >
+                    <b-form-input
+                      class="row__user-input"
+                      style="margin-left: 10px; margin-top: 0"
+                      v-model="value__input[fields.key]"
+                      type="text"
+                      :placeholder="fields.value"
+                    />
+                  </b-form-group>
+                  <span class="db__tc" v-if="fields.description">{{
+                    fields.description
+                  }}</span>
+                </div>
+                <div v-else-if="fields.type === 'select'">
+                  <b-form-group
+                    label-cols="4"
+                    label-cols-lg="2"
+                    :label="fields.value"
+                    label-for="input-lg"
+                    style="width: 400px"
+                  >
+                    <multiselect
+                      v-model="phone_zadarma"
+                      onclick="this.querySelector('input').focus();"
+                      :options="fields.options"
+                      selectedLabel="Выбрано"
+                      style="margin-top: 10px; margin-left: 10px"
+                      label="label"
+                      track-by="value"
+                      placeholder="Выберите источник"
+                      :showLabels="false"
                     >
-                      <b-form-input
-                        class="row__user-input"
-                        style="margin-left: 10px; margin-top: 0"
-                        v-model="value__input[f.key]"
-                        type="text"
-                        placeholder="roistat_id"
-                      />
-                    </b-form-group>
-                    <span class="db__tc" v-if="f.description">{{
-                      f.description
-                    }}</span>
-                  </div>
-                  <div v-else-if="f.type === 'select'">
-                    <b-form-group
-                      label-cols="4"
-                      label-cols-lg="2"
-                      :label="f.value"
-                      label-for="input-lg"
-                      style="width: 400px"
-                    >
-                      <multiselect
-                        v-model="phone_zadarma"
-                        onclick="this.querySelector('input').focus();"
-                        :options="f.options"
-                        selectedLabel="Выбрано"
-                        style="margin-top: 10px; margin-left: 10px"
-                        label="label"
-                        track-by="value"
-                        placeholder="Выберите источник"
-                        :showLabels="false"
-                      >
-                      </multiselect>
-                    </b-form-group>
-                  </div>
-                  <div v-else-if="f.type === 'hint'">
-                    <p class="fields__hint db__tc">
-                      {{ f.message }}
-                    </p>
-                  </div>
+                    </multiselect>
+                  </b-form-group>
+                </div>
+                <div v-else-if="fields.type === 'hint'">
+                  <p class="fields__hint db__tc">
+                    {{ fields.message }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -394,10 +406,25 @@ export default {
       getSources: false,
       arraySearch: "",
       project: [],
-      tempFields: [],
+      tempCancel: {},
     };
   },
   methods: {
+    async inputIntegration() {
+      await axios
+        .put(
+          " api/projects/" +
+            this.project.id +
+            "/sources/" +
+            this.modalObject.id,
+          {
+            integration_id: this.modalObject.integration.id,
+          }
+        )
+        .then(() => {
+          this.$store.dispatch("getTempFields");
+        });
+    },
     pushArraySearch(search) {
       this.arraySearch = search;
     },
@@ -431,36 +458,43 @@ export default {
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
         this.modalObject = row;
-        this.tempFields = [];
+        for (let key in row) {
+          this.tempCancel[key] = row[key];
+        }
         this.value__input = "";
-        await axios
-          .get(
-            "api/projects/" +
-              this.project.id +
-              "/sources/" +
-              this.modalObject.id +
-              "/integration-fields"
-          )
-          .then((response) => {
-            this.tempFields.push(response.data.fields);
-
-            if (this.modalObject.data) {
-              this.value__input = this.modalObject.data;
-              this.phone_zadarma = this.modalObject.data.phone;
-              this.tempFields[0][3].options.filter((item) => {
-                if (item.value == this.phone_zadarma) {
-                  this.phone_zadarma = item;
-                }
-              });
-            }
-          })
-          .catch((error) => {});
+        this.errors = {};
+        this.$store.commit("SET_OBJECTIDSOURCES", this.modalObject.id);
+        this.$store.dispatch("getTempFields");
+        if (this.modalObject.data) {
+          this.value__input = this.modalObject.data;
+          this.phone_zadarma = this.modalObject.data.phone;
+          if (this.getTempFields.length === 4) {
+            this.getTempFields[3].options.filter((item) => {
+              if (item.value == this.phone_zadarma) {
+                this.phone_zadarma = item;
+              }
+            });
+          }
+        }
       }
       if (item === "Удалить") {
         this.modalObject = row;
       }
     },
-    hideModal() {
+    async hideModal() {
+      await axios
+        .put(
+          " api/projects/" + this.project.id + "/sources/" + this.tempCancel.id,
+          {
+            integration_id: this.tempCancel.integration.id,
+          }
+        )
+        .then(() => {
+          this.$store.dispatch("getSourceTable");
+          this.$refs["modal__window"].hide();
+        });
+    },
+    cancelModal() {
       this.$store.dispatch("getSourceTable");
       this.$refs["modal__window"].hide();
     },
@@ -477,18 +511,17 @@ export default {
               name: this.modalObject.name,
               code: this.modalObject.code,
               data:
-                this.tempFields[0].length !== 4
+                this.getTempFields.length !== 4
                   ? {
-                      [this.tempFields[0][0].key]:
-                        this.value__input[this.tempFields[0][0].key],
-                      phone: this.phone_zadarma.value,
+                      [this.getTempFields[0].key]:
+                        this.value__input[this.getTempFields[0].key],
                     }
                   : {
-                      [this.tempFields[0][0].key]:
-                        this.value__input[this.tempFields[0][0].key],
-                      [this.tempFields[0][1].key]:
-                        this.value__input[this.tempFields[0][1].key],
-                      phone: this.phone_zadarma.value,
+                      [this.getTempFields[0].key]:
+                        this.value__input[this.getTempFields[0].key],
+                      [this.getTempFields[1].key]:
+                        this.value__input[this.getTempFields[1].key],
+                      phone: this.phone_zadarma ? this.phone_zadarma.value : [],
                     },
             }
           )
@@ -496,8 +529,12 @@ export default {
             this.$store.dispatch("getSourceTable");
             this.$refs["modal__window"].hide();
           })
-          .catch((error) => {});
+          .catch((error) => {
+            this.errors = error.response.data.errors;
+            console.log(this.errors);
+          });
       } catch (error) {
+        console.log(error);
         const vNodesMsg = [`${error}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
@@ -631,6 +668,9 @@ export default {
     },
     getIntegrationTable() {
       return this.$store.getters.getIntegrations;
+    },
+    getTempFields() {
+      return this.$store.getters.tempFields;
     },
   },
   created() {
