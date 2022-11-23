@@ -203,11 +203,6 @@
                   type="text"
                   placeholder="Название"
                 />
-                <!-- <span style="color: red" class="db__tc" v-if="errors">
-                  <span v-for="(err, index) in errors.code" :key="index"
-                    >{{ err }}<br
-                  /></span>
-                </span> -->
               </div>
             </div>
             <div class="row__source-lables">
@@ -551,10 +546,8 @@ export default {
               toaster: "b-toaster-top-center",
               autoHideDelay: 3000,
             });
-            
           });
       } catch (error) {
-        
         const vNodesMsg = [`${error}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,

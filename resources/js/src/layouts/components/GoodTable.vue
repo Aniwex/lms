@@ -447,11 +447,13 @@
                   :disabled="user.role.id === 3 ? true : false"
                 >
                 </multiselect>
-                <errorValidation
-                  v-if="errors"
-                  :errors="errors"
-                  :error="errors.source_id"
-                ></errorValidation>
+                <div v-if="!modalObject.source">
+                  <errorValidation
+                    v-if="errors"
+                    :errors="errors"
+                    :error="errors.source_id"
+                  ></errorValidation>
+                </div>
               </div>
             </div>
             <div class="row__user-lables">
@@ -830,9 +832,7 @@ export default {
         };
       }
       if (this.modalObject.source === null) {
-        this.modalObject.source = {
-          id: 0,
-        };
+        this.modalObject.source = {};
       }
       try {
         let tempTagsId = [];

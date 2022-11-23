@@ -171,9 +171,13 @@
                   :showLabels="false"
                 >
                 </multiselect>
-                <span style="color: red" class="db__tc" v-if="errors.role_id">{{
-                  errors.role_id[0]
-                }}</span>
+                <div v-if="!role">
+                  <errorValidation
+                    v-if="errors.role_id"
+                    :errors="errors"
+                    :error="errors.role_id"
+                  ></errorValidation>
+                </div>
               </div>
             </div>
             <div class="row__date-lables">
@@ -275,6 +279,7 @@ import {
 } from "bootstrap-vue";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 import { required } from "@validations";
+import errorValidation from "../views/error/errorValidation";
 import { togglePasswordVisibility } from "@core/mixins/ui/forms";
 import Search from "../layouts/components/Search.vue";
 import Filters from "../layouts/components/Filters.vue";
@@ -284,6 +289,7 @@ import Ripple from "vue-ripple-directive";
 import "swiper/css/swiper.css";
 export default {
   components: {
+    errorValidation,
     BInputGroupAppend,
     BInputGroup,
     ValidationProvider,
@@ -497,7 +503,6 @@ export default {
               toaster: "b-toaster-top-center",
               autoHideDelay: 3000,
             });
-            
           });
       } catch (error) {}
     },
