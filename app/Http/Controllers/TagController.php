@@ -49,7 +49,7 @@ class TagController extends Controller
     public function store(StoreTagRequest $request, Project $project)
     {
         $tag = new Tag;
-        $tag->forceFill($request->onlyFilled()->validated());
+        $tag->forceFill($request->onlyFilled()->input());
         $tag->project_id = $project->id;
         $tag->save();
 
@@ -86,7 +86,7 @@ class TagController extends Controller
      */
     public function update(UpdateTagRequest $request, Project $project, Tag $tag)
     {
-        $tag->forceFill($request->onlyFilled()->validated());
+        $tag->forceFill($request->onlyFilled()->input());
         $tag->save();
 
         return Response::success()

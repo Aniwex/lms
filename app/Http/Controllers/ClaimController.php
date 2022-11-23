@@ -52,7 +52,7 @@ class ClaimController extends Controller
     public function store(StoreClaimRequest $request, Project $project)
     {
         $claim = new Claim;
-        $claim->fill($request->onlyFilled()->validated());
+        $claim->fill($request->onlyFilled()->input());
         $claim->project_id = $project->id;
         $claim->save();
 
@@ -93,7 +93,7 @@ class ClaimController extends Controller
      */
     public function update(UpdateClaimRequest $request, Project $project, Claim $claim)
     {
-        $claim->fill($request->onlyFilled()->validated());
+        $claim->fill($request->onlyFilled()->input());
         $claim->save();
 
         $claim->tags()->sync($request->input('tags', []));

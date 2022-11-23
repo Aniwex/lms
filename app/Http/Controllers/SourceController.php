@@ -65,7 +65,7 @@ class SourceController extends Controller
     public function store(StoreSourceRequest $request, Project $project)
     {
         $source = new Source;
-        $source->fill($request->onlyFilled()->validated());
+        $source->fill($request->onlyFilled()->input());
         $source->project_id = $project->id;
         $source->save();
 
@@ -102,7 +102,7 @@ class SourceController extends Controller
      */
     public function update(UpdateSourceRequest $request, Project $project, Source $source)
     {
-        $source->fill($request->onlyFilled()->validated());
+        $source->fill($request->onlyFilled()->input());
         $source->save();
 
         $source->load(['integration']);
