@@ -2,11 +2,10 @@
 
 namespace App\Http\Requests\Source;
 
-use App\Http\Requests\Request;
 use App\Rules\Slug;
 use Illuminate\Validation\Rule;
 
-class UpdateSourceRequest extends Request
+class UpdateSourceRequest extends StoreSourceRequest
 {
     /**
      * Get the validation rules that apply to the request.

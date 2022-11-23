@@ -2,12 +2,10 @@
 
 namespace App\Http\Requests\Tag;
 
-use App\Http\Requests\Request;
-
 /**
  * Запрос на изменение тега обращения.
  */
-class UpdateTagRequest extends Request
+class UpdateTagRequest extends StoreTagRequest
 {
     /**
      * Get the validation rules that apply to the request.
