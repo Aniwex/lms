@@ -69,7 +69,9 @@
           v-if="props.column.field === 'integration'"
           class="text-nowrap db__tc"
         >
-          <span class="text-nowrap">{{ props.row.integration.title }}</span>
+          <span v-if="props.row.integration" class="text-nowrap">{{
+            props.row.integration.title
+          }}</span>
         </span>
         <!-- Column: Name -->
         <span
@@ -173,18 +175,24 @@
           <div class="row__lables">
             <div class="row__date-lables" v-if="getIntegrationTable">
               <label class="row__lables-label">Интеграция</label>
-              <multiselect
-                class="multiselect-input multiselect-margin"
-                v-model="modalObject.integration"
-                :options="getIntegrationTable"
-                label="title"
-                track-by="title"
-                placeholder="Выберите интеграцию"
-                selectLabel="Нажмите enter для выбора"
-                deselectLabel="Нажмите enter для удаления"
-                @input="inputIntegration"
-              >
-              </multiselect>
+              <div class="multiselect-input multiselect-margin">
+                <multiselect
+                  v-model="modalObject.integration"
+                  :options="getIntegrationTable"
+                  label="title"
+                  track-by="title"
+                  placeholder="Выберите интеграцию"
+                  selectLabel="Нажмите enter для выбора"
+                  deselectLabel="Нажмите enter для удаления"
+                  @input="inputIntegration"
+                >
+                </multiselect>
+                <span v-if="!modalObject.integration">
+                  <span class="db__tc" style="color: red">
+                    Выберите интеграцию
+                  </span>
+                </span>
+              </div>
             </div>
             <div class="row__date-lables">
               <label class="row__lables-label">Название</label>
@@ -412,19 +420,21 @@ export default {
   },
   methods: {
     async inputIntegration() {
-      await axios
-        .put(
-          " api/projects/" +
-            this.project.id +
-            "/sources/" +
-            this.modalObject.id,
-          {
-            integration_id: this.modalObject.integration.id,
-          }
-        )
-        .then(() => {
-          this.$store.dispatch("getTempFields");
-        });
+      if (this.modalObject.integration) {
+        await axios
+          .put(
+            " api/projects/" +
+              this.project.id +
+              "/sources/" +
+              this.modalObject.id,
+            {
+              integration_id: this.modalObject.integration.id,
+            }
+          )
+          .then(() => {
+            this.$store.dispatch("getTempFields");
+          });
+      }
     },
     pushArraySearch(search) {
       this.arraySearch = search;
@@ -541,10 +551,10 @@ export default {
               toaster: "b-toaster-top-center",
               autoHideDelay: 3000,
             });
-            console.log(this.errors);
+            
           });
       } catch (error) {
-        console.log(error);
+        
         const vNodesMsg = [`${error}`];
         this.$bvToast.toast([vNodesMsg], {
           title: `Ошибка`,
@@ -603,9 +613,7 @@ export default {
                       });
                     })
                     .catch((error) => {
-                      const vNodesMsg = [
-                        `${Object.values(error.response.data)}`,
-                      ];
+                      const vNodesMsg = [`${error.response.data.error}`];
                       this.$bvToast.toast([vNodesMsg], {
                         title: `Ошибка`,
                         variant: "danger",

@@ -44,6 +44,11 @@
               rows="5"
               no-resize
               v-model="client_plus_words"
+              :class="{
+                validation__input: errors['client_plus_words.0'] ? true : false,
+                validation__input_false:
+                  client_plus_words !== '' ? true : false,
+              }"
             />
             <div v-if="client_plus_words === ''">
               <errorValidation
@@ -63,6 +68,13 @@
               rows="5"
               no-resize
               v-model="client_minus_words"
+              :class="{
+                validation__input: errors['client_minus_words.0']
+                  ? true
+                  : false,
+                validation__input_false:
+                  client_minus_words !== '' ? true : false,
+              }"
             />
             <div v-if="client_minus_words === ''">
               <errorValidation
@@ -82,6 +94,13 @@
               rows="5"
               no-resize
               v-model="operator_plus_words"
+              :class="{
+                validation__input: errors['operator_plus_words.0']
+                  ? true
+                  : false,
+                validation__input_false:
+                  operator_plus_words !== '' ? true : false,
+              }"
             />
             <div v-if="operator_plus_words === ''">
               <errorValidation
@@ -101,6 +120,13 @@
               rows="5"
               no-resize
               v-model="operator_minus_words"
+              :class="{
+                validation__input: errors['operator_minus_words.0']
+                  ? true
+                  : false,
+                validation__input_false:
+                  operator_minus_words !== '' ? true : false,
+              }"
             />
             <div v-if="operator_minus_words === ''">
               <errorValidation
@@ -292,7 +318,7 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-            console.log(this.errors);
+            this.errors;
             const vNodesMsg = [`${error.response.data.error}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,

@@ -141,7 +141,6 @@ export default new Vuex.Store({
                 .get("api/projects/" + ctx.getters.project.id + "/claims")
                 .then((response) => {
                     let claims = response.data.claims;
-
                     ctx.commit("SET_CLAIMS", claims);
                 })
                 .catch((error) => {});

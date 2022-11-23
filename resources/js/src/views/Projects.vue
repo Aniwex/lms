@@ -264,7 +264,6 @@
                       :errors="errors"
                       :error="errors['mirrows.0']"
                     ></errorValidation>
-                    
                   </div>
                 </b-form>
               </div>
@@ -528,7 +527,7 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-            console.log(this.errors);
+           
             const vNodesMsg = [`${error.response.data.error}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
@@ -542,7 +541,7 @@ export default {
 
         await this.$store.dispatch("SET_USER");
       } catch (error) {
-        console.log(error);
+        
       }
     },
     async deleteModal() {
@@ -604,7 +603,7 @@ export default {
           }
         });
       } catch (error) {
-        console.log(error);
+        
       }
     },
     selectionChanged(params) {

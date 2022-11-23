@@ -822,7 +822,7 @@ export default {
         };
       }
       if (this.phone === "") {
-        this.phone = this.modalObject.phone.original;
+        this.phone = this.modalObject.phone.formatted;
       }
       if (this.client__check === null) {
         this.client__check = {
@@ -839,6 +839,7 @@ export default {
         this.modalObject.tags.filter((item) => {
           tempTagsId.push(item.id);
         });
+
         await axios
           .put(
             " api/projects/" +
@@ -903,7 +904,17 @@ export default {
                   .then(() => {
                     this.$store.dispatch("getDataTable");
                   })
-                  .catch((error) => {});
+                  .catch((error) => {
+                    const vNodesMsg = [`${error.response.data.error}`];
+                    this.$bvToast.toast([vNodesMsg], {
+                      title: `Ошибка`,
+                      variant: "danger",
+                      solid: true,
+                      appendToast: true,
+                      toaster: "b-toaster-top-center",
+                      autoHideDelay: 3000,
+                    });
+                  });
               }
             });
           });
@@ -956,7 +967,6 @@ export default {
     },
     pushSortedFilter(sorted) {
       this.sortedFilter = sorted;
-      //console.log(this.sortedFilter);
     },
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
@@ -1082,9 +1092,7 @@ export default {
                       this.$store.dispatch("getDataTable");
                     })
                     .catch((error) => {
-                      const vNodesMsg = [
-                        `${Object.values(error.response.data.errors)}`,
-                      ];
+                      const vNodesMsg = [`${error.response.data.error}`];
                       this.$bvToast.toast([vNodesMsg], {
                         title: `Ошибка`,
                         variant: "danger",
@@ -1099,7 +1107,17 @@ export default {
             }
           }
         });
-      } catch (error) {}
+      } catch (error) {
+        const vNodesMsg = [`${error.response.data.error}`];
+        this.$bvToast.toast([vNodesMsg], {
+          title: `Ошибка`,
+          variant: "danger",
+          solid: true,
+          appendToast: true,
+          toaster: "b-toaster-top-center",
+          autoHideDelay: 3000,
+        });
+      }
     },
     hideModal() {
       this.$refs["modal__window"].hide();

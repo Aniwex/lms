@@ -328,6 +328,15 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
           });
       } catch (error) {
         const vNodesMsg = [`${error}`];
@@ -378,6 +387,15 @@ export default {
             })
             .catch((error) => {
               this.errors = error.response.data.errors;
+              const vNodesMsg = [`${error.response.data.error}`];
+              this.$bvToast.toast([vNodesMsg], {
+                title: `Ошибка`,
+                variant: "danger",
+                solid: true,
+                appendToast: true,
+                toaster: "b-toaster-top-center",
+                autoHideDelay: 3000,
+              });
             });
         }
       } catch (error) {

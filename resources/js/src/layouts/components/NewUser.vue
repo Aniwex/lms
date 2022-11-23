@@ -10,7 +10,10 @@
               v-model="login"
               type="text"
               :placeholder="errors.login ? errors.login[1] : 'Логин'"
-              :state="login !== ''"
+              :class="{
+                validation__input: errors.login ? true : false,
+                validation__input_false: login !== '' ? true : false,
+              }"
             />
             <div v-if="login === ''">
               <errorValidation
@@ -29,7 +32,10 @@
               v-model="password"
               type="password"
               :placeholder="errors.password ? errors.password[1] : 'Пароль'"
-              :state="password !== ''"
+              :class="{
+                validation__input: errors.password ? true : false,
+                validation__input_false: password !== '' ? true : false,
+              }"
             />
             <div v-if="password === ''">
               <errorValidation

@@ -496,7 +496,7 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-            console.log(this.errors);
+
             const vNodesMsg = [`${error.response.data.error}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
@@ -552,7 +552,6 @@ export default {
                     })
                     .catch((error) => {
                       this.errors = error.response.data;
-
                       const vNodesMsg = [`${error.response.data.error}`];
                       this.$bvToast.toast([vNodesMsg], {
                         title: `Ошибка`,

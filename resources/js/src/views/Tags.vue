@@ -639,9 +639,7 @@ export default {
                       });
                     })
                     .catch((error) => {
-                      const vNodesMsg = [
-                        `${Object.values(error.response.data.errors)}`,
-                      ];
+                      const vNodesMsg = [`${error.response.data.error}`];
                       this.$bvToast.toast([vNodesMsg], {
                         title: `Ошибка`,
                         variant: "danger",
