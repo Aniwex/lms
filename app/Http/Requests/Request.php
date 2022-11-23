@@ -41,7 +41,7 @@ class Request extends FormRequest
     public function onlyFilled() : self
     {
         foreach ($this->all() as $key => $value) {
-            if (empty($value)) {
+            if (!$value || is_null($value) || empty($value)) {
                 $this->getInputSource()->remove($key);
                 $this->request->remove($key);
                 $this->query->remove($key);
