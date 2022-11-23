@@ -16,13 +16,13 @@
               :placeholder="errors.name ? errors.name[0] : 'Название'"
               :state="name !== ''"
             />
-            <span v-if="name === ''"
-              ><span style="color: red" class="db__tc" v-if="errors.name">
-                <span v-for="(err, index) in errors.name" :key="index">{{
-                  err
-                }}</span>
-              </span></span
-            >
+            <div v-if="name === ''">
+              <errorValidation
+                v-if="errors.name"
+                :errors="errors"
+                :error="errors.name"
+              ></errorValidation>
+            </div>
           </div>
         </div>
         <div class="form__group">
@@ -39,11 +39,13 @@
               }"
               :placeholder="errors.domain ? errors.domain[0] : 'Главный домен'"
             />
-            <span style="color: red" class="db__tc" v-if="errors.domain">
-              <span v-for="(err, index) in errors.domain" :key="index">{{
-                err
-              }}</span>
-            </span>
+            <div v-if="domain === ''">
+              <errorValidation
+                v-if="errors.domain"
+                :errors="errors"
+                :error="errors.domain"
+              ></errorValidation>
+            </div>
           </div>
         </div>
 
@@ -78,12 +80,11 @@
                           : 'Зеркало'
                       "
                     />
-                    <span
-                      style="color: red"
-                      class="db__tc"
+                    <errorValidation
                       v-if="errors['mirrows.' + index]"
-                      >{{ errors["mirrows." + index][0] }}</span
-                    >
+                      :errors="errors"
+                      :error="errors['mirrows.' + index]"
+                    ></errorValidation>
                   </div>
                 </b-form-group>
                 <hr />
@@ -178,10 +179,12 @@ import flatPickr from "vue-flatpickr-component";
 import "@core/scss/vue/libs/vue-flatpicker.scss";
 import Ripple from "vue-ripple-directive";
 import vSelect from "vue-select";
+import errorValidation from "../../views/error/errorValidation";
 import "vue-select/dist/vue-select.css";
 import axios from "axios";
 export default {
   components: {
+    errorValidation,
     vSelect,
     BRow,
     BCol,
@@ -278,7 +281,7 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-            console.log(this.errors);
+
             const vNodesMsg = [`${error.response.data.error}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,

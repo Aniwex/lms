@@ -420,15 +420,13 @@
                     ></plus-icon>
                   </b-button>
                 </div>
-                <span v-if="modalObject.duration.original === 0">
-                  <span style="color: red" class="db__tc" v-if="errors">
-                    <span
-                      v-for="(err, index) in errors.duration"
-                      :key="index"
-                      >{{ err }}</span
-                    >
-                  </span></span
-                >
+                <div v-if="modalObject.duration.original === 0">
+                  <errorValidation
+                    v-if="errors"
+                    :errors="errors"
+                    :error="errors.duration"
+                  ></errorValidation>
+                </div>
               </div>
             </div>
             <div class="row__tag-lables">
@@ -449,11 +447,11 @@
                   :disabled="user.role.id === 3 ? true : false"
                 >
                 </multiselect>
-                <span style="color: red" class="db__tc" v-if="errors">
-                  <span v-for="(err, index) in errors.source_id" :key="index">{{
-                    err
-                  }}</span>
-                </span>
+                <errorValidation
+                  v-if="errors"
+                  :errors="errors"
+                  :error="errors.source_id"
+                ></errorValidation>
               </div>
             </div>
             <div class="row__user-lables">
@@ -634,6 +632,7 @@ import "@core/scss/vue/libs/vue-flatpicker.scss";
 import "vue-good-table/dist/vue-good-table.css";
 import Ripple from "vue-ripple-directive";
 import "@core/scss/vue/libs/vue-select.scss";
+import errorValidation from "../../views/error/errorValidation";
 import axios from "axios";
 import {
   Trash2Icon,
@@ -649,6 +648,7 @@ import {
 } from "vue-feather-icons";
 export default {
   components: {
+    errorValidation,
     Trash2Icon,
     BSpinner,
     Filters,

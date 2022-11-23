@@ -249,14 +249,11 @@
                   v-model="modalObject.client_plus_words"
                   :state="modalObject.client_plus_words !== ''"
                 />
-                <span v-if="modalObject.client_plus_words === ''"
-                  ><span
-                    style="color: red"
-                    class="db__tc"
-                    v-if="errors['client_plus_words.' + 0]"
-                    >{{ errors["client_plus_words." + 0][0] }}</span
-                  ></span
-                >
+                <errorValidation
+                  v-if="errors['client_plus_words.' + 0]"
+                  :errors="errors"
+                  :error="errors['client_plus_words.' + 0]"
+                ></errorValidation>
               </div>
             </div>
             <div class="row__source-lables">
@@ -275,14 +272,11 @@
                   v-model="modalObject.client_minus_words"
                   :state="modalObject.client_minus_words !== ''"
                 />
-                <span v-if="modalObject.client_minus_words === ''"
-                  ><span
-                    style="color: red"
-                    class="db__tc"
-                    v-if="errors['client_minus_words.' + 0]"
-                    >{{ errors["client_minus_words." + 0][0] }}</span
-                  ></span
-                >
+                <errorValidation
+                  v-if="errors['client_minus_words.' + 0]"
+                  :errors="errors"
+                  :error="errors['client_minus_words.' + 0]"
+                ></errorValidation>
               </div>
             </div>
             <div class="row__source-lables">
@@ -301,14 +295,11 @@
                   v-model="modalObject.operator_plus_words"
                   :state="modalObject.operator_plus_words !== ''"
                 />
-                <span v-if="modalObject.operator_plus_words === ''"
-                  ><span
-                    style="color: red"
-                    class="db__tc"
-                    v-if="errors['operator_plus_words.' + 0]"
-                    >{{ errors["operator_plus_words." + 0][0] }}</span
-                  ></span
-                >
+                <errorValidation
+                  v-if="errors['operator_plus_words.' + 0]"
+                  :errors="errors"
+                  :error="errors['operator_plus_words.' + 0]"
+                ></errorValidation>
               </div>
             </div>
             <div class="row__source-lables">
@@ -327,14 +318,11 @@
                   v-model="modalObject.operator_minus_words"
                   :state="modalObject.operator_minus_words !== ''"
                 />
-                <span v-if="modalObject.operator_minus_words === ''"
-                  ><span
-                    style="color: red"
-                    class="db__tc"
-                    v-if="errors['operator_minus_words.' + 0]"
-                    >{{ errors["operator_minus_words." + 0][0] }}</span
-                  ></span
-                >
+                <errorValidation
+                  v-if="errors['operator_minus_words.' + 0]"
+                  :errors="errors"
+                  :error="errors['operator_minus_words.' + 0]"
+                ></errorValidation>
               </div>
             </div>
             <div class="modal__form-buttons">
@@ -365,6 +353,7 @@
 import { VueGoodTable } from "vue-good-table";
 import axios from "axios";
 import "vue-good-table/dist/vue-good-table.css";
+import errorValidation from "../views/error/errorValidation";
 import { Trash2Icon, CheckIcon, XCircleIcon } from "vue-feather-icons";
 import {
   BBadge,
@@ -392,6 +381,7 @@ import Ripple from "vue-ripple-directive";
 import "swiper/css/swiper.css";
 export default {
   components: {
+    errorValidation,
     BFormCheckbox,
     XCircleIcon,
     CheckIcon,

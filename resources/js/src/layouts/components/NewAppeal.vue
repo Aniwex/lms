@@ -55,13 +55,13 @@
               </b-button>
             </div>
             <label class="form__apeal-label-seconds">Значение в секундах</label>
-            <span v-if="selected.duration === 0"
-              ><span style="color: red" class="db__tc" v-if="errors.duration">
-                <span v-for="(err, index) in errors.duration" :key="index">{{
-                  err
-                }}</span>
-              </span></span
-            >
+            <div v-if="selected.duration === 0">
+              <errorValidation
+                v-if="errors.duration"
+                :errors="errors"
+                :error="errors.duration"
+              ></errorValidation>
+            </div>
           </div>
         </div>
         <div class="form__appeal-group">
@@ -79,11 +79,11 @@
               placeholder="Выберите источник"
             >
             </multiselect>
-            <span style="color: red" class="db__tc" v-if="errors.source_id">
-              <span v-for="(err, index) in errors.source_id" :key="index">{{
-                err
-              }}</span>
-            </span>
+            <errorValidation
+              v-if="errors.source_id"
+              :errors="errors"
+              :error="errors.source_id"
+            ></errorValidation>
             <!-- <b-form-checkbox
               v-model="selectedCheckBox"
               value="true"
@@ -107,13 +107,13 @@
                 validation__input_false: phone !== null && phone !== '',
               }"
             />
-            <span v-if="phone === null || phone === ''"
-              ><span style="color: red" class="db__tc" v-if="errors.phone">
-                <span v-for="(err, index) in errors.phone" :key="index">{{
-                  err
-                }}</span>
-              </span></span
-            >
+            <div v-if="phone === null || phone === ''">
+              <errorValidation
+                v-if="errors.phone"
+                :errors="errors"
+                :error="errors.phone"
+              ></errorValidation>
+            </div>
           </div>
         </div>
         <div class="form__appeal-group">
@@ -236,10 +236,12 @@ import {
 import { PlusIcon, MinusIcon } from "vue-feather-icons";
 import flatPickr from "vue-flatpickr-component";
 import "@core/scss/vue/libs/vue-flatpicker.scss";
+import errorValidation from "../../views/error/errorValidation";
 import Ripple from "vue-ripple-directive";
 import axios from "axios";
 export default {
   components: {
+    errorValidation,
     PlusIcon,
     MinusIcon,
     BSpinner,

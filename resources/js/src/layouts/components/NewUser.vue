@@ -12,12 +12,13 @@
               :placeholder="errors.login ? errors.login[1] : 'Логин'"
               :state="login !== ''"
             />
-            <span v-if="login === ''"
-              ><span style="color: red" class="db__tc" v-if="errors.login">
-                <span v-for="(err, index) in errors.login" :key="index"
-                  >{{ err }}<br
-                /></span> </span
-            ></span>
+            <div v-if="login === ''">
+              <errorValidation
+                v-if="errors.login"
+                :errors="errors"
+                :error="errors.login"
+              ></errorValidation>
+            </div>
           </div>
         </div>
         <div class="form__group">
@@ -30,12 +31,13 @@
               :placeholder="errors.password ? errors.password[1] : 'Пароль'"
               :state="password !== ''"
             />
-            <span v-if="password === ''"
-              ><span style="color: red" class="db__tc" v-if="errors.password">
-                <span v-for="(err, index) in errors.password" :key="index"
-                  >{{ err }}<br
-                /></span> </span
-            ></span>
+            <div v-if="password === ''">
+              <errorValidation
+                v-if="errors.password"
+                :errors="errors"
+                :error="errors.password"
+              ></errorValidation>
+            </div>
           </div>
         </div>
         <div class="form__group">
@@ -114,12 +116,14 @@ import {
 } from "bootstrap-vue";
 import flatPickr from "vue-flatpickr-component";
 import "@core/scss/vue/libs/vue-flatpicker.scss";
+import errorValidation from "../../views/error/errorValidation";
 import Ripple from "vue-ripple-directive";
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 import axios from "axios";
 export default {
   components: {
+    errorValidation,
     vSelect,
     BSpinner,
     BFormInput,

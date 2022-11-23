@@ -27,13 +27,16 @@
               :placeholder="errors.name ? errors.name[1] : 'Название'"
               :class="{
                 validation__input: errors.name ? true : false,
+                validation__input_false: name !== '' ? true : false,
               }"
             />
-            <span style="color: red" class="db__tc" v-if="errors.name">
-              <span v-for="(err, index) in errors.name" :key="index"
-                >{{ err }}<br
-              /></span>
-            </span>
+            <div v-if="name === ''">
+              <errorValidation
+                v-if="errors.name"
+                :errors="errors"
+                :error="errors.name"
+              ></errorValidation>
+            </div>
           </div>
         </div>
         <div class="form__group">
@@ -46,13 +49,16 @@
               :placeholder="errors.code ? errors.code[1] : 'Код'"
               :class="{
                 validation__input: errors.code ? true : false,
+                validation__input_false: code !== '' ? true : false,
               }"
             />
-            <span style="color: red" class="db__tc" v-if="errors.code">
-              <span v-for="(err, index) in errors.code" :key="index"
-                >{{ err }}<br
-              /></span>
-            </span>
+            <div v-if="code === ''">
+              <errorValidation
+                v-if="errors.code"
+                :errors="errors"
+                :error="errors.code"
+              ></errorValidation>
+            </div>
           </div>
         </div>
       </div>
@@ -101,9 +107,11 @@ import {
 import flatPickr from "vue-flatpickr-component";
 import "@core/scss/vue/libs/vue-flatpicker.scss";
 import Ripple from "vue-ripple-directive";
+import errorValidation from "../../views/error/errorValidation";
 import axios from "axios";
 export default {
   components: {
+    errorValidation,
     BSpinner,
     BFormInput,
     flatPickr,

@@ -211,11 +211,10 @@
                   type="text"
                   placeholder="Код"
                 />
-                <span style="color: red" class="db__tc" v-if="errors">
-                  <span v-for="(err, index) in errors.code" :key="index"
-                    >{{ err }}<br
-                  /></span>
-                </span>
+                <errorValidation
+                  :errors="errors"
+                  :error="errors.code"
+                ></errorValidation>
               </div>
             </div>
             <div class="data__source">
@@ -320,12 +319,14 @@ import {
 } from "bootstrap-vue";
 import Search from "../layouts/components/Search.vue";
 import Filters from "../layouts/components/Filters.vue";
+import errorValidation from "../views/error/errorValidation";
 import { Swiper, SwiperSlide } from "vue-awesome-swiper";
 import { MoreVerticalIcon } from "vue-feather-icons";
 import Ripple from "vue-ripple-directive";
 import "swiper/css/swiper.css";
 export default {
   components: {
+    errorValidation,
     Trash2Icon,
     MoreVerticalIcon,
     Swiper,
@@ -531,6 +532,15 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
+            const vNodesMsg = [`${error.response.data.error}`];
+            this.$bvToast.toast([vNodesMsg], {
+              title: `Ошибка`,
+              variant: "danger",
+              solid: true,
+              appendToast: true,
+              toaster: "b-toaster-top-center",
+              autoHideDelay: 3000,
+            });
             console.log(this.errors);
           });
       } catch (error) {

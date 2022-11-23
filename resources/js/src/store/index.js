@@ -106,9 +106,7 @@ export default new Vuex.Store({
                     const projects = response.data.projects;
                     ctx.commit("SET_PROJECTS", projects);
                 })
-                .catch((error) => {
-                    alert(error.response.data.error);
-                });
+                .catch((error) => {});
         },
         getSourceTable: async (ctx) => {
             await axios
@@ -117,9 +115,7 @@ export default new Vuex.Store({
                     let sources = response.data.sources;
                     ctx.commit("SET_SOURCES", sources);
                 })
-                .catch((error) => {
-                    alert(error.response.data.error);
-                });
+                .catch((error) => {});
         },
         getTagsTable: async (ctx) => {
             await axios
@@ -138,9 +134,7 @@ export default new Vuex.Store({
                     });
                     ctx.commit("SET_TAGS", tags);
                 })
-                .catch((error) => {
-                    alert(error.response.data.error);
-                });
+                .catch((error) => {});
         },
         getDataTable: async (ctx) => {
             await axios
@@ -150,9 +144,7 @@ export default new Vuex.Store({
 
                     ctx.commit("SET_CLAIMS", claims);
                 })
-                .catch((error) => {
-                    alert(error.response.data.error);
-                });
+                .catch((error) => {});
         },
         getIntegrationTable: async (ctx) => {
             await axios
@@ -161,9 +153,7 @@ export default new Vuex.Store({
                     let integrations = response.data.integrations;
                     ctx.commit("SET_INTEGRATIONS", integrations);
                 })
-                .catch((error) => {
-                    alert(error.response.data.error);
-                });
+                .catch((error) => {});
         },
         SET_USER: async (ctx) => {
             await axios.get("/sanctum/csrf-cookie").then((response) => {
@@ -184,7 +174,6 @@ export default new Vuex.Store({
                                 this.$store.commit("SET_ENTERED", false);
                             });
                         } else {
-                            alert(error.response.data.error);
                         }
                     });
             });

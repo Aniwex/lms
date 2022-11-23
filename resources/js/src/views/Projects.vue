@@ -218,14 +218,11 @@
                           modalObject.mirrows[index] === '' ? false : true
                         "
                       />
-                      <span v-if="modalObject.mirrows[index] === ''"
-                        ><span
-                          style="color: red"
-                          class="db__tc"
-                          v-if="errors['mirrows.' + index]"
-                          >{{ errors["mirrows." + index][0] }}</span
-                        >
-                      </span>
+                      <errorValidation
+                        v-if="errors['mirrows.' + index]"
+                        :errors="errors"
+                        :error="errors['mirrows.' + index]"
+                      ></errorValidation>
                     </b-form-group>
                     <hr />
                     <!-- Добавить Button -->
@@ -262,12 +259,12 @@
                       <feather-icon icon="PlusIcon" class="mr-25" />
                       <span>Добавить ещё</span>
                     </b-button>
-                    <span
-                      style="color: red"
-                      class="db__tc"
+                    <errorValidation
                       v-if="errors['mirrows.0']"
-                      >{{ errors["mirrows.0"][0] }}</span
-                    >
+                      :errors="errors"
+                      :error="errors['mirrows.0']"
+                    ></errorValidation>
+                    
                   </div>
                 </b-form>
               </div>
@@ -317,6 +314,7 @@
 import { VueGoodTable } from "vue-good-table";
 import axios from "axios";
 import "vue-good-table/dist/vue-good-table.css";
+import errorValidation from "../views/error/errorValidation";
 import { Trash2Icon } from "vue-feather-icons";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 import {
@@ -348,6 +346,7 @@ import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 export default {
   components: {
+    errorValidation,
     ValidationProvider,
     ValidationObserver,
     BInputGroup,

@@ -12,13 +12,16 @@
               placeholder="Название"
               :class="{
                 validation__input: errors.name ? true : false,
+                validation__input_false: name !== '' ? true : false,
               }"
             />
-            <span style="color: red" class="db__tc" v-if="errors.name">
-              <span v-for="(err, index) in errors.name" :key="index"
-                >{{ err }}<br
-              /></span>
-            </span>
+            <div v-if="name === ''">
+              <errorValidation
+                v-if="errors.name"
+                :errors="errors"
+                :error="errors.name"
+              ></errorValidation>
+            </div>
           </div>
         </div>
         <div class="form__appeal-group">
@@ -42,17 +45,13 @@
               no-resize
               v-model="client_plus_words"
             />
-            <span
-              style="color: red"
-              class="db__tc"
-              v-if="errors['client_plus_words.0']"
-            >
-              <span
-                v-for="(err, index) in errors['client_plus_words.0']"
-                :key="index"
-                >{{ err }}<br
-              /></span>
-            </span>
+            <div v-if="client_plus_words === ''">
+              <errorValidation
+                v-if="errors['client_plus_words.0']"
+                :errors="errors"
+                :error="errors['client_plus_words.0']"
+              ></errorValidation>
+            </div>
           </div>
         </div>
         <div class="form__appeal-group">
@@ -65,17 +64,13 @@
               no-resize
               v-model="client_minus_words"
             />
-            <span
-              style="color: red"
-              class="db__tc"
-              v-if="errors['client_minus_words.0']"
-            >
-              <span
-                v-for="(err, index) in errors['client_minus_words.0']"
-                :key="index"
-                >{{ err }}<br
-              /></span>
-            </span>
+            <div v-if="client_minus_words === ''">
+              <errorValidation
+                v-if="errors['client_minus_words.0']"
+                :errors="errors"
+                :error="errors['client_minus_words.0']"
+              ></errorValidation>
+            </div>
           </div>
         </div>
         <div class="form__appeal-group">
@@ -88,17 +83,13 @@
               no-resize
               v-model="operator_plus_words"
             />
-            <span
-              style="color: red"
-              class="db__tc"
-              v-if="errors['operator_plus_words.0']"
-            >
-              <span
-                v-for="(err, index) in errors['operator_plus_words.0']"
-                :key="index"
-                >{{ err }}<br
-              /></span>
-            </span>
+            <div v-if="operator_plus_words === ''">
+              <errorValidation
+                v-if="errors['operator_plus_words.0']"
+                :errors="errors"
+                :error="errors['operator_plus_words.0']"
+              ></errorValidation>
+            </div>
           </div>
         </div>
         <div class="form__appeal-group">
@@ -111,17 +102,13 @@
               no-resize
               v-model="operator_minus_words"
             />
-            <span
-              style="color: red"
-              class="db__tc"
-              v-if="errors['operator_minus_words.0']"
-            >
-              <span
-                v-for="(err, index) in errors['operator_minus_words.0']"
-                :key="index"
-                >{{ err }}<br
-              /></span>
-            </span>
+            <div v-if="operator_minus_words === ''">
+              <errorValidation
+                v-if="errors['operator_minus_words.0']"
+                :errors="errors"
+                :error="errors['operator_minus_words.0']"
+              ></errorValidation>
+            </div>
           </div>
         </div>
       </div>
@@ -166,11 +153,13 @@ import {
   BSpinner,
 } from "bootstrap-vue";
 import flatPickr from "vue-flatpickr-component";
+import errorValidation from "../../views/error/errorValidation";
 import "@core/scss/vue/libs/vue-flatpicker.scss";
 import Ripple from "vue-ripple-directive";
 import axios from "axios";
 export default {
   components: {
+    errorValidation,
     BSpinner,
     BFormInput,
     flatPickr,
