@@ -1239,6 +1239,21 @@ export default {
         return this.checkboxUser;
       }
       if (this.sortedFilter.length) {
+        // const tempKeysSelected = [];
+        // for (const [key, value] of Object.entries(this.selected)) {
+        //   if (value !== null && value !== 0) {
+        //     tempKeysSelected.push(key);
+        //   }
+        // }
+        // this.getDataTable.filter((row) => {
+        //   tempKeysSelected.filter((key) => {
+        //     //console.log(row[key]);
+        //     //console.log(this.selected[key]);
+        //     if (row[key].toString().includes(this.selected[key])) {
+        //       console.log(row);
+        //     }
+        //   });
+        // });
         const filteredRows = this.sortedFilter.filter((row) => {
           let flag = true;
           for (const [key, value] of Object.entries(this.selected)) {

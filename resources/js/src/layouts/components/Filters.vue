@@ -21,7 +21,7 @@
                 >X</b-dropdown-item
               > -->
               <multiselect
-                v-model="selected.tag"
+                v-model="selected.tags"
                 :options="options_tags"
                 selectedLabel="Выбрано"
                 :multiple="true"
@@ -201,7 +201,7 @@ export default {
   data() {
     return {
       selected: {
-        tag: [],
+        tags: [],
         source: null,
         date: null,
         user: null,
@@ -228,7 +228,7 @@ export default {
     selectTag() {
       this.sortedFilter = [];
       let tempTags = [];
-      this.selected.tag.filter((item) => {
+      this.selected.tags.filter((item) => {
         tempTags.push(item.name);
       });
       this.getDataTable.filter((row) => {
@@ -307,7 +307,7 @@ export default {
       this.$emit("sortedFilter", this.sortedFilter);
     },
     resetFilters() {
-      this.selected.tag = null;
+      this.selected.tags = null;
       this.selected.source = null;
       this.selected.date = null;
       this.selected.manager = null;
