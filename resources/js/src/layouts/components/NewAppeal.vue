@@ -79,11 +79,14 @@
               placeholder="Выберите источник"
             >
             </multiselect>
-            <errorValidation
-              v-if="errors.source_id"
-              :errors="errors"
-              :error="errors.source_id"
-            ></errorValidation>
+            <div v-if="selected.source_id.length === 0">
+              <errorValidation
+                v-if="errors.source_id"
+                :errors="errors"
+                :error="errors.source_id"
+              ></errorValidation>
+            </div>
+
             <!-- <b-form-checkbox
               v-model="selectedCheckBox"
               value="true"
