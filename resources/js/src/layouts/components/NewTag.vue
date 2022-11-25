@@ -250,6 +250,7 @@ export default {
             return item !== "";
           })
         );
+        console.log(this.temp_client_plus_words);
         await axios
           .post("api/projects/" + this.project.id + "/tags", {
             name: this.name,

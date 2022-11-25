@@ -167,6 +167,9 @@
       size="lg"
       ref="modal__window"
       hide-footer
+      no-close-on-backdrop
+      no-close-on-esc
+      hide-header-close
       @hidden="cancelModal"
     >
       <div class="see-project__form">

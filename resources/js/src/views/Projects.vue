@@ -515,7 +515,7 @@ export default {
             name: this.modalObject.name,
             mirrows:
               this.modalObject.mirrows.length === 0
-                ? [""]
+                ? []
                 : this.modalObject.mirrows,
             domain: this.modalObject.domain,
             users: tempUserId,
@@ -527,7 +527,7 @@ export default {
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
-           
+
             const vNodesMsg = [`${error.response.data.error}`];
             this.$bvToast.toast([vNodesMsg], {
               title: `Ошибка`,
@@ -540,9 +540,7 @@ export default {
           });
 
         await this.$store.dispatch("SET_USER");
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     },
     async deleteModal() {
       try {
@@ -602,9 +600,7 @@ export default {
             }
           }
         });
-      } catch (error) {
-        
-      }
+      } catch (error) {}
     },
     selectionChanged(params) {
       this.rowSelection = params.selectedRows;

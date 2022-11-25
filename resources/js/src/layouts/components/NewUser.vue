@@ -15,13 +15,11 @@
                 validation__input_false: login !== '' ? true : false,
               }"
             />
-            <div v-if="login === ''">
-              <errorValidation
-                v-if="errors.login"
-                :errors="errors"
-                :error="errors.login"
-              ></errorValidation>
-            </div>
+            <errorValidation
+              v-if="errors.login"
+              :errors="errors"
+              :error="errors.login"
+            ></errorValidation>
           </div>
         </div>
         <div class="form__group">
@@ -37,13 +35,12 @@
                 validation__input_false: password !== '' ? true : false,
               }"
             />
-            <div v-if="password === ''">
-              <errorValidation
-                v-if="errors.password"
-                :errors="errors"
-                :error="errors.password"
-              ></errorValidation>
-            </div>
+
+            <errorValidation
+              v-if="errors.password"
+              :errors="errors"
+              :error="errors.password"
+            ></errorValidation>
           </div>
         </div>
         <div class="form__group">

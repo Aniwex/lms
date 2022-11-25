@@ -235,9 +235,9 @@
             </div>
             <div class="row__source-lables">
               <label class="row__lables-label">Плюс слова клиента</label>
-              <div>
+              <div style="width: 300px">
                 <b-form-textarea
-                  style="text-align: left; width: 300px"
+                  style="text-align: left"
                   :placeholder="
                     errors['client_plus_words.' + 0]
                       ? errors['client_plus_words.' + 0][0]
@@ -258,10 +258,10 @@
             </div>
             <div class="row__source-lables">
               <label class="row__lables-label">Минус слова клиента</label>
-              <div>
+              <div style="width: 300px">
                 <b-form-textarea
                   class="row__user-input"
-                  style="text-align: left; width: 300px"
+                  style="text-align: left"
                   :placeholder="
                     errors['client_minus_words.' + 0]
                       ? errors['client_minus_words.' + 0][0]
@@ -281,10 +281,10 @@
             </div>
             <div class="row__source-lables">
               <label class="row__lables-label">Плюс слова оператора</label>
-              <div>
+              <div style="width: 300px">
                 <b-form-textarea
                   class="row__user-input"
-                  style="text-align: left; width: 300px"
+                  style="text-align: left"
                   :placeholder="
                     errors['operator_plus_words.' + 0]
                       ? errors['operator_plus_words.' + 0][0]
@@ -304,10 +304,10 @@
             </div>
             <div class="row__source-lables">
               <label class="row__lables-label">Минус слова оператора</label>
-              <div>
+              <div style="width: 300px">
                 <b-form-textarea
                   class="row__user-input"
-                  style="text-align: left; width: 300px"
+                  style="text-align: left"
                   :placeholder="
                     errors['operator_minus_words.' + 0]
                       ? errors['operator_minus_words.' + 0][0]
@@ -532,16 +532,30 @@ export default {
       let temp_operator_plus_words = [];
       let temp_operator_minus_words = [];
       temp_client_plus_words.push(
-        this.modalObject.client_plus_words.split(/(?=\/)|\s/)
+        this.modalObject.client_plus_words.split(/(?=\/)|\s/).filter((item) => {
+          return item !== "";
+        })
       );
       temp_client_minus_words.push(
-        this.modalObject.client_minus_words.split(/(?=\/)|\s/)
+        this.modalObject.client_minus_words
+          .split(/(?=\/)|\s/)
+          .filter((item) => {
+            return item !== "";
+          })
       );
       temp_operator_plus_words.push(
-        this.modalObject.operator_plus_words.split(/(?=\/)|\s/)
+        this.modalObject.operator_plus_words
+          .split(/(?=\/)|\s/)
+          .filter((item) => {
+            return item !== "";
+          })
       );
       temp_operator_minus_words.push(
-        this.modalObject.operator_minus_words.split(/(?=\/)|\s/)
+        this.modalObject.operator_minus_words
+          .split(/(?=\/)|\s/)
+          .filter((item) => {
+            return item !== "";
+          })
       );
       try {
         await axios
