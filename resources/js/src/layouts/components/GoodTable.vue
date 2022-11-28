@@ -230,7 +230,6 @@
             :key="index"
             pill
             variant="success"
-            style="margin-top: 10px"
             class="badge-glow db__tc"
             >{{ tag.name }}</b-badge
           >
@@ -336,7 +335,7 @@
       size="lg"
       ref="modal__window"
       hide-footer
-      @hidden="hideModal"
+      @close="hideModal"
     >
       <div class="see-project__form">
         <h3 style="margin-top: 30px">Диалог</h3>
@@ -1120,9 +1119,6 @@ export default {
         });
       }
     },
-    hideModal() {
-      this.$refs["modal__window"].hide();
-    },
     hideProjectModal() {
       this.$refs["project__modal"].hide();
     },
@@ -1306,10 +1302,5 @@ export default {
 @import "~@core/scss/base/pages/app-chat.scss";
 @import "~@core/scss/base/pages/app-chat-list.scss";
 </style>
-// :datetimeFormatOptions="{
-//                   year: 'numeric',
-//                   month: 'numeric',
-//                   day: 'numeric',
-//                 }"
 // @hide="handleHide($event)"
 // @hidden="isCloseable = false"
