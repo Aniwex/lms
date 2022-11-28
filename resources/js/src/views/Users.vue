@@ -8,7 +8,7 @@
     </div>
     <!-- search input -->
     <search
-      :rows="rowsUsers"
+      :rows="getDataUsers"
       :searchTerm="searchTerm"
       v-if="getUsers && user"
       :role_id="user.role.id"
@@ -38,6 +38,7 @@
     <!-- table -->
     <vue-good-table
       :columns="columns"
+      compactMode
       :rows="sorted"
       v-if="getUsers && user"
       :search-options="{
@@ -326,7 +327,6 @@ export default {
   mixins: [togglePasswordVisibility],
   data() {
     return {
-      rowsUsers: [],
       password: "",
       errors: {},
       rowSelection: [],
@@ -615,12 +615,15 @@ export default {
       }
     },
     getProjects() {
-      return this.$store.getters.projects;
+      return this.$store.getters.projects; // Получение проектов
+    },
+    getDataUsers() {
+      return this.$store.getters.getUsers; // Получение таблицы пользователей
     },
   },
   created() {
-    this.getDataUser();
-    this.getTableUsers();
+    this.getDataUser(); //Получение авторизованного пользователя
+    this.getTableUsers(); //Вызываем диспатчи и получаем роли
   },
 };
 </script>

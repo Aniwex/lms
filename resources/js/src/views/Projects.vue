@@ -8,7 +8,7 @@
     </div>
     <!-- search input -->
     <search
-      :rows="rowsProjects"
+      :rows="getProjects"
       :searchTerm="searchTerm"
       v-if="getProjects && user"
       :role_id="user.role.id"
@@ -38,6 +38,7 @@
     <!-- table -->
     <vue-good-table
       :columns="columns"
+      compactMode
       :rows="sorted"
       v-if="getProjects && user"
       :search-options="{

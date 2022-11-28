@@ -69,6 +69,7 @@
     <!-- table -->
     <vue-good-table
       v-if="getDataTable && user.role"
+      compactMode
       :columns="columns"
       :rows="sorted"
       :search-options="{

@@ -8,7 +8,7 @@
     </div>
     <!-- search input -->
     <search
-      :rows="rowsIntegration"
+      :rows="getIntegrations"
       :searchTerm="searchTerm"
       v-if="getIntegrations && user"
       :role_id="user.role.id"
@@ -38,6 +38,7 @@
     <!-- table -->
     <vue-good-table
       :columns="columns"
+      compactMode
       :rows="sorted"
       v-if="getIntegrations && user"
       :search-options="{
@@ -355,7 +356,6 @@ export default {
   },
   data() {
     return {
-      rowsIntegration: [],
       errors: {},
       rowSelection: [],
       modalObject: [],
@@ -579,9 +579,9 @@ export default {
     },
     deleteSelected() {
       try {
-        if (this.rowsIntegration.length) {
+        if (this.getIntegrations.length) {
           this.rowSelection.filter((item) => {
-            this.rowsIntegration.filter((index, i) => {
+            this.getIntegrations.filter((index, i) => {
               if (item.id === index.id) {
                 axios
                   .delete("/api/integrations/" + item.id)

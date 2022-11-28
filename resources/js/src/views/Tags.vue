@@ -38,6 +38,7 @@
     <!-- table -->
     <vue-good-table
       :columns="columns"
+      compactMode
       :rows="sorted"
       v-if="getDataTags && user"
       :search-options="{
