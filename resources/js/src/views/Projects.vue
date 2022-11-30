@@ -523,7 +523,51 @@ export default {
           })
           .then(() => {
             this.$store.dispatch("SET_PROJECTS");
+            axios.get("api/user").then((response) => {
+              this.user = response.data;
+              if (this.user.projects.length === 0) {
+                this.$store.commit("SET_PROJECT", "");
+                localStorage.removeItem("project");
+              }
+              this.users.filter((item) => {
+                if (
+                  item.login !== this.user.login &&
+                  this.user.projects.length !== 0
+                ) {
+                  this.$store.commit("SET_PROJECT", this.user.projects[0]);
+                  localStorage.removeItem("project");
+                  localStorage.setItem(
+                    "project",
+                    JSON.stringify(this.user.projects[0])
+                  );
+                } else if (item.login === this.user.login) {
+                  localStorage.setItem(
+                    "project",
+                    JSON.stringify({
+                      id: this.modalObject.id,
+                      name: this.modalObject.name,
+                      mirrows:
+                        this.modalObject.mirrows.length === 0
+                          ? []
+                          : this.modalObject.mirrows,
+                      domain: this.modalObject.domain,
+                    })
+                  );
+                  this.$store.commit("SET_PROJECT", {
+                    id: this.modalObject.id,
+                    name: this.modalObject.name,
+                    mirrows:
+                      this.modalObject.mirrows.length === 0
+                        ? []
+                        : this.modalObject.mirrows,
+                    domain: this.modalObject.domain,
+                  });
+                }
+              });
+            });
+
             this.$refs["modal__window"].hide();
+
             this.errors = {};
           })
           .catch((error) => {
@@ -636,6 +680,9 @@ export default {
     },
     getUsers() {
       return this.$store.getters.getUsers;
+    },
+    getUser() {
+      return this.$store.getters.getUser;
     },
     sorted() {
       if (this.arraySearch.length) {

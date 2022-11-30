@@ -39,7 +39,6 @@
     <vue-good-table
       :columns="columns"
       compactMode
-
       :rows="sorted"
       v-if="getDataSources && user"
       :search-options="{
@@ -171,7 +170,6 @@
       hide-footer
       no-close-on-backdrop
       no-close-on-esc
-      hide-header-close
       @hidden="cancelModal"
     >
       <div class="see-project__form">

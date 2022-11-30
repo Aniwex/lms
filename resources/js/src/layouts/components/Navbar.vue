@@ -48,7 +48,7 @@
       </b-nav>
       <div v-if="get_projects.projects && get_choose_project">
         <multiselect
-          v-model="get_choose_project"
+          :value="get_choose_project"
           :options="get_projects.projects"
           selectedLabel="Выбрано"
           class="choose__project"

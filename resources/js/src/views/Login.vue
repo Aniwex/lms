@@ -3,7 +3,7 @@
     <!-- Login-->
     <div class="container__auth">
       <b-card-title title-tag="h2" class="font-weight-bold mb-1">
-        Добро пожаловать на Vuyxy
+        Добро пожаловать на LMS
       </b-card-title>
       <b-card-text class="mb-2">
         Пожалуйста, войдите в свою учетную запись
