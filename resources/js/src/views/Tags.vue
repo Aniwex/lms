@@ -475,6 +475,7 @@ export default {
     };
   },
   methods: {
+    //Метод получения авторизованного пользователя
     async getDataUser() {
       if (!this.getProject) {
         this.$router.push("/Home");
@@ -515,6 +516,7 @@ export default {
         this.ActionOnProject(row.event.path[0].innerText, row.row);
       }
     },
+    //Метод открытия модалки
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
         this.modalObject = row;
@@ -523,10 +525,12 @@ export default {
         this.modalObject = row;
       }
     },
+    //Метод закрытия модалки
     hideModal() {
       this.$store.dispatch("getTagsTable");
       this.$refs["modal__window"].hide();
     },
+    //Метод сохранения модалки
     async saveModal() {
       let temp_client_plus_words = [];
       let temp_client_minus_words = [];
@@ -607,6 +611,7 @@ export default {
           });
       } catch (error) {}
     },
+    //Метод удаления тэга
     async deleteModal() {
       try {
         this.$swal({
@@ -671,6 +676,7 @@ export default {
         });
       } catch (error) {}
     },
+    //Метод выбора определённого тэга
     selectionChanged(params) {
       this.rowSelection = params.selectedRows;
       if (this.rowSelection.length) {
@@ -679,6 +685,7 @@ export default {
         this.check = false;
       }
     },
+    //Метод удаления определённого тэга
     deleteSelected() {
       try {
         if (this.getDataTags.length) {
@@ -723,9 +730,11 @@ export default {
         return this.getDataTags;
       }
     },
+    //Получения тэгов из store для таблицы
     getDataTags() {
       return this.$store.getters.getTags;
     },
+    //Получения проекта из store
     getProject() {
       return this.$store.getters.project;
     },
