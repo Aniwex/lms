@@ -35,7 +35,6 @@
     <filters
       @arrayCheckboxUser="pushChangeCheckBox"
       @selected="pushSelected"
-      @sortedFilter="pushSortedFilter"
       :getDataTable="getDataTable"
       :role_id="user.role.id"
       :project="getProject"
@@ -693,7 +692,6 @@ export default {
         maxScrollbarLength: 150,
       },
       managerObject: {},
-      sortedFilter: [],
       clientObject: {},
       pageLength: 10,
       dir: false,
@@ -803,6 +801,7 @@ export default {
       await this.$store.dispatch("getTagsTable");
     },
     //modalSeeProject
+    //Метод для отнимания по кнопке -
     quantity_minus() {
       if (this.user.role.id === 1) {
         if (this.modalObject.duration.original >= 1) {
@@ -810,15 +809,18 @@ export default {
         }
       }
     },
+    //Метод для сложения по кнопке +
     quantity_plus() {
       if (this.user.role.id === 1) {
         this.modalObject.duration.original++;
       }
     },
+    //Метод для закрытия модалки
     hideModal() {
       this.$store.dispatch("getDataTable");
       this.$refs["modal__window"].hide();
     },
+    //Метод для сохранения модалки
     async saveModal() {
       if (this.manager__check === null) {
         this.manager__check = {
@@ -893,6 +895,7 @@ export default {
       }
     },
     //modalSeeProject end
+    //Метод для удаления выбранных обращений
     deleteSelected() {
       try {
         if (this.getDataTable.length) {
@@ -923,6 +926,7 @@ export default {
         }
       } catch (error) {}
     },
+    //Метод для поиска по номеру телефона
     handleSearch() {
       this.arraySearch = [];
       //let key = Object.keys(this.getDataTable[0]);
@@ -947,29 +951,16 @@ export default {
       }
       this.arraySearch = [...new Set(this.arraySearch)];
     },
-    async saveProjectModal() {
-      await this.$store.commit("SET_PROJECT", this.project);
-    },
-    handleHide(bvEvent) {
-      if (!this.isCloseable) {
-        bvEvent.preventDefault();
-      } else {
-        this.$refs.dropdown.hide();
-      }
-    },
-    closeMe() {
-      this.isCloseable = true;
-      this.$refs.dropdown.hide();
-    },
+
+    //Метод получения выбранных фильтров
     pushChangeCheckBox(user) {
       this.checkboxUser = user;
     },
+    //Метод получения выбранных фильтров
     pushSelected(select) {
       this.selected = select;
     },
-    pushSortedFilter(sorted) {
-      this.sortedFilter = sorted;
-    },
+    //Получение авторизованного пользователя
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
         axios
@@ -1022,11 +1013,13 @@ export default {
         }
       });
     },
+    //Срабатывание метода при нажатии на колонку действие
     onCellClick(row) {
       if (row.column.label === "Действие") {
         this.ActionOnProject(row.event.path[0].innerText, row.row);
       }
     },
+    //Срабатывание метода при нажатии на строку посмотреть
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
         this.phone = "";
@@ -1047,6 +1040,7 @@ export default {
         this.modalObject = row;
       }
     },
+    //Удаление обращения
     async deleteModal() {
       try {
         this.$swal({
@@ -1124,7 +1118,7 @@ export default {
     hideProjectModal() {
       this.$refs["project__modal"].hide();
     },
-
+    //Метод для изменения менеджера
     async changeIconManager(id, manager) {
       this.getDataTable.map((row) => {
         if (row.id === id) {
@@ -1157,6 +1151,7 @@ export default {
         }
       });
     },
+    //Метод для изменения клиента
     changeIconClient(id, client) {
       this.getDataTable.map((row) => {
         if (row.id === id) {
@@ -1187,6 +1182,7 @@ export default {
         }
       });
     },
+    //Метод для проверки проекта из local storage
     async verifyLocalStorage() {
       if (this.LocalStorageProject) {
         await this.$store.commit("SET_PROJECT", this.LocalStorageProject);
@@ -1197,6 +1193,7 @@ export default {
     },
   },
   computed: {
+    //Метод для получения данных для таблицы а так же формирование формата для колонок менеджер и клиент
     getDataTable() {
       this.historyArray = [];
       this.$store.getters.getClaims.forEach((row, index, k) => {
@@ -1224,19 +1221,24 @@ export default {
       this.historyArray = [...new Set(this.historyArray)];
       return this.$store.getters.getClaims;
     },
+    //Получение тэгов из store
     getTagsTable() {
       return this.$store.getters.getTags;
     },
+    //Получение источников из store
     getSourceTable() {
       return this.$store.getters.getSources;
     },
     sorted() {
+      // Поиск
       if (this.arraySearch.length) {
         return this.arraySearch;
       }
+      // Групировка по пользователю в фильтрации
       if (this.checkboxUser.length) {
         return this.checkboxUser;
       }
+      // Фильтрация
       if (this.selected) {
         return this.getDataTable.filter(
           (row) =>
@@ -1263,29 +1265,33 @@ export default {
 
       return this.getDataTable;
     },
+    //Получение проекта из store
     getProject() {
       return this.$store.getters.project;
     },
+    //Получение менеджера из store
     getManager() {
       return this.$store.getters.manager;
     },
+    //Получение клиента из store
     getClient() {
       return this.$store.getters.client;
     },
+    //Получение набора для селекта менеджера из store
     options_manager_check() {
       return this.$store.getters.options_manager_check;
     },
+    //Получение набора для селекта клиента из store
     options_client_check() {
       return this.$store.getters.options_client_check;
     },
-    create_window() {
-      return this.$store.getters.get_create_modal_window;
-    },
+    //Получение проекта из local storage
     LocalStorageProject() {
       return JSON.parse(localStorage.getItem("project"));
     },
   },
   created() {
+    //Вызов метода для получения данных авторизованного пользователя
     this.getDataUser();
   },
   mounted() {
@@ -1298,5 +1304,3 @@ export default {
 @import "~@core/scss/base/pages/app-chat.scss";
 @import "~@core/scss/base/pages/app-chat-list.scss";
 </style>
-// @hide="handleHide($event)"
-// @hidden="isCloseable = false"
