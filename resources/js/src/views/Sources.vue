@@ -170,6 +170,7 @@
       hide-footer
       no-close-on-backdrop
       no-close-on-esc
+      hide-header-close
       @hidden="cancelModal"
     >
       <div class="see-project__form">
@@ -417,6 +418,7 @@ export default {
     };
   },
   methods: {
+    //Метод динамического обновления при выборе интеграции
     async inputIntegration() {
       if (this.modalObject.integration) {
         await axios
@@ -434,9 +436,11 @@ export default {
           });
       }
     },
+    //Метод добавления в массив поиска данных
     pushArraySearch(search) {
       this.arraySearch = search;
     },
+    //Метод получения авторизованного пользователя
     async getDataUser() {
       if (!this.$store.getters.project) {
         this.$router.push("/Home");
@@ -464,6 +468,7 @@ export default {
         this.ActionOnProject(row.event.path[0].innerText, row.row);
       }
     },
+    //Метод открытия модалки
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
         this.modalObject = row;
@@ -490,6 +495,7 @@ export default {
         this.modalObject = row;
       }
     },
+    //Метод закрытия модалки только при нажатии на кнопку отменить, для отмены выбранной интеграции, она меняется динамически, поэтому необходимо возвращаться к значению полученому при открытии модального окна
     async hideModal() {
       await axios
         .put(
@@ -503,10 +509,12 @@ export default {
           this.$refs["modal__window"].hide();
         });
     },
+    //Обычное закрытия модалки
     cancelModal() {
       this.$store.dispatch("getSourceTable");
       this.$refs["modal__window"].hide();
     },
+    //Метод сохранения модалки
     async saveModal() {
       try {
         await axios
@@ -562,6 +570,7 @@ export default {
         });
       }
     },
+    //Метод удаления модалки
     async deleteModal() {
       try {
         this.$swal({
@@ -626,6 +635,7 @@ export default {
         });
       } catch (error) {}
     },
+    //Метод выбора определённых источников
     selectionChanged(params) {
       this.rowSelection = params.selectedRows;
       if (this.rowSelection.length) {
@@ -634,6 +644,7 @@ export default {
         this.check = false;
       }
     },
+    //Метод удаления определённых источников
     deleteSelected() {
       try {
         if (this.getDataSources.length) {
@@ -673,16 +684,20 @@ export default {
         return this.$store.getters.getSources;
       }
     },
+    //Получение источников из store для таблицы
     getDataSources() {
       return this.$store.getters.getSources;
     },
+    //Получение проекта из store
     getProject() {
       this.project = this.$store.getters.project;
       return this.$store.getters.project;
     },
+    //Получение интеграций из store
     getIntegrationTable() {
       return this.$store.getters.getIntegrations;
     },
+    //Получение настроек интеграций из store
     getTempFields() {
       return this.$store.getters.tempFields;
     },
