@@ -402,18 +402,22 @@ export default {
     };
   },
   methods: {
+    //Метод добавления репитера
     repeateAgain() {
       this.modalObject.config.push({
         key: null,
         value: null,
       });
     },
+    //Метод удаления репитера
     removeItem(index) {
       this.modalObject.config.splice(index, 1);
     },
+    //Метод добавления в массив поиска данных
     pushArraySearch(search) {
       this.arraySearch = search;
     },
+    //Метод получения авторизованного пользователя
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
         axios
@@ -462,6 +466,7 @@ export default {
         this.ActionOnProject(row.event.path[0].innerText, row.row);
       }
     },
+    //Метод открытия модалки
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
         this.modalObject = row;
@@ -476,10 +481,12 @@ export default {
         this.modalObject = row;
       }
     },
+    //Метод закрытия модалки
     hideModal() {
       this.$store.dispatch("getIntegrationTable");
       this.$refs["modal__window"].hide();
     },
+    //Метод сохранения интеграции
     async saveModal() {
       try {
         await axios
@@ -509,6 +516,7 @@ export default {
           });
       } catch (error) {}
     },
+    //Метод удаления интеграции
     async deleteModal() {
       try {
         this.$swal({
@@ -569,6 +577,7 @@ export default {
         });
       } catch (error) {}
     },
+    //Метод выбора определённых интеграций
     selectionChanged(params) {
       this.rowSelection = params.selectedRows;
       if (this.rowSelection.length) {
@@ -577,6 +586,7 @@ export default {
         this.check = false;
       }
     },
+    //Метод удаления определённых интеграций
     deleteSelected() {
       try {
         if (this.getIntegrations.length) {
@@ -599,6 +609,7 @@ export default {
     },
   },
   computed: {
+    //Получение проекта из store
     getProject() {
       return this.$store.getters.project;
     },
@@ -609,6 +620,7 @@ export default {
         return this.getIntegrations;
       }
     },
+    //Получение интеграций из store для таблицы
     getIntegrations() {
       return this.$store.getters.getIntegrations;
     },
