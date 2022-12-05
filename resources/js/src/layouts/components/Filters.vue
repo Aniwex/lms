@@ -162,6 +162,7 @@ import {
   BFormSpinbutton,
 } from "bootstrap-vue";
 import { FilterIcon, Trash2Icon, PlusIcon, MinusIcon } from "vue-feather-icons";
+import { isEmpty } from 'lodash';
 import flatPickr from "vue-flatpickr-component";
 import Ripple from "vue-ripple-directive";
 import axios from "axios";
@@ -213,6 +214,14 @@ export default {
       checkboxUser: false,
       arrayCheckboxUser: [],
     };
+  },
+  computed: {
+    filtersValuesArray() {
+      return Object.entries(this.selected).map(entrie => entrie[1]);
+    },
+    filtersAreEmpty() {
+      return !this.filtersValuesArray.filter(filterValue => typeof filterValue == 'object' ? !isEmpty(filterValue) : !!filterValue).length;
+    }
   },
   methods: {
     quantity_minus() {
@@ -307,19 +316,20 @@ export default {
       this.$emit("sortedFilter", this.sortedFilter);
     },
     resetFilters() {
-      this.selected.tags = null;
+      this.selected.tags = [];
       this.selected.source = null;
       this.selected.date = null;
       this.selected.manager = null;
       this.selected.client = null;
       this.selected.value_range = 0;
       this.selected.user = null;
+      this.selected.duration = 0;
       this.sortedFilter = [];
       this.arrayCheckboxUser = [];
       this.checkboxUser = false;
       this.$emit("sortedFilter", this.sortedFilter);
       this.$emit("arrayCheckboxUser", this.arrayCheckboxUser);
-      this.$emit("selected", this.selected);
+      this.$emit("selected", null);
     },
 
     changeCheckBox(chek) {
@@ -343,11 +353,12 @@ export default {
       }
     },
   },
-  computed: {},
   updated() {
-    this.$emit("selected", this.selected);
+    this.$emit("selected", this.filtersAreEmpty ? null : this.selected);
   },
-  created() {},
+  created() {
+    this.$emit("selected", this.filtersAreEmpty ? null : this.selected);
+  }
 };
 </script>
 

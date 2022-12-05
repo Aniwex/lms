@@ -636,6 +636,7 @@ import Ripple from "vue-ripple-directive";
 import "@core/scss/vue/libs/vue-select.scss";
 import errorValidation from "../../views/error/errorValidation";
 import axios from "axios";
+import { isEqual, intersection } from 'lodash';
 import {
   Trash2Icon,
   CheckIcon,
@@ -757,7 +758,7 @@ export default {
         },
       ],
       errors: {},
-      selected: {},
+      selected: null,
       options_tags: [],
       options_source: [],
       managerIcons: [
@@ -1229,43 +1230,29 @@ export default {
       return this.$store.getters.getSources;
     },
     sorted() {
+
       if (this.arraySearch.length) {
         return this.arraySearch;
       }
       if (this.checkboxUser.length) {
         return this.checkboxUser;
       }
-      if (this.sortedFilter.length) {
-        // const tempKeysSelected = [];
-        // for (const [key, value] of Object.entries(this.selected)) {
-        //   if (value !== null && value !== 0) {
-        //     tempKeysSelected.push(key);
-        //   }
-        // }
-        // this.getDataTable.filter((row) => {
-        //   tempKeysSelected.filter((key) => {
-        //     //console.log(row[key]);
-        //     //console.log(this.selected[key]);
-        //     if (row[key].toString().includes(this.selected[key])) {
-        //       console.log(row);
-        //     }
-        //   });
-        // });
-        const filteredRows = this.sortedFilter.filter((row) => {
-          let flag = true;
-          for (const [key, value] of Object.entries(this.selected)) {
-            if (!!value && !row[key] === value) {
-              // если value фильтра истинно (то есть не равно ни null, ни 0) и если то же поле в строке (с тем же ключом что и в фильтре) не содержит значение фильтра...
-              flag = false; // ... то флаг = false...
-              break; // ... и цикл прерывается
-            }
-          }
-          return flag; // возвращаем флаг, если флаг == false - строка не проходит фильтрацию
-        });
-        return filteredRows;
+      if (this.selected) {
+
+        return this.getDataTable.filter(row => 
+          (!this.selected.client || isEqual(row.client.check, this.selected.client)) &&
+          (!this.selected.source || row.source.id == this.selected.source.id) &&
+          (!this.selected.manager || isEqual(row.manager.check, this.selected.manager)) &&
+          (!this.selected.date || new Date(row.datetime).toLocaleDateString() == new Date(this.selected.date).toLocaleDateString()) &&
+          (!this.selected.duration || row.duration.original == this.selected.duration) &&
+          (!this.selected.user || row.phone.formatted == this.selected.user) &&
+          (!this.selected.tags.length || intersection(row.tags.map(tag => tag.id), this.selected.tags.map(tag => tag.id)).length == this.selected.tags.length)
+        );
+        
       }
 
       return this.getDataTable;
+
     },
     getProject() {
       return this.$store.getters.project;
