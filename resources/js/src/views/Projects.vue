@@ -432,10 +432,12 @@ export default {
     };
   },
   methods: {
+    //Метод добавление репитера
     repeateAgain() {
       this.modalObject.mirrows.push("");
       this.trHeight += 250;
     },
+    //Метод удаление репитера
     removeItem(index) {
       this.modalObject.mirrows.splice(index, 1);
       this.trHeight -= 250;
@@ -443,7 +445,7 @@ export default {
     pushArraySearch(search) {
       this.arraySearch = search;
     },
-
+    //Получение авторизованного пользователя
     async getDataUser() {
       await this.$store.dispatch("getDataUsers");
       await this.$store.dispatch("SET_PROJECTS");
@@ -501,10 +503,12 @@ export default {
           this.users = response.data.project.users;
         });
     },
+    //Закрытие модалки
     hideModal() {
       this.$store.dispatch("SET_PROJECTS");
       this.$refs["modal__window"].hide();
     },
+    //Сохранение модалки
     async saveModal() {
       try {
         let tempUserId = [];
@@ -587,6 +591,7 @@ export default {
         await this.$store.dispatch("SET_USER");
       } catch (error) {}
     },
+    //Удаление модалки
     async deleteModal() {
       try {
         this.$swal({
@@ -647,6 +652,7 @@ export default {
         });
       } catch (error) {}
     },
+    //Метод выбора проектов
     selectionChanged(params) {
       this.rowSelection = params.selectedRows;
       if (this.rowSelection.length) {
@@ -655,6 +661,7 @@ export default {
         this.check = false;
       }
     },
+    //Удаление выбранных проектов
     deleteSelected() {
       try {
         if (this.getProjects.length) {
@@ -675,12 +682,15 @@ export default {
     },
   },
   computed: {
+    //Получение проекта из store
     getProject() {
       return this.$store.getters.project;
     },
+    //Получение пользователей из store
     getUsers() {
       return this.$store.getters.getUsers;
     },
+    //Получение пользователя из store
     getUser() {
       return this.$store.getters.getUser;
     },
@@ -691,6 +701,7 @@ export default {
         return this.$store.getters.projects;
       }
     },
+    //Получение проектов из store
     getProjects() {
       return this.$store.getters.projects;
     },
