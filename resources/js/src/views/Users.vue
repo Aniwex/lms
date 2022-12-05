@@ -366,6 +366,7 @@ export default {
     };
   },
   methods: {
+    //Метод добавления репитера
     repeateAgain() {
       this.modalObject.config.push({
         key: null,
@@ -373,13 +374,16 @@ export default {
       });
       this.trHeight += 250;
     },
+    //Метод удаления репитера
     removeItem(index) {
       this.modalObject.config.splice(index, 1);
       this.trHeight -= 250;
     },
+    //Метод добавления в массив поиска данных
     pushArraySearch(search) {
       this.arraySearch = search;
     },
+    //Метод получение ролей
     async getTableUsers() {
       await this.$store.dispatch("getDataUsers");
       await this.$store.dispatch("SET_PROJECTS");
@@ -401,6 +405,7 @@ export default {
           });
         });
     },
+    //Метод получение авторизованного пользователя
     async getDataUser() {
       await axios.get("/sanctum/csrf-cookie").then((response) => {
         axios
@@ -447,6 +452,7 @@ export default {
         this.ActionOnProject(row.event.path[0].innerText, row.row);
       }
     },
+    //Метод открытия модалки
     async ActionOnProject(item, row) {
       if (item === "Посмотреть") {
         this.modalObject = row;
@@ -461,10 +467,12 @@ export default {
         this.modalObject = row;
       }
     },
+    //Метод закрытия модалки
     hideModal() {
       this.$store.dispatch("getDataUsers");
       this.$refs["modal__window"].hide();
     },
+    //Метод сохранения модалки
     async saveModal() {
       try {
         let tempProjects = [];
@@ -506,6 +514,7 @@ export default {
           });
       } catch (error) {}
     },
+    //Метод удаление пользователя
     async deleteModal() {
       try {
         this.$swal({
@@ -567,6 +576,7 @@ export default {
         });
       } catch (error) {}
     },
+    //Метод выбора определённых пользователей
     selectionChanged(params) {
       this.rowSelection = params.selectedRows;
       if (this.rowSelection.length) {
@@ -575,6 +585,7 @@ export default {
         this.check = false;
       }
     },
+    //Метод удаления определённых пользователей
     deleteSelected() {
       try {
         if (this.$store.getters.getUsers.length) {
@@ -614,9 +625,11 @@ export default {
         return this.$store.getters.getUsers;
       }
     },
+    //Получения проектов из store
     getProjects() {
       return this.$store.getters.projects; // Получение проектов
     },
+    //Получения пользователей из store
     getDataUsers() {
       return this.$store.getters.getUsers; // Получение таблицы пользователей
     },
