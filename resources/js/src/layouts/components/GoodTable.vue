@@ -92,11 +92,12 @@
       @on-cell-click="onCellClick"
     >
       <template slot="table-row" slot-scope="props">
-        <!-- Column: Name -->
-        <!-- Column: datetime -->
-        <span v-if="props.column.field === 'ID'" class="text-nowrap">
+        <!-- Column: ID -->
+
+        <span v-if="props.column.field === 'ID'" class="text-nowrap db__tc">
           <span class="text-nowrap">{{ props.row.id }}</span>
         </span>
+        <!-- Column: datetime -->
         <span
           v-else-if="props.column.field === 'datetime'"
           class="text-nowrap db__tc"
@@ -636,7 +637,7 @@ import Ripple from "vue-ripple-directive";
 import "@core/scss/vue/libs/vue-select.scss";
 import errorValidation from "../../views/error/errorValidation";
 import axios from "axios";
-import { isEqual, intersection } from 'lodash';
+import { isEqual, intersection } from "lodash";
 import {
   Trash2Icon,
   CheckIcon,
@@ -1230,7 +1231,6 @@ export default {
       return this.$store.getters.getSources;
     },
     sorted() {
-
       if (this.arraySearch.length) {
         return this.arraySearch;
       }
@@ -1238,21 +1238,30 @@ export default {
         return this.checkboxUser;
       }
       if (this.selected) {
-
-        return this.getDataTable.filter(row => 
-          (!this.selected.client || isEqual(row.client.check, this.selected.client)) &&
-          (!this.selected.source || row.source.id == this.selected.source.id) &&
-          (!this.selected.manager || isEqual(row.manager.check, this.selected.manager)) &&
-          (!this.selected.date || new Date(row.datetime).toLocaleDateString() == new Date(this.selected.date).toLocaleDateString()) &&
-          (!this.selected.duration || row.duration.original == this.selected.duration) &&
-          (!this.selected.user || row.phone.formatted == this.selected.user) &&
-          (!this.selected.tags.length || intersection(row.tags.map(tag => tag.id), this.selected.tags.map(tag => tag.id)).length == this.selected.tags.length)
+        return this.getDataTable.filter(
+          (row) =>
+            (!this.selected.client ||
+              isEqual(row.client.check, this.selected.client)) &&
+            (!this.selected.source ||
+              row.source.id == this.selected.source.id) &&
+            (!this.selected.manager ||
+              isEqual(row.manager.check, this.selected.manager)) &&
+            (!this.selected.date ||
+              new Date(row.datetime).toLocaleDateString() ==
+                new Date(this.selected.date).toLocaleDateString()) &&
+            (!this.selected.duration ||
+              row.duration.original == this.selected.duration) &&
+            (!this.selected.user ||
+              row.phone.formatted == this.selected.user) &&
+            (!this.selected.tags.length ||
+              intersection(
+                row.tags.map((tag) => tag.id),
+                this.selected.tags.map((tag) => tag.id)
+              ).length == this.selected.tags.length)
         );
-        
       }
 
       return this.getDataTable;
-
     },
     getProject() {
       return this.$store.getters.project;

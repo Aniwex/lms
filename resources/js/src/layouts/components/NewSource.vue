@@ -29,14 +29,13 @@
                 validation__input: errors.name ? true : false,
                 validation__input_false: name !== '' ? true : false,
               }"
+              @input="errorNullableName"
             />
-            <div v-if="name === ''">
-              <errorValidation
-                v-if="errors.name"
-                :errors="errors"
-                :error="errors.name"
-              ></errorValidation>
-            </div>
+            <errorValidation
+              v-if="errors.name"
+              :errors="errors"
+              :error="errors.name"
+            ></errorValidation>
           </div>
         </div>
         <div class="form__group">
@@ -51,14 +50,14 @@
                 validation__input: errors.code ? true : false,
                 validation__input_false: code !== '' ? true : false,
               }"
+              @input="errorNullableCode"
             />
-            <div v-if="code === ''">
-              <errorValidation
-                v-if="errors.code"
-                :errors="errors"
-                :error="errors.code"
-              ></errorValidation>
-            </div>
+
+            <errorValidation
+              v-if="errors.code"
+              :errors="errors"
+              :error="errors.code"
+            ></errorValidation>
           </div>
         </div>
       </div>
@@ -139,6 +138,12 @@ export default {
     };
   },
   methods: {
+    errorNullableName() {
+      this.errors.name ? (this.errors.name = {}) : "";
+    },
+    errorNullableCode() {
+      this.errors.code ? (this.errors.code = {}) : "";
+    },
     async getIntegrations() {
       await axios
         .get("api/integrations")

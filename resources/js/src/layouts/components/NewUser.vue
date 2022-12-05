@@ -14,6 +14,7 @@
                 validation__input: errors.login ? true : false,
                 validation__input_false: login !== '' ? true : false,
               }"
+              @input="errorNullableLogin"
             />
             <errorValidation
               v-if="errors.login"
@@ -34,6 +35,7 @@
                 validation__input: errors.password ? true : false,
                 validation__input_false: password !== '' ? true : false,
               }"
+              @input="errorNullablePassword"
             />
 
             <errorValidation
@@ -155,6 +157,12 @@ export default {
     };
   },
   methods: {
+    errorNullableLogin() {
+      this.errors.login ? (this.errors.login = {}) : "";
+    },
+    errorNullablePassword() {
+      this.errors.password ? (this.errors.password = {}) : "";
+    },
     async getProjects() {
       await axios
         .get("api/projects")

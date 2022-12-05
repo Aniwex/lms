@@ -15,14 +15,14 @@
               }"
               :placeholder="errors.name ? errors.name[0] : 'Название'"
               :state="name !== ''"
+              @input="errorNullableName"
             />
-            <div v-if="name === ''">
-              <errorValidation
-                v-if="errors.name"
-                :errors="errors"
-                :error="errors.name"
-              ></errorValidation>
-            </div>
+
+            <errorValidation
+              v-if="errors.name"
+              :errors="errors"
+              :error="errors.name"
+            ></errorValidation>
           </div>
         </div>
         <div class="form__group">
@@ -38,14 +38,14 @@
                 validation__input_false: domain !== '' ? true : false,
               }"
               :placeholder="errors.domain ? errors.domain[0] : 'Главный домен'"
+              @input="errorNullableDomain"
             />
-            <div v-if="domain === ''">
-              <errorValidation
-                v-if="errors.domain"
-                :errors="errors"
-                :error="errors.domain"
-              ></errorValidation>
-            </div>
+
+            <errorValidation
+              v-if="errors.domain"
+              :errors="errors"
+              :error="errors.domain"
+            ></errorValidation>
           </div>
         </div>
 
@@ -221,6 +221,12 @@ export default {
     };
   },
   methods: {
+    errorNullableName() {
+      this.errors.name ? (this.errors.name = {}) : "";
+    },
+    errorNullableDomain() {
+      this.errors.domain ? (this.errors.domain = {}) : "";
+    },
     repeateAgain() {
       this.mirrows.push({
         value: "",

@@ -14,14 +14,14 @@
                 validation__input: errors.name ? true : false,
                 validation__input_false: name !== '' ? true : false,
               }"
+              @input="errorNullableName"
             />
-            <div v-if="name === ''">
-              <errorValidation
-                v-if="errors.name"
-                :errors="errors"
-                :error="errors.name"
-              ></errorValidation>
-            </div>
+
+            <errorValidation
+              v-if="errors.name"
+              :errors="errors"
+              :error="errors.name"
+            ></errorValidation>
           </div>
         </div>
         <div class="form__appeal-group">
@@ -49,14 +49,13 @@
                 validation__input_false:
                   client_plus_words !== '' ? true : false,
               }"
+              @input="errorNullableClientPlusWords"
             />
-            <div v-if="client_plus_words === ''">
-              <errorValidation
-                v-if="errors['client_plus_words.0']"
-                :errors="errors"
-                :error="errors['client_plus_words.0']"
-              ></errorValidation>
-            </div>
+            <errorValidation
+              v-if="errors['client_plus_words.0']"
+              :errors="errors"
+              :error="errors['client_plus_words.0']"
+            ></errorValidation>
           </div>
         </div>
         <div class="form__appeal-group">
@@ -75,6 +74,7 @@
                 validation__input_false:
                   client_minus_words !== '' ? true : false,
               }"
+              @input="errorNullableClientMinusWords"
             />
             <div v-if="client_minus_words === ''">
               <errorValidation
@@ -101,14 +101,14 @@
                 validation__input_false:
                   operator_plus_words !== '' ? true : false,
               }"
+              @input="errorNullableOperatorPlusWords"
             />
-            <div v-if="operator_plus_words === ''">
-              <errorValidation
-                v-if="errors['operator_plus_words.0']"
-                :errors="errors"
-                :error="errors['operator_plus_words.0']"
-              ></errorValidation>
-            </div>
+
+            <errorValidation
+              v-if="errors['operator_plus_words.0']"
+              :errors="errors"
+              :error="errors['operator_plus_words.0']"
+            ></errorValidation>
           </div>
         </div>
         <div class="form__appeal-group">
@@ -127,14 +127,13 @@
                 validation__input_false:
                   operator_minus_words !== '' ? true : false,
               }"
+              @input="errorNullableOperatorMinusWords"
             />
-            <div v-if="operator_minus_words === ''">
-              <errorValidation
-                v-if="errors['operator_minus_words.0']"
-                :errors="errors"
-                :error="errors['operator_minus_words.0']"
-              ></errorValidation>
-            </div>
+            <errorValidation
+              v-if="errors['operator_minus_words.0']"
+              :errors="errors"
+              :error="errors['operator_minus_words.0']"
+            ></errorValidation>
           </div>
         </div>
       </div>
@@ -224,6 +223,27 @@ export default {
     };
   },
   methods: {
+    errorNullableName() {
+      this.errors.name ? (this.errors.name = {}) : "";
+    },
+    errorNullableClientPlusWords() {
+      this.errors.client_plus_words ? (this.errors.client_plus_words = {}) : "";
+    },
+    errorNullableClientMinusWords() {
+      this.errors.client_minus_words
+        ? (this.errors.client_minus_words = {})
+        : "";
+    },
+    errorNullableOperatorPlusWords() {
+      this.errors.operator_plus_words
+        ? (this.errors.operator_plus_words = {})
+        : "";
+    },
+    errorNullableOperatorMinusWords() {
+      this.errors.operator_minus_words
+        ? (this.errors.operator_minus_words = {})
+        : "";
+    },
     async addAppeal() {
       try {
         this.temp_client_plus_words = [];
